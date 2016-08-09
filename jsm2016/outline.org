@@ -1,0 +1,52 @@
+* PSO as inspiration for MCMC
+** Independent Metropolis
+   Use PSO to quickly find the mode
+   Assume you can quickly find the hessian at the mode
+   Use normal approximation to generate a proposal distribution for an independence Metropolis
+      actually use a t for fatter tails
+      note: IM tends to be more efficient than rejection sampling, ambiguous wrt importannce
+      (Liu paper)
+** Population MCMC methods
+   Basic idea: instead of target distribution pi(x), target p(x) = \prox_{i=1}^n pi(x_i)
+   Construct a MC that converges to p(x) -> n x iters draws 
+
+   Examples:
+   1) Evolutionary algorithms: Run independent chains for each x_i, except have
+      a probability that one of the margins jumps to another location using a metropolis step
+      (Various evolutionary metaphors here)
+   2) Parallel tempering similar to evolutionary algorithm, except set
+      p(x) = \prod_{i=1}^n \pi(x_i)^{1/t_i}
+      where 1 = t_1 < ... < t_n are temperatures
+      Now can only "evolve" to a new location from the next highest temperature
+      Useful for multimodal posterior distributions
+   3) popMCMC: suppose we're back to the original population framework. Suppose the kernel on 
+      the marginal space is
+      K(x_i'|x_i, phi(x) )
+      where phi(x) is a function of each x. Then run this kernel in a Gibbs fashion.
+      They focus on the case where K is an independence kernel, K(x_i'|phi(x)), and 
+      K(x_i'|phi^*) is a reasonable approximation to or the same as pi(x_i) for some phi^*.
+
+   We can be more general than popMCMC: K(x_i|x)
+   Then:
+   1) one proposal across all margins: \prod_{i=1}^n K(x_i|x)
+      accept or reject everywhere at once
+   2) or separate proposals for each margin -- Metropolis within Gibbs on the expanded space
+
+   Analogy with PSO: choose K(x_i|x) so that i pays attention to its neighbors or the rest of
+   the swarm. Some ideas:
+   1) Adaptive independent metropolis with that normal/t proposal: same as popMCMC
+   2) local adaptive independent metropolis: same as 1), except weight current location 
+      and nearby members of the swarm more heavily
+   3) random swarm walk metropolis: random walk except proposal mean is weighted average of 
+      swarm's current location - still just popMCMC
+   4) same as 3), except different weights for each particle
+   5) random walk except covariance matrix depends on other members of the swarm
+      e.g. higher variances along dimensions where other members of the swarm are doing better
+** Auxillary variable methods
+   Basically, what about *velocity*?
+   now p(x) = \prod_{i=1}^n\pi(x_i)q(x_i) where q() is the density of some auxillary variable v
+   
+   analogy to HMC and why it probably won't work
+
+   analogy to RW metrop where new location is chosen with a velocity factor
+   question: can we store up til now personal and group bests?
