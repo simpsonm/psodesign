@@ -50,3 +50,12 @@ An old outline (pre-JSM):
 * Application to MCMC for founty population estimates
   ACC sims and MCMC sims
 * Discussion - bad for unemployment rates
+
+New outline (very broad):
+* introduce PSO
+* AT-PSO and AT-BBPSO (new!)
+* Laplace approximation (PSO for this)
+* global laplace approximation for conditional distributions
+
+In the appendices:
+* more PSO details
