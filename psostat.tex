@@ -228,7 +228,7 @@ where $N(\mu,\sigma^2)$ is the normal distribution with mean $\mu$ and standard 
 \theta_{ij}(t+1) = \begin{cases} N\left(\frac{p_{ij}(t) + g_{ij}(t)}{2}, |p_{ij}(t) - g_{ij}(t)|^2\right) & \mbox{with probability }0.5\\
 g_{ij}(t) &\mbox{otherwise}.\end{cases}
 \end{align*}
-This specification tends to bias the algorithm toward local optima and may not be ideal for multimodal objective functions, but it does accelerate convergence for more well behaved objective functions. Appendix \ref{sec:psodetail} contains more detail on the BBPSO variants in the literature which we employ.
+Appendix \ref{sec:psodetail} contains more detail on the BBPSO variants in the literature which we employ.
 
 \subsection{Adaptively tuned BBPSO}\label{subsec:ATBBPSO}
 \citet{hsieh2010modified} propose a modified version of BBPSO with 
@@ -266,7 +266,7 @@ The idea of time-varying $\omega(t)$ has been in the PSO literature for some tim
 \end{align}
 where $\alpha$ and $\beta$ are user-defined parameters. Roughly, $\alpha$ controls how low $\omega(t)$ can go and $\beta$ controls how fast it gets there, so $\alpha$ and $\beta$ can be thought of as intercept and slope parameters respectively. The suggestion in \citet{tuppadung2011comparing} is to set $\alpha$ to a small fraction of the total amount of iterations in which the algorithm is allowed to run (e.g., 10\% or 20\%), and set $\beta$ between one and four.
 
-This approach tends to improve on standard PSO if $\omega(t)$'s progression is set appropriately, but it invariably makes using PSO more difficult for the average user. Using a parameterized inertia weight function such as \eqref{eq:inertiafun} solves this somewhat, but it still introduces new parameters that must be chosen by the user. Depending on the problem, it may be more useful to let the swarm explore the space for more iterations, necessitating higher values of $\omega(t)$ for longer, or it may be more useful to let the swarm quickly move toward high value areas, necessitating lower values for $\omega(t)$ earlier. A priori it may not be clear exactly which approach is best for any given problem, so an automatic method is desirable. Adaptively tuned PSO (AT-PSO) is just that --- it provides an automatic method to adjust the value of $\omega(t)$ depending on local information obtained by the particle swarm. Formally, the AT-PSO updating equations are as follows:
+This approach tends to improve on standard PSO if $\omega(t)$'s progression is set appropriately, but it invariably makes using PSO more difficult for the average user. Additionally, depending on the problem, it may be more useful to let the swarm explore the space for more or less iterations, necessitating different progressions of $\omega(t)$. A priori it may not be clear exactly which approach is best for any given problem, so an automatic method is desirable. Adaptively tuned PSO (AT-PSO) is just that --- it provides an automatic method to adjust the value of $\omega(t)$ depending on local information obtained by the particle swarm. Formally, the AT-PSO updating equations are as follows:
 \begin{align}\label{eq:atpso}
 \log\omega(t+1)& = \log\omega(t) + c\times sgn(R(t) - R^*),\nonumber\\
 \bm{v}_i(t+1) &= \omega(t+1) \bm{v}_i(t) + \phi_1 \bm{r}_{1i}(t)\circ\{\bm{p}_i(t) - \bm{\theta}_i(t)\} + \phi_2 \bm{r}_{2i}(t)\circ\{\bm{g}_i(t) - \bm{\theta}_i(t)\},\nonumber\\
