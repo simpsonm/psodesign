@@ -32,7 +32,7 @@
 \usepackage{natbib}
 \usepackage{color}
 \usepackage{epstopdf}
-\usepackage{hyperref}
+\usepackage{hyperref, xr, zref}
 \usepackage{bm, bbm}
 
 \newcommand{\mbv}[1]{\mbox{\boldmath$#1$\unboldmath}}
@@ -73,7 +73,7 @@
 %- Makes the section title start with Appendix in the appendix environment
 \newcommand{\Appendix}
 {%\appendix
-\def\thesection{Appendix~\Alph{section}}
+\def\thesection{Appendix~\Alph{section}:}
 %\def\thesubsection{\Alph{section}.\arabic{subsection}}
 \def\thesubsection{A.\arabic{subsection}}
 }
@@ -135,6 +135,8 @@
 
 \newtheorem{alg}{Algorithm}
 
+\externaldocument{psostat}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
 \thispagestyle{empty} \baselineskip=28pt
@@ -169,8 +171,29 @@ Department of Statistics, University of Missouri,
 
 \baselineskip=24pt
 
+\Appendix
+\section{PSO and BBPSO details}\label{sec:psodetail}
 
-\section*{Comparing AT-BBPSO, BBPSO, and PSO algorithms}\label{sec:psocompare}
+[THIS IS JUST PASTED TEXT THAT CAME FROM THE MAIN BODY OF THE DOCUMENT - SECTION NEEDS TO BE WRITTEN IN EARNEST. INCLUDE RING TOPOLOGY STUFF HERE.]
+
+A downside of both versions of BBPSO above is that any particle currently at its group best location does not move due to the definition of the standard deviation term. Several methods have been proposed to overcome this; e.g., see \citet{hsieh2010modified} and \citet{zhang2011novel}. \citet{zhang2011novel} propose using mutation and crossover operations for the group best particle. To do this, the group best particle randomly selects three other distinct particles $i_1$, $i_2$, and $i_3$, and updates:
+\begin{align}\label{eq:bbpsomc}
+\theta_{ij}(t+1) = p_{i_1j}(t) + 0.5(p_{i_2j}(t) - p_{i_3j}(t)).
+\end{align}
+When combined with BBPSOxp, this becomes
+\begin{align}\label{eq:bbpsoxpmcbest}
+\theta_{ij}(t+1) = \begin{cases} p_{i_1j}(t) + 0.5(p_{i_2j}(t) - p_{i_3j}(t)) & \mbox{with probability }0.5\\
+g_{ij}(t) &\mbox{otherwise,}\end{cases}
+\end{align}
+but it also introduces another problem --- a particle which moves to its group best location on a single coordinate will have a standard deviation of zero for that coordinate during the next iteration. This is easily overcome by manually setting the standard deviation to a small value (e.g., 0.001), which allows us to define the two base BBPSO algorithms that we will consider: BBPSO-MC and BBPSOxp-MC. BBPSO-MC is standard BBPSO where each particle evolves according to \eqref{eq:bbpso} except any current group best particle evolves according to \eqref{eq:bbpsomc}. BBPSOxp-MC evolves every particle according to 
+\begin{align}\label{eq:bbpsoxpmcall}
+\theta_{ij}(t+1) = \begin{cases} N\left(\frac{p_{ij}(t) + g_{ij}(t)}{2}, \sigma^2_{ij}(t)\right) & \mbox{with probability }0.5\\
+g_{ij}(t) &\mbox{otherwise,}\end{cases}
+\end{align}
+where $\sigma_{ij}(t) = |p_{ij}(t) - g_{ij}(t)|$ if $|p_{ij}(t) - g_{ij}(t)|>0$ and $\sigma_{ij}(t) = 0.001$ otherwise, except current group best particles evolve according to \eqref{eq:bbpsoxpmcbest}. 
+
+
+\section{Comparing AT-BBPSO, BBPSO, and PSO algorithms}\label{sec:psocompare}
 \begin{appendix}
 \Appendix    % This makes the section title start with Appendix!
 \renewcommand{\theequation}{A.\arabic{equation}}
@@ -653,7 +676,7 @@ Algorithm & Mean & SD & $\widehat{p}_2$ & $\widehat{p}_4$ & Mean & SD & $\wideha
 \label{tab:psosim6}
 \end{table}
 \end{appendix}
-\section*{Deriving the Hessian}\label{sec:hess}
+\section{Deriving the Hessian}\label{sec:hess}
 \begin{appendix}
 \Appendix    % This makes the section title start with Appendix!
 \renewcommand{\theequation}{B.\arabic{equation}}
@@ -755,7 +778,7 @@ We make this algorithm adaptive as well by tuning $\eta$ in the same fashion as 
 \end{appendix}
 
 \clearpage\pagebreak\newpage\thispagestyle{empty}
-\bibliographystyle{apalike}
+\bibliographystyle{jasa}
 \bibliography{pso}
 \end{document}
 
