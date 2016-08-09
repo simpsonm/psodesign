@@ -1,0 +1,14 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [1][-]{section.2}{Particle swarm optimization}{}% 2
+\BOOKMARK [2][-]{subsection.2.1}{Adaptively tuned BBPSO}{section.2}% 3
+\BOOKMARK [2][-]{subsection.2.2}{Adaptively tuned PSO}{section.2}% 4
+\BOOKMARK [1][-]{section.3}{PSO Assisted Independent Metropolis-Hastings}{}% 5
+\BOOKMARK [1][-]{section.4}{Generalized linear mixed model applications}{}% 6
+\BOOKMARK [2][-]{subsection.4.1}{Spatially modeling county population estimates}{section.4}% 7
+\BOOKMARK [2][-]{subsection.4.2}{Predicting the 1988 presidential election}{section.4}% 8
+\BOOKMARK [1][-]{section.5}{PSO results for finding posterior modes}{}% 9
+\BOOKMARK [1][-]{section.6}{Comparison of MCMC techniques}{}% 10
+\BOOKMARK [1][-]{section.7}{Discussion}{}% 11
+\BOOKMARK [1][-]{appendix.A}{Comparing AT-BBPSO, BBPSO, and PSO algorithms}{}% 12
+\BOOKMARK [1][-]{appendix.B}{Deriving the Hessian}{}% 13
+\BOOKMARK [1][-]{appendix.C}{Alternative MCMC algorithms}{}% 14
