@@ -725,17 +725,17 @@ Given target posterior $p(\bm{\theta}_1,\bm{\theta}_2|\bm{y})$ where $\bm{\theta
 \item Draw $\bm{\theta}_1^{(t+1)} \sim p(\bm{\theta}_1|\bm{\theta}_2^{(t)},\bm{y})$
 \item For $k=1,2\dots,n$
 \begin{itemize}
-\item[] Draw $\theta_{2k}^{(prop)} \sim N(\theta_{2k}^{(t)}, \eta_k^2)$ and form the Metropolis acceptance ratio
+\item[] Draw $\theta_{2k}^{(prop)} \sim N(\theta_{2k}^{(t)}, \eta_k)$ and form the Metropolis acceptance ratio
 \begin{align*}
-a_k = \frac{p(\theta_{2k}^{(prop)}|\bm{\theta}_1^{(t+1)},\theta_{21}^{(t+1)},,\dots,\theta_{2k-1}^{(t+1)},\theta_{2k+1}^{(t)},\dots,\theta_{2n}^{(t)},\bm{y})}{p(\theta_{2k}^{(t)}|\bm{\theta}_1^{(t+1)},\theta_{21}^{(t+1)},,\dots,\theta_{2k-1}^{(t+1)},\theta_{2k+1}^{(t)},\dots,\theta_{2n}^{(t)},\bm{y})}.
+a_k^{(t)} = \frac{p(\theta_{2k}^{(prop)}|\bm{\theta}_1^{(t+1)},\theta_{21}^{(t+1)},,\dots,\theta_{2k-1}^{(t+1)},\theta_{2k+1}^{(t)},\dots,\theta_{2n}^{(t)},\bm{y})}{p(\theta_{2k}^{(t)}|\bm{\theta}_1^{(t+1)},\theta_{21}^{(t+1)},,\dots,\theta_{2k-1}^{(t+1)},\theta_{2k+1}^{(t)},\dots,\theta_{2n}^{(t)},\bm{y})}.
 \end{align*}
-Then set $\theta_{2k}^{(t+1)}=\theta_{2k}^{(prop)}$ with probability $\min(a_k, 1)$ and otherwise set $\theta_{2k}^{(t+1)} = \theta_{2k}^{(t)}$
+Then set $\theta_{2k}^{(t+1)}=\theta_{2k}^{(prop)}$ with probability $r_k^{(t)}=\min(a_k, 1)$ and otherwise set $\theta_{2k}^{(t+1)} = \theta_{2k}^{(t)}$
 \end{itemize}
 \end{enumerate}
 \end{alg}
-A major problem with this algorithm is that the $\eta_k$s must be selected so that the algorithm Metropolis steps accept a reasonable amount of time. According to \citet{gelman1996efficient} the optimal acceptance rate in a narrow set of problems is 0.44 for a single dimensional random walk, though this is often used as a guideline for more complex problems. We adaptively tune $\eta_k$ during the burn-in period of the chain in a manner discussed in \citet{andrieu2008tutorial}. Let $r_{k}^{(t)} = \min(a_k^{(t)}, 1)$ denote the computed Metropolis acceptance probability for $\theta_{2k}$, and $r^*$ denote the target acceptance probability. Then we evolve $\eta_k$ over time via
+A major problem with this algorithm is that the $\eta_k$s must be selected so that the algorithm Metropolis steps accept a reasonable amount of time. According to \citet{gelman1996efficient} the optimal acceptance rate in a narrow set of problems is 0.44 for a single dimensional random walk, though this is often used as a guideline for more complex problems. We adaptively tune $\eta_k$ during the burn-in period of the chain in a manner discussed in \citet{andrieu2008tutorial}. The computed Metropolis acceptance probability for $\theta_{2k}$ is denoted by $r_{k}^{(t)} = \min(a_k^{(t)}, 1)$; let $r^*$ denote the target acceptance probability. Then we evolve $\eta_k$ over time via
 \begin{align*}
-\log\eta_{k}^{(t+1)} = \log\eta_{k}^{(t)} + \gamma^{(t+1)}(r_k^{(t)} - r^*)
+\log\ \eta_{k}^{(t+1)} = \log\ \eta_{k}^{(t)} + \gamma^{(t+1)}(r_k^{(t)} - r^*)
 \end{align*}
 where $\gamma^{(t)}$ is a fixed sequence decreasing to zero fast enough to enough that the algorithm converges. The intuition here is that if the acceptance rate is too high, we can increase the effective search space by increasing the random walk standard deviation, while if it is too low, we can decrease the effective search space by decreasing the random walk standard deviation. We use $r^*=0.44$. A tuning method such as this implies that $(\bm{\theta}^{(1)}, \bm{\theta}^{(2)},\dots)$ is no longer a Markov chain, and additional conditions are required to ensure convergence to the target posterior distribution. So in practice our RWwG algorithms run Algorithm~\ref{alg:RWwG} with the tuning method described above until convergence and until the $\eta_k$s settle into a rough equilibrium, then we use Algorithm~\ref{alg:RWwG} without tuning but using the last known values of the $\eta_k$s. In practice this is equivalent setting $\gamma^{(t)}=0$ after the burn-in period. During the burn-in we set $\gamma^{(t)}=1$ and we initialize at $\eta_k^{(0)}=1$ for all $k$.
 
@@ -744,14 +744,14 @@ An alternative to RWwG algorithms are block random walk Metropolis within Gibbs 
 Given target posterior $p(\bm{\theta}_1,\bm{\theta}_2|\bm{y})$ where it is easy to sample from $p(\bm{\theta}_1|\bm{\theta}_2,\bm{y})$, the support of $p(\bm{\theta}_{2}|\bm{\theta}_1,\bm{y})$ is $\Re^n$, and given an estimate $\bm{\Sigma}$ of $\mathrm{cov}(\bm{\theta}_2|\bm{y})$, iteration $t+1$ is obtained from iteration $t$ via
 \begin{enumerate}
 \item Draw $\bm{\theta}_1^{(t+1)} \sim p(\bm{\theta}_1|\bm{\theta}_2^{(t)},\bm{y})$
-\item Draw $\bm{\theta}_{2}^{(prop)} \sim N(\bm{\theta}_{2}^{(t)}, \bm{\Sigma})$ and form the Metropolis acceptance ratio
+\item Draw $\bm{\theta}_{2}^{(prop)} \sim N(\bm{\theta}_{2}^{(t)}, \eta\bm{\Sigma})$ and form the Metropolis acceptance ratio
 \begin{align*}
 a = \frac{p(\bm{\theta}_{2}^{(prop)}|\bm{\theta}_1^{(t+1)},\bm{y})}{p(\bm{\theta}_{2}^{(t)}|\bm{\theta}_1^{(t+1)},\bm{y})}.
 \end{align*}
 Then set $\bm{\theta}_{2}^{(t+1)}=\bm{\theta}_{2}^{(prop)}$ with probability $\min(a,1)$ and otherwise set $\bm{\theta}_{2}^{(t+1)} = \bm{\theta}_{2}^{(t)}$.
 \end{enumerate}
 \end{alg}
-We make this algorithm adaptive as well by tuning $\bm{\Sigma}$, again using a method from \citet{andrieu2008tutorial}. [NEED TO PICK A BETTER TUNING METHOD FOR THIS, THEN DESCRIBE IT]
+We make this algorithm adaptive as well by tuning $\eta$ in the same fashion as the $\eta_k$s above. The main difference is that this algorithm must be initialized with a crude estimate of $\bm{\Sigma}$ by running, e.g., Algorithm \ref{alg:RWwG}.
 \end{appendix}
 
 \clearpage\pagebreak\newpage\thispagestyle{empty}
