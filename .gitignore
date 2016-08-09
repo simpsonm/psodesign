@@ -6,7 +6,8 @@
 .Rapp.history
 
 # Session Data files
-# .RData   (I sometimes like to save these)
+*.RData
+*.Rdata 
 
 # Example code in package build process
 *-Ex.R
