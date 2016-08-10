@@ -147,13 +147,24 @@ g_{ij}(t) &\mbox{otherwise}.\end{cases}
 Appendix \ref{sec:psodetail} contains more detail on the BBPSO variants in the literature which we employ.
 
 \subsection{Adaptively tuned BBPSO}\label{subsec:ATBBPSO}
-\citet{hsieh2010modified} propose a modified version of BBPSO with 
+BBPSO adapts the size effective search space of the swarm over time through the variance term: $|p_{ij}(t) - g_{ij}(t)|^2$. As the personal best locations of the swarm move closer together, these variances decrease and the swarm tries locations which are closer to known high value areas in the space. This behavior is desireable, but the adaptation is forced to occur through one channel: the personal and group best locations. If the personal best locations of the swarm are arranged in a rough ring around the global optimum, smaller variances are desireable so that the new particle locations have a tendency to be in the center of the ring. On the other hand, if the personal best locations of the swarm are all to one side of the optimum and fairly far away, larger variances are desireable so that the particles can quickly approach the neighborhood of the optimum. BBPSO cannot distinguish between these two cases. 
+
+In order to allow it to adapt in a more flexible manner, we modify the BBPSO variance to $\sigma^2(t)|p_{ij}(t) - g_{ij}(t)|^2$ and tune $\sigma(t)$ in a manner similar to adaptive random walk Metropolis algorithms \citep{andrieu2008tutorial}. Define the improvement rate of the swarm in period $t$ as $R(t) = \#[\{i:Q(\bm{p}_i(t))> Q(\bm{p}_i(t-1))\}]/n$ and let $R^*$ denote the target improvement rate. Then what we term adaptively tuned BBPSO (AT-BBPSO) updates as follows:
+\begin{align}\label{eq:at-bbpso}
+\theta_{ij}(t+1) &\sim t_{df}\left(\frac{p_{ij}(t) + g_{ij}(t)}{2}, \sigma^2(t)|p_{ij}(t) - g_{ij}(t)|^2\right)\\\nonumber
+\log \sigma^2(t+1) = \log\sigma^2(t) + c\{R(t) - R^*\}
+\end{align}
+where $df$ is a user chosen degrees of freedom parameter. We use a $t$ kernel instead of a Gaussian in order to allow for more flexibility. Both using a $t$ kernel and adding a fixed scale parameter have been discussed in the BBPSO literature, but as \citet{kennedy2003bare} notes, something about the normal with $\sigma=1$ is special that causes the algorithm to work well. When $\sigma(t)$ is dynamically adjusted, however, we find the additional flexibility useful. 
+
+Another similar PSO algorithm in the literature is \citet{hsieh2010modified} which proposes a modified version of BBPSO with 
 \begin{align*}
 \theta_{ij}(t+1) \sim N\left(\omega_1\frac{p_{ij}(t) + g_{ij}(t)}{2}, \omega_2|p_{ij}(t) - g_{ij}(t)|^2\right),
 \end{align*}
-where $\omega_1$ and $\omega_2$ are constriction parameters that are eventually both set to one after enough iterations of the algorithm. The authors suggest dynamically adjusting the constriction parameters in the early stage of the algorithm before they are set to one, but give no suggestion for how to do this. We propose a variant of this algorithm where $\omega_1=1$ and where $\omega_2\equiv\sigma$ is a dynamically adjusted scale parameter, and additionally we propose using a more general student's $t$-distribution. Given a value for $\sigma(t)$ in period $t$, $\theta_{ij}(t+1)$ is obtained via
+where $\omega_1\leq 1$ and $\omega_2\leq 1$ are constriction parameters that are eventually both set to one after enough iterations of the algorithm. The authors suggest dynamically adjusting the constriction parameters in the early stage of the algorithm before they are set to one, but give no suggestion for how to do this. 
+
+We propose a variant of this algorithm where $\omega_1=1$ and where $\omega_2\equiv\sigma$ is a dynamically adjusted scale parameter, and additionally we propose using a more general student's $t$-distribution. Given a value for $\sigma(t)$ in period $t$, $\theta_{ij}(t+1)$ is obtained via
 \begin{align}\label{eq:at-bbpso}
-\theta_{ij}(t+1) \sim T_{df}\left(\frac{p_{ij}(t) + g_{ij}(t)}{2}, \sigma(t)|p_{ij}(t) - g_{ij}(t)|^2\right)
+\theta_{ij}(t+1) \sim t_{df}\left(\frac{p_{ij}(t) + g_{ij}(t)}{2}, \sigma(t)|p_{ij}(t) - g_{ij}(t)|^2\right)
 \end{align}
 where $df$ is a degrees of freedom parameter. Define the improvement rate of the swarm in period $t$ as $R(t) = \#[\{i:Q(\bm{p}_i(t))> Q(\bm{p}_i(t-1))\}]/n$, where if $A$ is a set then $\#(A)$ is the number of members of that set. Heuristically, we can think about this rate similar to a random walk Metropolis acceptance rate. If the rate is too large, the jumps we are proposing are too small; so, while each particle is likely to find a new best location, the improvement will tend to be small. Similarly, if the rate is too small the jumps are too large and very few improvements occur. 
 
@@ -210,7 +221,7 @@ This sort of algorithm is more likely to be useful in the tall data setting, i.e
 \begin{alg}[Independent Metropolis-Hastings with Laplace approximation]\label{alg:IM1}
 Given a user-chosen degrees of freedom parameter $df$, an estimate of the posterior mode $\bm{\theta}^*$ and the Hessian $\bm{H}^* \equiv \bm{H}(\bm{\theta}^*)$ with $\ell^* = \log p(\bm{\theta}^*|\bm{y}_{1:n})$ and $\bm{\Sigma}^* = (-\bm{H}^*)^{-1}$, obtain $\bm{\theta}^{(t+1)}$ from $\bm{\theta}^{(t)}$ via:
 \begin{enumerate}
-\item Draw proposal $\bm{\theta}^{(prop)} \sim T_{df}(\bm{\theta}^*, \bm{\Sigma}^*)$.
+\item Draw proposal $\bm{\theta}^{(prop)} \sim t_{df}(\bm{\theta}^*, \bm{\Sigma}^*)$.
 \item Compute the log posterior $\ell^{(prop)} = \log p(\bm{\theta}^{(prop)}|\bm{y}_{1:n})$.
 \item Compute the log acceptance ratio 
 \begin{align*}
@@ -334,20 +345,20 @@ We conduct a simulation study using \verb0R0 \citep{R2008} to compare various PS
 Figure \ref{fig:popmaxboxplot} contains boxplots of the results of the simulations for the Poisson county population models of Section~\ref{sec:pop}. Models with iid random effects had 30 random effects while models with fully correlated random effects had 15. Each box plot was created using the 10, 25, 50, 75, and 90 percentiles of the maximum value of the log posterior found in all 20 replications after 1,000 iterations. Figure \ref{fig:popmaxboxplot2} is similar, except for the lognormal models. Across all models we see that the ring-3 topology and BFGS initialization both improve each of the algorithms, especially in combination. In Appendix \ref{sec:psocompare} the ring-3 neighborhood performed the best on our suite of test functions, and the same seems to be true here. The BFGS initialization is cheap, taking essentially no time to compute, yet seems to drastically improve the quality of every PSO algorithms. In Appendix \ref{sec:psocompare} we speculated that the AT-PSO algorithms would benefit significantly from some sort of stage one optimization, and our results confirm this for all of the algorithms. Another lesson from these boxplots is that the AT-PSO and AT-BBPSO algorithms tend to do the best, especially when $R^*=0.5$ in both cases. 
 \begin{figure}[!ht]
 \centering
-%\includegraphics[width=0.4\textwidth]{pop/maxplot11.png}
-\includegraphics[width=0.4\textwidth]{pop/maxplot12.png}
-%\includegraphics[width=0.4\textwidth]{pop/maxplot13.png}
-\includegraphics[width=0.4\textwidth]{pop/maxplot14.png}
+%\includegraphics[width=0.4\textwidth]{code/pop/maxplot11.png}
+\includegraphics[width=0.4\textwidth]{code/pop/maxplot12.png}
+%\includegraphics[width=0.4\textwidth]{code/pop/maxplot13.png}
+\includegraphics[width=0.4\textwidth]{code/pop/maxplot14.png}
 \caption{Boxplots of the maximum value of the log posterior found for Poisson models by random effect type, neighborhood topology, optimization initialization, and algorithm. Each box plot was created using the 10, 25, 50, 75, and 90 percentiles of the maximum found from 20 replications of 1,000 iterations with 50 particles for each factor combination.}
 \label{fig:popmaxboxplot}
 \end{figure}
 
 \begin{figure}[!ht]
 \centering
-%\includegraphics[width=0.4\textwidth]{pop/maxplot21.png}
-\includegraphics[width=0.4\textwidth]{pop/maxplot22.png}
-%\includegraphics[width=0.4\textwidth]{pop/maxplot23.png}
-\includegraphics[width=0.4\textwidth]{pop/maxplot24.png}
+%\includegraphics[width=0.4\textwidth]{code/pop/maxplot21.png}
+\includegraphics[width=0.4\textwidth]{code/pop/maxplot22.png}
+%\includegraphics[width=0.4\textwidth]{code/pop/maxplot23.png}
+\includegraphics[width=0.4\textwidth]{code/pop/maxplot24.png}
 \caption{Boxplots of the maximum value of the log posterior found for lognormal models by random effect type, number of random effects, neighborhood topology, optimization initialization, and algorithm. Each box plot was created using the 10, 25, 50, 75, and 90 percentiles of the maximum found from 20 replications of 1,000 iterations with 50 particles for each factor combination.}
 \label{fig:popmaxboxplot2}
 \end{figure}
@@ -476,7 +487,7 @@ In single poll model of Section~\ref{sec:pres}, we draw $(\beta_0, \beta_f, \bet
 
 % % \begin{figure}[ht]
 % % \centering
-% % \includegraphics[width=0.8\textwidth]{pop/poisfullplot.png}
+% % \includegraphics[width=0.8\textwidth]{code/pop/poisfullplot.png}
 % % \caption{Log posterior evaluation at current estimate of the posterior mode in the last 1,000 iterations of the standard PSO algorithm for the fully parameterizez Poisson model using 100 particles in the ring-1 neighborhood.}
 % % \label{fig:longpsopoisfull15}
 % % \end{figure}
