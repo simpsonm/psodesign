@@ -174,7 +174,7 @@ for(idelta in 1:length(ndeltasiid)){
 
 psooutnew2 <- psoout
 
-psoout <- rbind(psooutnew, subset(psooutold2, !(algorithm %in% levels(psooutnew2$algorithm))))
+psoout <- rbind(psooutnew2, subset(psooutold2, !(algorithm %in% levels(psooutnew2$algorithm))))
 
 save(psooutnew2, file = "psooutnew2.RData")
 save(psoout, file = "psoout.RData")
