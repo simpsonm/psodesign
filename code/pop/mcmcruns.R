@@ -1,4 +1,4 @@
-source("psofun.R")
+source("../psofun.R")
 source("popfun.R")
 source("mcmcfun.R")
 library(rstan)
