@@ -119,5 +119,5 @@ for(n in c(1:8)[-c(3,6)]){
       }
     }
   }
-  write.csv(psoout, file = "psoout.csv")
+  write.csv(psoout, file = "psoout.csv", row.names=FALSE)
 }
