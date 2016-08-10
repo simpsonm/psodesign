@@ -1,7 +1,7 @@
 #! /bin/bash
 
 #SBATCH -A stsn
-#SBATCH -J psoruns
+#SBATCH -J psorunspop
 #SBATCH -o psoruns.o
 #SBATCH -e psoruns.e
 #SBATCH --mem 10000
