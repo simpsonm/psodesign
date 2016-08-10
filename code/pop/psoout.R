@@ -48,6 +48,3 @@ for(i in 1:2){
     ggsave(paste("maxplot", i, j, ".png", sep=""), maxplot, width = wd, height = ht)
   }
 }
-
-
-k

@@ -1,4 +1,4 @@
-source("psofun.R")
+source("../psofun.R")
 source("popfun.R")
 source("mcmcfun.R")
 load("popdat/popdat.RData")
@@ -179,4 +179,3 @@ psoout <- rbind(psooutnew, subset(psooutold, !(algorithm %in% levels(psooutnew$a
 save(psooutold, file = "psooutold.RData")
 save(psooutnew, file = "psooutnew.RData")
 save(psoout, file = "psoout.RData")
-
