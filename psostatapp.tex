@@ -35,12 +35,12 @@
       \vrule height0.75em width0.5em depth0.25em\fi}
 
 %- Makes the section title start with Appendix in the appendix environment
-\newcommand{\Appendix}
-{%\appendix
-\def\thesection{Appendix~\Alph{section}:}
-%\def\thesubsection{\Alph{section}.\arabic{subsection}}
-\def\thesubsection{A.\arabic{subsection}}
-}
+ \newcommand{\Appendix}
+ {%\appendix
+ \def\thesection{\Alph{section}}
+ \def\thesubsection{\Alph{section}.\arabic{subsection}}
+ %\def\thesubsection{A.\arabic{subsection}}
+ }
 
 \DeclareMathOperator{\vect}{vec}
 \DeclareMathOperator{\vech}{vech}
@@ -107,7 +107,7 @@
 \baselineskip=24pt
 
 \Appendix
-\section{PSO and BBPSO details}\label{sec:psodetail}
+\section{PSO and BBPSO details}\label{app:psodetail}
 
 [THIS IS JUST PASTED TEXT THAT CAME FROM THE MAIN BODY OF THE DOCUMENT - SECTION NEEDS TO BE WRITTEN IN EARNEST. INCLUDE RING TOPOLOGY STUFF HERE.]
 
@@ -128,11 +128,7 @@ g_{ij}(t) &\mbox{otherwise,}\end{cases}
 where $\sigma_{ij}(t) = |p_{ij}(t) - g_{ij}(t)|$ if $|p_{ij}(t) - g_{ij}(t)|>0$ and $\sigma_{ij}(t) = 0.001$ otherwise, except current group best particles evolve according to \eqref{eq:bbpsoxpmcbest}. 
 
 
-\section{Comparing AT-BBPSO, BBPSO, and PSO algorithms}\label{sec:psocompare}
-\begin{appendix}
-\Appendix    % This makes the section title start with Appendix!
-\renewcommand{\theequation}{A.\arabic{equation}}
-\setcounter{equation}{0}
+\section{Comparing AT-BBPSO, BBPSO, and PSO algorithms}\label{app:psocompare}
 In order to compare AT-BBPSO to other PSO variants, we employ a subset of test functions used in \citet{hsieh2010modified}. Each function is listed in Table \ref{tab:testfuns} along with the global maximum and argmax, and the initialization range for the simulations. Further description of many of these functions can be found in \citet{clerc2010particle}. Each function is randomly initialized in a range that does not contain its global maximum.
 
 \begin{table}[h]
@@ -610,12 +606,8 @@ Algorithm & Mean & SD & $\widehat{p}_2$ & $\widehat{p}_4$ & Mean & SD & $\wideha
 \caption{Simulation results for OF6 with $D=20$. Each PSO algorithm was initiated in a range that did not contain the true maximum with 20 particles and run for 500 iterations, repeated for 50 repetitions. The Mean and SD columns represent the mean and standard deviation of the difference between the found maximum and the true maximum, while $\widehat{p}_i$ denotes the proportion of the repetitions that ended within $10^{-i}$ of the true maximum for $i=2,4$.}
 \label{tab:psosim6}
 \end{table}
-\end{appendix}
-\section{Deriving the Hessian}\label{sec:hess}
-\begin{appendix}
-\Appendix    % This makes the section title start with Appendix!
-\renewcommand{\theequation}{B.\arabic{equation}}
-\setcounter{equation}{0}
+
+\section{Deriving the Hessian}\label{app:hess}
 
 The log posterior in the fully parameterized Poisson case can be written as
 \begin{align*}
@@ -668,13 +660,8 @@ Finally, the Hessian is
 \frac{\partial^2 \log p}{\partial \vech(\bm{L}) \partial \bm{\beta}'} & \frac{\partial^2 \log p}{ \partial \vech(\bm{L}) \partial \bm{\delta}'} & \frac{\partial^2 \log p}{\partial \vech(\bm{L}) \partial \vech(\bm{L})'} 
 \end{bmatrix}.
 \end{align*}
-\end{appendix}
-\section{Alternative MCMC algorithms}\label{sec:altmcmc}
-\begin{appendix}
-\Appendix    % This makes the section title start with Appendix!
-\renewcommand{\theequation}{C.\arabic{equation}}
-\setcounter{equation}{0}
 
+\section{Alternative MCMC algorithms}\label{app:altmcmc}
 [CURRENTLY THIS SECTION ONLY HAS GENERIC VERSIONS OF THE ALGORTIHMS. DETAILS FOR OUR CASES?]
 This section describes the alternative MCMC algorithms used for comparisons with PSO assisted Metropolis-Hastings algorithms. In particular, we use two types of adaptive random walk Metropolis within Gibbs algorithms. In the generic problem, suppose we wish to sample from the posterior distribution $p(\bm{\theta}|\bm{y})$ using MCMC methods. Suppose that $\bm{\theta} = (\bm{\theta}_1, \bm{\theta}_2)$ and that the full conditional $p(\bm{\theta}_1|\bm{\theta}_2, \bm{y})$ can be sampled from easily while the full conditional for $\bm{\theta}_2$ may be intractable. Then a single move random walk Metropolis within Gibbs (RWwG) algorithm for this problem is as follows.
 \begin{alg}[Single move random walk Metropolis within Gibbs]\label{alg:RWwG}
@@ -710,7 +697,6 @@ Then set $\bm{\theta}_{2}^{(t+1)}=\bm{\theta}_{2}^{(prop)}$ with probability $\m
 \end{enumerate}
 \end{alg}
 We make this algorithm adaptive as well by tuning $\eta$ in the same fashion as the $\eta_k$s above. The main difference is that this algorithm must be initialized with a crude estimate of $\bm{\Sigma}$ by running, e.g., Algorithm \ref{alg:RWwG}.
-\end{appendix}
 
 \clearpage\pagebreak\newpage\thispagestyle{empty}
 \bibliographystyle{jasa}
