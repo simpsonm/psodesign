@@ -121,20 +121,7 @@ for(idelta in 1:length(ndeltasiid)){
                       poisfull = poislpostfull,
                       lnormfull = lnormlpostfull)
       npar <- nbeta + ndelta + (1 - nell)*(ranef == "iid") + nell + 1*(model == "lnorm")
-      bfgsinit <- rep(0, npar)
-      bfgsctr <- 0
-      while(abs(lpost(bfgsinit, datlist)) == Inf){
-        bfgsctr <- bfgsctr + 1
-        bfgsinit <- rnorm(npar)
-        if(bfgsctr %% 100){
-          print("while loop counter is ", bfgsctr)
-        }
-      }
-      bfgsout <- optim(bfgsinit, lpost, datlist = datlist, method = "BFGS",
-                       control=list(fnscale=-1))
-      mubfgs <- bfgsout$par
-      init <- matrix(runif(npar*nswarm, -1, 1), ncol = nswarm) + mubfgs
-      init[,1] <- mubfgs
+      init <- matrix(runif(npar*nswarm, -100, 100), ncol = nswarm)
       psolist[[model]][[ranef]][[idelta]] <-
         pso(niter, nswarm, inertia, cognitive, social, init, nbhd,
             lpost, datlist = datlist)
