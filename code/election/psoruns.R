@@ -1,6 +1,6 @@
 source("../psofun.R")
 source("electionfun.R")
-source("electionmcmcfun.R")
+source("mcmcfun.R")
 load("datlistsmall.RData")
 load("datlistplus.RData")
 
