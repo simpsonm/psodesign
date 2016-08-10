@@ -1,9 +1,8 @@
+source("../psofun.R")
 source("popfun.R")
 source("mcmcfun.R")
-source("psofun.R")
 load("popdat/popdat.RData")
 library(MCMCpack)
-
 
 nbeta <- 1
 nswarm <- 50
@@ -77,7 +76,6 @@ atpso1list[["lnorm"]][["full"]] <- list()
 atpso2list[["lnorm"]][["full"]] <- list()
 atbbpso1list[["lnorm"]][["full"]] <- list()
 atbbpso2list[["lnorm"]][["full"]] <- list()
-
 
 
 datlistiids <- list()
