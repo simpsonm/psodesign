@@ -3,10 +3,6 @@ source("popfun.R")
 source("mcmcfun.R")
 load("popdat/popdat.RData")
 
-load("psoout.RData")
-psooutold2 <- psoout
-save(psooutold2, file = "psooutold2.RData")
-
 nbeta <- 1
 nrep <- 20
 ndeltasiid <- c(10, 30)
@@ -71,27 +67,9 @@ for(idelta in 1:length(ndeltasiid)){
                         poisfull = poislpostfull,
                         lnormfull = lnormlpostfull)
         npar <- nbeta + ndelta + (1 - nell)*(ranef == "iid") + nell + 1*(model == "lnorm")
-        bfgsinit <- rep(0, npar)
-        bfgsctr <- 0
-        while(abs(lpost(bfgsinit, datlist)) == Inf){
-          bfgsctr <- bfgsctr + 1
-          bfgsinit <- rnorm(npar)
-          if(bfgsctr %% 100){
-            print("while loop counter is ", bfgsctr)
-          }
-        }
-        bfgsout <- optim(bfgsinit, lpost, datlist = datlist, method = "BFGS",
-                         control=list(fnscale=-1))
-        mubfgs <- bfgsout$par
+        init <- matrix(runif(npar*nswarm, -100, 100), ncol = nswarm)
         for(m in 1:2){
-          for(psoinit in c("zero", "bfgs")){
             for(rep in 1:nrep){
-              if(psoinit == "zero"){
-                init <- matrix(runif(npar*nswarm, -100, 100), ncol = nswarm)
-              } else {
-                init <- matrix(runif(npar*nswarm, -1, 1), ncol = nswarm) + mubfgs
-                init[,1] <- mubfgs
-              }
               cat("idelta = ")
               cat(idelta)
               cat(", ")
