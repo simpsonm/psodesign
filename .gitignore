@@ -1,3 +1,7 @@
+# extra tex files for makefile
+psostatblind.tex
+psostatappblind.tex
+
 # emacs auto backups
 *~
 
