@@ -3,6 +3,10 @@ source("popfun.R")
 source("mcmcfun.R")
 load("popdat/popdat.RData")
 
+load("psoout.RData")
+psooutold2 <- psoout
+save(psooutold2, file = "psooutold2.RData")
+
 nbeta <- 1
 nrep <- 20
 ndeltasiid <- c(10, 30)
@@ -113,15 +117,15 @@ for(idelta in 1:length(ndeltasiid)){
               ##                          iteration = 0:niter,
               ##                          maxes = psotemp$maxes)
               ## psoout <- rbind(psoout, psotempout)
-              print("BBPSOxp-MC")
-              psotemp <- bbpso(niter, nswarm, 0, 1, init, nbhd[[m]], lpost, Inf, FALSE,
-                            c(.5,.5), datlist = datlist)
-              psotempout <- data.frame(model = model, ranef = ranef, ndelta = ndelta,
-                                       algorithm = "BBPSOxp-MC", init = psoinit,
-                                       nbhd = nbhdnames[m], rep = rep,
-                                       iteration = 0:niter,
-                                       maxes = psotemp$maxes)
-              psoout <- rbind(psoout, psotempout)
+              ## print("BBPSOxp-MC")
+              ## psotemp <- bbpso(niter, nswarm, 0, 1, init, nbhd[[m]], lpost, Inf, FALSE,
+              ##               c(.5,.5), datlist = datlist)
+              ## psotempout <- data.frame(model = model, ranef = ranef, ndelta = ndelta,
+              ##                          algorithm = "BBPSOxp-MC", init = psoinit,
+              ##                          nbhd = nbhdnames[m], rep = rep,
+              ##                          iteration = 0:niter,
+              ##                          maxes = psotemp$maxes)
+              ## psoout <- rbind(psoout, psotempout)
               ## print("DI-PSO")
               ## psotemp <- pso(niter, nswarm, inertia, social, cognitive, init, nbhd[[m]],
               ##                lpost, datlist = datlist, tune = TRUE, style = "deterministic",
@@ -136,16 +140,16 @@ for(idelta in 1:length(ndeltasiid)){
               for(rate in rates){
                 for(ccc in cccs){
                   print(paste(c(rate, ccc)))
-                  ## psotemp <- pso(niter, nswarm, 0.9, cognitive, social, init, nbhd[[m]],
-                  ##                lpost, datlist = datlist, tune = TRUE, style = "adaptive",
-                  ##                rate = rate, ccc = ccc)
-                  ## psotempout <- data.frame(model = model, ranef = ranef, ndelta = ndelta,
-                  ##                          algorithm = paste("AT-PSO", rate, ccc, sep="-"),
-                  ##                          init = psoinit,
-                  ##                          nbhd = nbhdnames[m], rep = rep,
-                  ##                          iteration = 0:niter,
-                  ##                          maxes = psotemp$maxes)
-                  ## psoout <- rbind(psoout, psotempout)
+                  psotemp <- pso(niter, nswarm, 0.9, cognitive, social, init, nbhd[[m]],
+                                 lpost, datlist = datlist, tune = TRUE, style = "adaptive",
+                                 rate = rate, ccc = ccc)
+                  psotempout <- data.frame(model = model, ranef = ranef, ndelta = ndelta,
+                                           algorithm = paste("AT-PSO", rate, ccc, sep="-"),
+                                           init = psoinit,
+                                           nbhd = nbhdnames[m], rep = rep,
+                                           iteration = 0:niter,
+                                           maxes = psotemp$maxes)
+                  psoout <- rbind(psoout, psotempout)
                   psotemp <- bbpso(niter, nswarm, 1, rate, init, nbhd[[m]], lpost, 1,
                                 TRUE, c(0.5,0.5), datlist = datlist, ccc = ccc)
                   psotempout <- data.frame(model = model, ranef = ranef, ndelta = ndelta,
@@ -168,14 +172,9 @@ for(idelta in 1:length(ndeltasiid)){
 }
 
 
-load("psooutold.RData")
-psooutold <- psoout
+psooutnew2 <- psoout
 
-load("psoout.RData")
-psooutnew <- psoout
+psoout <- rbind(psooutnew, subset(psooutold2, !(algorithm %in% levels(psooutnew2$algorithm))))
 
-psoout <- rbind(psooutnew, subset(psooutold, !(algorithm %in% levels(psooutnew$algorithm))))
-
-save(psooutold, file = "psooutold.RData")
-save(psooutnew, file = "psooutnew.RData")
+save(psooutnew2, file = "psooutnew2.RData")
 save(psoout, file = "psoout.RData")
