@@ -1,4 +1,4 @@
-source("psofun.R")
+source("../psofun.R")
 source("electionfun.R")
 source("electionmcmcfun.R")
 load("datlistsmall.RData")
@@ -20,6 +20,7 @@ nbhd <- list()
 nbhd[[1]] <- sapply(1:nswarm, function(x){return( (x + -1:1 - 1)%%nswarm + 1)}) ## ring-1
 nbhd[[2]] <- sapply(1:nswarm, function(x){return( (x + -3:3 - 1)%%nswarm + 1)}) ## ring-3
 models <- c("small", "poll")
+
 for(model in models){
   lpost <- switch(model,
                   small = gelmanlpost,
