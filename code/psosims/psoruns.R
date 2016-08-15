@@ -51,7 +51,6 @@ for(n in c(1:8)[-c(3,6)]){
       inits <- initfun(n, nswarm, np)
       print("PSO")
       temp <- pso(niter, nswarm, inertia, cognitive, social, inits, nbhd[[m]], fwrap, opt=n)
-      temp$max
       psoout <- rbind(psoout, data.frame(obj = n, logpost = temp[["maxes"]],
                                          argnorm = apply(temp[["argmaxes"]], 2, normvec),
                                          time = time, type = "PSO", nbhd = nbhdnames[m], rep = l,
@@ -72,18 +71,18 @@ for(n in c(1:8)[-c(3,6)]){
                                          inertias = rep(0, niter+1)))
       for(i in 1:length(dfs)){
         for(j in 1:length(rates)){
+          print(paste("AT-BBPSO-MC", dfs[i], rates[j], sep="-"))
           temp <- bbpso(niter, nswarm, sig0, rates[j], inits, nbhd[[m]], fwrap, dfs[i],
                         TRUE, c(0,0),  opt = n)
-          print(paste("AT-BBPSO-MC", dfs[i], rates[j], sep="-"))
           psoout <- rbind(psoout, data.frame(obj = n, logpost= temp[["maxes"]],
                                              argnorm = apply(temp[["argmaxes"]], 2, normvec),
                                              time = time,
                                              type = paste("AT-BBPSO-MC", dfs[i], rates[j], sep="-"),
                                              nbhd = nbhdnames[m], rep = l,
                                              inertias = rep(0, niter+1)))
+          print(paste("AT-BBPSOxp-MC", dfs[i], rates[j], sep="-"))
           temp <- bbpso(niter, nswarm, sig0, rates[j], inits, nbhd[[m]], fwrap, dfs[i],
                         TRUE, c(.5,.5),  opt = n)
-          print(paste("AT-BBPSOxp-MC", dfs[i], rates[j], sep="-"))
           psoout <- rbind(psoout,
                           data.frame(obj = n, logpost= temp[["maxes"]],
                                      argnorm = apply(temp[["argmaxes"]], 2, normvec),

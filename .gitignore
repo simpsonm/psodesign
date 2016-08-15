@@ -1,3 +1,6 @@
+# large .csv files
+*.csv
+
 # extra tex files for makefile
 psostatblind.tex
 psostatappblind.tex
