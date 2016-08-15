@@ -3,6 +3,16 @@ library(plyr)
 library(ggplot2)
 library(reshape2)
 
+psoout <- read.csv("psoout.csv")
+
+sumlast <- subset(psoout, iteration == max(psoout$iteration))
+
+mean(subset(sumlast, model == "lnorm" & ranef == "iid" & ndelta == 10 & nbhd == "ring-1" &
+                algorithm == "AT-BBPSOxp-MC-1-0.3-0.1")$maxes) -
+mean(subset(sumlast, model == "lnorm" & ranef == "iid" & ndelta == 10 & nbhd == "ring-1" &
+                algorithm == "AT-BBPSOxp-MC-1-0.3-1e-05")$maxes)
+
+
 load("accout.RData")
 
 accout$id <- as.factor(paste(accout$model, accout$ranef, accout$ndelta, accout$niter, accout$pso, accout$mcmc, sep=""))
