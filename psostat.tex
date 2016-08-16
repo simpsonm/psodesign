@@ -221,7 +221,7 @@ Between the two possible parameterizations of $\bm{\Sigma}$ and the two choices 
 \section{Predicting the 1988 presidential election}\label{sec:pres}
 \citet[Chapter~14]{gelman2006data} describes a model used to predict state-level opinions about the 1988 presidential candidates from national polls in order to predict the outcome of the election. They model the responses to a series of seven polls conducted by CBS News during the week before the 1988 presidential election. The variable of interest is binary: $Z_i=1$ if the $i$th respondent said they supported the Republican candidate and $Z_i=0$ if they said they supported the Democratic candidate, with undecideds being excluded. Focusing on the last poll, they ultimately estimate a logistic regression model with fixed effects for race (whether the respondent was African American or not), sex, and race$\times$sex, and random effects for four age categories, four education categories, and 16 age$\times$education categories, as well as for the respondent's state of residence (including District of Columbia). The mean of the state random effect distribution is one of five region random effects plus the proportion of the state that voted republican in the last election times a slope coefficient. 
 
-We reduce the size of this model somewhat by omitting the age and education random effects, but keeping the age$\times$education interaction terms --- so the age$\times$education random effects now represent the random effects for each age$\times$education category. The single poll data model is
+The model is somewhat overparameterized since it has age, education, and age$\times$education random effects, so we reduce its size somewhat by omitting the age and education random effects, but keeping the age$\times$education interaction terms. In our model the age$\times$education random effects now represent the random effects for each age$\times$education category rather than an interaction term. The single poll data model is
 \begin{align}
 P(Z_i = 1) &= \theta_i,\ \ \   \theta_i = \exp(Y_i)/\{1 + \exp(Y_i)\}, \nonumber\\
 Y_i &= \beta_0 + f_i\beta_f + b_i\beta_b + f_ib_i\beta_{fb} + \alpha_{ae}[ae_i] + \alpha_{s}[s_i]\mbox{\ \ \ \ (single poll data model), }
@@ -232,9 +232,9 @@ where $f_i$ indicates whether respondent $i$ identified as female, $b_i$ indicat
 \alpha_{ae}[k] \stackrel{iid}{\sim}& N(0, \sigma^2_{ae}) \mbox{ for } k=1,2,\dots,16,\nonumber\\
 \alpha_{r}[k] \stackrel{iid}{\sim}& N(0, \sigma^2_{r}) \mbox{ for } k=1,2,\dots,5 \mbox{\ \ \ \ (single poll process model), }
 \end{align}
-where $\alpha_r[r_k]$ denotes the region containing state $k$ and $prev_k$ denotes the average vote share for the Republicans in the previous three presidential elections. This model expands the class of models discussed at the beginning of this section by allowing the mean of $\bm{\delta}$ to depend on random effects that are further modeled. Adding a level to the hierarchy does not fundamentally change the applicability of PSO assisted MCMC algorithms, so long as the parameter space is still not too large for PSO to be feasible and the normal approximation is reasonable for the additional parameters.
+where $\alpha_r[r_k]$ denotes the region containing state $k$ and $prev_k$ denotes the average vote share for the Republicans in the previous three presidential elections. This model expands the class of models discussed in Section \ref{subsec:glm} by allowing the mean of $\bm{\delta}$ to depend on random effects that are further modeled, but adding a level to the hierarchy does not fundamentally change the applicability of the Laplace approximations we use.
 
-The last poll had 2,015 respondents, but together all seven polls have 11,566 respondents. Using each poll with a minimal number of additional parameters to account for poll to poll variability should increase the quality of the model and result in a posterior with a better Laplace approximation. We analyze a model for all of the polls using the following data model
+The last poll had 2,015 respondents, but together all seven polls have 11,566 respondents. Using each poll with a minimal number of additional parameters to account for poll to poll variability should increase the quality of the model and result in a posterior with better Laplace approximations since there is so much more data. We analyze a model for all of the polls using the following data model
 \begin{align}
 P(Z_i = 1) &= \theta_i,\ \ \   \theta_i = \exp(Y_i)/\{1 + \exp(Y_i)\}, \nonumber\\
 Y_i &= \beta_0 + f_i\beta_f + b_i\beta_b + f_ib_i\beta_{fb} + \alpha_{ae}[ae_i] + \alpha_{s}[s_i] + \alpha_p[p_i]\mbox{\ \ \ \ (all polls data model), }
@@ -247,9 +247,10 @@ where $p_i$ denotes which poll respondent $i$ was surveyed in. The process model
 \alpha_{p}[k] \stackrel{iid}{\sim}& N(0, \sigma^2_{p}) \mbox{ for } k=1,2,\dots,7 \mbox{\ \ \ \ (all polls process model). }
 \end{align}
 In both models we assume each of the $\beta$s have independent $N(0,1000)$ priors, and each of the 
-$\sigma^2$s have $IG(1,1)$ priors. Including the random effects the single poll model contains 80 parameters while the all polls model contains 89 parameters, so both models are large enough to be challenging for PSO and other optimization algorithms. Writing down the log posteriors and deriving the Hessians is straightforward but tedious for these models, so we omit these steps, though note that in both the PSO and IMH algorithms the variances should be transformed to the log scale.
+$\sigma^2$s have $IG(1,1)$ priors. Including the random effects the single poll model contains 80 parameters while the all polls model contains 89 parameters. Writing down the log posteriors and deriving the Hessians is straightforward but tedious for these models, so we omit these steps, though note that in both the PSO and IMH algorithms the variances should be transformed to the log scale. [SHOULD WE ADD THIS INTO AN APPENDIX]
 
 \section{PSO results for finding posterior modes}\label{sec:psomode}
+[THIS STUFF ALL GETS PUT INTO THE LATTER TWO SECTIONS]
 
 [I HAVE RESULTS USING 10 RANDOM EFFECTS iid MODELS AND 5 IN full; WORTH FINDING SPACE FOR?]
 
