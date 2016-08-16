@@ -18,6 +18,8 @@
 \usepackage{subfigure, url, mathtools, enumerate, wasysym, threeparttable, lscape}
 \usepackage{natbib,color}
 \usepackage{bm, bbm,epstopdf}
+\usepackage{tikz}
+\newcount\mycount
 \usepackage{xr, zref, hyperref}
 
 \newenvironment{proof}[1][Proof]{\begin{trivlist}
@@ -39,6 +41,8 @@
  {%\appendix
  \def\thesection{\Alph{section}}
  \def\thesubsection{\Alph{section}.\arabic{subsection}}
+ \def\theequation{\Alph{section}.\arabic{equation}}
+ \def\thefigure{\Alph{section}.\arabic{figure}}
  %\def\thesubsection{A.\arabic{subsection}}
  }
 
@@ -109,23 +113,214 @@
 \Appendix
 \section{PSO and BBPSO details}\label{app:psodetail}
 
-[THIS IS JUST PASTED TEXT THAT CAME FROM THE MAIN BODY OF THE DOCUMENT - SECTION NEEDS TO BE WRITTEN IN EARNEST. INCLUDE RING TOPOLOGY STUFF HERE.]
+In Section \ref{sec:pso} we introduce PSO, BBPSO, and our adaptively tuned variants of both. Here we describe in detail several BBPSO variants which we employ as well as a class of neighborhood topologies called the ring topologies.
 
-A downside of both versions of BBPSO above is that any particle currently at its group best location does not move due to the definition of the standard deviation term. Several methods have been proposed to overcome this; e.g., see \citet{hsieh2010modified} and \citet{zhang2011novel}. \citet{zhang2011novel} propose using mutation and crossover operations for the group best particle. To do this, the group best particle randomly selects three other distinct particles $i_1$, $i_2$, and $i_3$, and updates:
+\subsection{BBPSO}
+The standard BBPSO algorithm was introduced by \citet{kennedy2003bare} and updates from $t$ to $t+1$ via equation \eqref{eq:bbpso}. A commonly used variant of BBPSO also introduced by \citet{kennedy2003bare} is called BBPSOxp. In this variant, each coordinate of each particle has a 50\% chance of updating according to \eqref{eq:bbpso} and a 50\% chance of moving directly to that particle's personal best location on that coordinate. In other words
+\begin{align}\label{eq:bbpsoxp}
+\theta_{ij}(t+1) = \begin{cases} N\left(\frac{p_{ij}(t) + g_{ij}(t)}{2}, s^2_{ij}(t)\right) & \mbox{with probability }0.5\\
+p_{ij}(t) &\mbox{otherwise,}\end{cases}
+\end{align}
+where $s_{ij}(t) = |p_{ij}(t) - g_{ij}(t)|$.
+
+A downside of both BBPSO and BBPSOxp is that any particle whose personal best is currently its group best location does not move due to the definition of the standard deviation term. Several methods have been proposed to overcome this; e.g. \citet{hsieh2010modified} and \citet{zhang2011novel}. \citet{zhang2011novel} propose using mutation and crossover operations for the group best particle. To do this, each group best particle randomly selects three other distinct particles from the entire swarm, $i_1$, $i_2$, and $i_3$, and updates according to
 \begin{align}\label{eq:bbpsomc}
-\theta_{ij}(t+1) = p_{i_1j}(t) + 0.5(p_{i_2j}(t) - p_{i_3j}(t)).
+\theta_{ij}(t+1) = p_{i_1j}(t) + 0.5\{p_{i_2j}(t) - p_{i_3j}(t)\}.
 \end{align}
-When combined with BBPSOxp, this becomes
-\begin{align}\label{eq:bbpsoxpmcbest}
-\theta_{ij}(t+1) = \begin{cases} p_{i_1j}(t) + 0.5(p_{i_2j}(t) - p_{i_3j}(t)) & \mbox{with probability }0.5\\
-g_{ij}(t) &\mbox{otherwise,}\end{cases}
+This combines easily with BBPSOxp to create BBPSOxp-MC by updating group best particles according to \eqref{eq:bbpsomc} and all other particles according to \eqref{eq:bbpsoxp}, but it also introduces another problem. A particle which finds a personal best that is the same as its group best on some but not all coordinates due to the ``xp'' component of BBPSOxp-MC will have a standard deviation of zero for those coordinates during the next iteration. This is easily overcome by using the ``MC'' operation for those coordinates as well. So BBPSOxp-MC and BBPSO-MC can be encapsulated into the following general BBPSO algorithm. For each particle $i$, sample three other particles $i_1$, $i_2$, $i_3$ from the swarm, and for each coordinate $j$ let $s_{ij}(t) = |p_{ij}(t) - g_{ij}(t)|$. Then the general updating equation is
+\begin{align}\label{eq:bbpsoall}
+\theta_{ij}(t+1) = 
+  \begin{cases} 
+    \begin{cases} N\left(\frac{p_{ij}(t) + g_{ij}(t)}{2}, s^2_{ij}(t)\right) & \mbox{with probability } \rho\\
+      p_{ij}(t) & \mbox{with probability } 1 - \rho,
+    \end{cases}
+    & \mbox{ if } s^2_{ij}(t) > 0\\
+    p_{i_1j}(t) + 0.5\{p_{i_2j}(t) - p_{i_3j}(t)\} & \mbox{ otherwise.}
+  \end{cases}
 \end{align}
-but it also introduces another problem --- a particle which moves to its group best location on a single coordinate will have a standard deviation of zero for that coordinate during the next iteration. This is easily overcome by manually setting the standard deviation to a small value (e.g., 0.001), which allows us to define the two base BBPSO algorithms that we will consider: BBPSO-MC and BBPSOxp-MC. BBPSO-MC is standard BBPSO where each particle evolves according to \eqref{eq:bbpso} except any current group best particle evolves according to \eqref{eq:bbpsomc}. BBPSOxp-MC evolves every particle according to 
-\begin{align}\label{eq:bbpsoxpmcall}
-\theta_{ij}(t+1) = \begin{cases} N\left(\frac{p_{ij}(t) + g_{ij}(t)}{2}, \sigma^2_{ij}(t)\right) & \mbox{with probability }0.5\\
-g_{ij}(t) &\mbox{otherwise,}\end{cases}
-\end{align}
-where $\sigma_{ij}(t) = |p_{ij}(t) - g_{ij}(t)|$ if $|p_{ij}(t) - g_{ij}(t)|>0$ and $\sigma_{ij}(t) = 0.001$ otherwise, except current group best particles evolve according to \eqref{eq:bbpsoxpmcbest}. 
+When $\rho = 0$ we have BBPSO-MC, and when $\rho = 0.5$ we have BBPSOxp-MC. These are the two BBPSO variants that we consider.
+
+Similarly, we can create adaptively tuned versions of BBPSO-MC and BBPSOxp-MC by analogy with \eqref{eq:at-bbpso} and \eqref{eq:bbpsoall}:
+\begin{align*}%\label{eq:at-bbpsoall}
+\theta_{ij}(t+1) &= 
+  \begin{cases} 
+    \begin{cases} t_{df}\left(\frac{p_{ij}(t) + g_{ij}(t)}{2}, \sigma^2(t)s^2_{ij}(t)\right) & \mbox{with probability } \rho\\
+      p_{ij}(t) & \mbox{with probability } 1 - \rho,
+    \end{cases}
+    & \mbox{ if } s^2_{ij}(t) > 0\\
+    p_{i_1j}(t) + 0.5\{p_{i_2j}(t) - p_{i_3j}(t)\} & \mbox{ otherwise.}
+  \end{cases}\\
+\log\sigma^2(t+1) &= \log\sigma^2(t) + c\times\{R(t+1) - R^*\},
+\end{align*}
+where $R(t)=\#\{i:Q(\bm{p}_i(t))> Q(\bm{p}_i(t-1))\}/n$, and $df$, $R^*$, and $c$ are defined in Section \ref{subsec:ATBBPSO}. Then AT-BBPSO-MC sets $\rho=0$ and AT-BBPSOxp-MC sets $\rho=0.5$.
+
+\subsection{Ring neighborhood topologies}
+For all PSO and BBPSO algorithms, the group best location for a given particle is defined relative to the particle's group. To wit $\bm{g}_i(t+1) = \arg\max_{\{\bm{p}_j(t+1)|j\in\mathcal{N}_i\}}Q(\bm{p}_j(t+1))$ where $\mathcal{N}_i$ is the set of particles that are ``neighbors'' of particle $i$. The default neighborhood topology is $\mathcal{N}_i = \{1, 2, \dots, n\}$ where $n$ is the number of particles, so each particle is in each other particle's group, also called their neighborhood. PSO and BBPSO algorithms using this topology are often call gbest swarms or gbest algorithms. 
+
+The main problem with gbest PSO and BBPSO algorithms is that by allowing each particle to see the best location of the entire swarm, they curtail early exploration of the search space. In order to restrict the flow of information across the swarm and allow for more exploration, it is often useful to only allow each particle to see a subset of the other particles using a more restrictive neighborhood topology. There are several commonly used neighborhood topologies [CITATION], but we will use the ring topologies. The ring-$k$ neighborhood topology for $k=1,2,\dots,\lfloor n/2\rfloor$ is defined as follows. Arrange the particles in a circle, as in Figure \ref{fig:ring}. Then each particle is neighbors with the $k$ particles to its left and the $k$ particles to its right. That is, $\mathcal{N}_i = \{i-k, i-k+1, \dots, i-1, i+1, \dots, i+k-1, i+k\}$ where addition and subtraction are modulo $n$ so that e.g. $n + 1 = 1$.
+
+\begin{figure}
+  \centering
+  {
+    \begin{tikzpicture}[transform shape]
+      % the multiplication with floats is not possible. Thus I split the loop in two.
+      \foreach \number in {1,...,7}{
+        % Computer angle:
+        \mycount=\number
+        \advance\mycount by 2
+        \multiply\mycount by 45
+        \advance\mycount by 0
+        \node[draw,circle,inner sep=0.1cm] (N-\number) at (\the\mycount:1cm) {};
+      }
+      \foreach \number in {10,...,15}{
+        % Computer angle:
+        \mycount=\number
+        \advance\mycount by 1
+        \multiply\mycount by 45
+        \advance\mycount by 22.5
+        \node[draw,circle,inner sep=0.1cm] (N-\number) at (\the\mycount:1cm) {};
+      }
+      \foreach \number in {1,...,2}{
+        % Computer angle:
+        \mycount=\number
+        \advance\mycount by 0
+        \multiply\mycount by 45
+        \advance\mycount by 22.5
+        \node[circle,inner sep=0.1cm,fill=gray] (N-\number) at (\the\mycount:1cm) {};
+      }
+      \foreach \number in {1,...,1}{
+        % Computer angle:
+        \mycount=\number
+        \advance\mycount by 1
+        \multiply\mycount by 45
+        \advance\mycount by 0
+        \node[draw=black,circle,inner sep=0.1cm,fill=black,label=Ring-1] (N-\number) at (\the\mycount:1cm) {};
+      }
+    \end{tikzpicture}
+  }
+  {
+    \begin{tikzpicture}[transform shape]
+      % the multiplication with floats is not possible. Thus I split the loop in two.
+      \foreach \number in {2,...,6}{
+        % Computer angle:
+        \mycount=\number
+        \advance\mycount by 2
+        \multiply\mycount by 45
+        \advance\mycount by 0
+        \node[draw,circle,inner sep=0.1cm] (N-\number) at (\the\mycount:1cm) {};
+      }
+      \foreach \number in {10,...,15}{
+        % Computer angle:
+        \mycount=\number
+        \advance\mycount by 1
+        \multiply\mycount by 45
+        \advance\mycount by 22.5
+        \node[draw,circle,inner sep=0.1cm] (N-\number) at (\the\mycount:1cm) {};
+      }
+      \foreach \number in {1,...,2}{
+        % Computer angle:
+        \mycount=\number
+        \advance\mycount by 0
+        \multiply\mycount by 45
+        \advance\mycount by 22.5
+        \node[circle,inner sep=0.1cm,fill=gray] (N-\number) at (\the\mycount:1cm) {};
+      }
+      \foreach \number in {1,...,3}{
+        % Computer angle:
+        \mycount=\number
+        \advance\mycount by 0
+        \multiply\mycount by 45
+        \advance\mycount by 0
+        \node[circle,inner sep=0.1cm,fill=gray] (N-\number) at (\the\mycount:1cm) {};
+      }
+      \foreach \number in {1,...,1}{
+        % Computer angle:
+        \mycount=\number
+        \advance\mycount by 1
+        \multiply\mycount by 45
+        \advance\mycount by 0
+        \node[draw=black,circle,inner sep=0.1cm,fill=black,label=Ring-2] (N-\number) at (\the\mycount:1cm) {};
+      }
+    \end{tikzpicture}
+  }
+  {
+    \begin{tikzpicture}[transform shape]
+      % the multiplication with floats is not possible. Thus I split the loop in two.
+      \foreach \number in {2,...,6}{
+        % Computer angle:
+        \mycount=\number
+        \advance\mycount by 2
+        \multiply\mycount by 45
+        \advance\mycount by 0
+        \node[draw,circle,inner sep=0.1cm] (N-\number) at (\the\mycount:1cm) {};
+      }
+      \foreach \number in {10,...,15}{
+        % Computer angle:
+        \mycount=\number
+        \advance\mycount by 1
+        \multiply\mycount by 45
+        \advance\mycount by 22.5
+        \node[draw,circle,inner sep=0.1cm] (N-\number) at (\the\mycount:1cm) {};
+      }
+      \foreach \number in {1,...,4}{
+        % Computer angle:
+        \mycount=\number
+        \advance\mycount by -1
+        \multiply\mycount by 45
+        \advance\mycount by 22.5
+        \node[circle,inner sep=0.1cm,fill=gray] (N-\number) at (\the\mycount:1cm) {};
+      }
+      \foreach \number in {1,...,3}{
+        % Computer angle:
+        \mycount=\number
+        \advance\mycount by 0
+        \multiply\mycount by 45
+        \advance\mycount by 0
+        \node[circle,inner sep=0.1cm,fill=gray] (N-\number) at (\the\mycount:1cm) {};
+      }
+      \foreach \number in {1,...,1}{
+        % Computer angle:
+        \mycount=\number
+        \advance\mycount by 1
+        \multiply\mycount by 45
+        \advance\mycount by 0
+        \node[draw=black,circle,inner sep=0.1cm,fill=black,label=Ring-3] (N-\number) at (\the\mycount:1cm) {};
+      }
+    \end{tikzpicture}
+  }
+  {
+    \begin{tikzpicture}[transform shape]
+      % the multiplication with floats is not possible. Thus I split the loop in two.
+      \foreach \number in {2,...,8}{
+        % Computer angle:
+        \mycount=\number
+        \advance\mycount by 1
+        \multiply\mycount by 45
+        \advance\mycount by 0
+        \node[draw,circle,inner sep=0.1cm,fill=gray] (N-\number) at (\the\mycount:1cm) {};
+      }
+      \foreach \number in {9,...,16}{
+        % Computer angle:
+        \mycount=\number
+        \advance\mycount by 1
+        \multiply\mycount by 45
+        \advance\mycount by 22.5
+        \node[draw,circle,inner sep=0.1cm,fill=gray] (N-\number) at (\the\mycount:1cm) {};
+      }
+      \foreach \number in {1,...,1}{
+        % Computer angle:
+        \mycount=\number
+        \advance\mycount by 1
+        \multiply\mycount by 45
+        \advance\mycount by 0
+        \node[draw=black,circle,inner sep=0.1cm,fill=black,label=Global] (N-\number) at (\the\mycount:1cm) {};
+      }
+    \end{tikzpicture}
+  }
+  \caption{Ring-$k$ and global neighborhood topologies. Filled in gray particles are neighbors of the filled in black particle.}
+  \label{fig:ring}
+\end{figure}
+
 
 
 \section{Comparing AT-BBPSO, BBPSO, and PSO algorithms}\label{app:psocompare}
@@ -150,9 +345,9 @@ In order to compare AT-BBPSO to other PSO variants, we employ a subset of test f
 
 We use several PSO algorithms in the simulation study. The standard PSO algorithm uses the parameter values suggested by \cite{blum2008swarm} and \cite{clerc2002particle}. The AT-BBPSO variants are implemented a wide variety of parameter values, but all have the scale parameter initialized at $\sigma(0)=1$, and both set $c=0.1$. The AT-PSO variants are initialized at $\omega(0)=1$ and also set $c=0.1$. In addition, each algorithm is implemented using each of three neighborhood structures --- the global, ring-3, and ring-1 neighborhoods. Each algorithm was used to optimize each objective function for 500 iterations over 50 replications using 20 particles. Initializations were changed across replications but held constant across algorithms. The standard PSO, DI-PSO, and AT-PSO algorithms initialized their velocity terms using the same method as a function of the initial locations of the particles, which we will denote by $\bm{x}_i$ for particle $i$. Let $x_{max,j}$ be the maximum initial value of coordinate $j$ of $\bm{x}_i$ for each particle $i$, and let $x_{min,j}$ be the corresponding minimum. Then let $d_{max} = max_{j}x_{max,j} - x_{min,j}$. Then we initialize the velocities with $v_{ij}(0)\stackrel{iid}{\sim}U(-d_{max}/2,d_{max}/2)$. Tables \ref{tab:psosim1}-\ref{tab:psosim6} contain the simulation results for objective functions 1-6 respectively (OF1, OF2, etc.). We use several measures to quantify how well each algorithm finds the global maximum. First, each table includes the mean and standard deviation of the absolute difference between the true global maximum and the algorithm's estimated global maximum across all 50 replications, denoted by Mean and SD. Second, each table includes a convergence criterion --- the proportion of the replications that came within $0.01$ of the true global maximum, denoted by $\widehat{p}$. Finally, $\widehat{t}$ denotes the median number of iterations until the algorithm reaches the convergence criterion. When $\hat{p}<0.5$ then $\hat{t} = \infty$ since greater than 50\% of the replications did not converge in the maximum number of iterations allowed. Mean, $\hat{p}$, and $\hat{t}$ can be thought of how close the algorithm gets to the global maximum, what proportion of the time in converges, and long it takes to converge respectively.
 
-We highlight only some of the features of these tables. First and foremost, PSO, BBPSO-MC, and BBPSOxp-MC almost always do worse than their AT cousins. Adaptively tuning either the scale or inertia parameter leads to gains in all three of our measures, sometimes large. Second, for most algorithms the more restrictive neighborhood appears to be result in algorithms which do a better job of finding the global max. This is not true for the AT algorithms. For the AT-PSO algorithms, it appears that the target improvement rate ($R^*$) and the neighborhood interact. When the rate is high a more restrictive neighborhood is preferable, while when the rate is low a less restrictive neighborhood is preferable. On the other hand, for the AT-BBPSO algorithms, the opposite appears to be true --- when the target improvement rate is high, a less restrictive neighborhood is desireable. In addition, the best AT-BBPSO algorithms often use the global neighborhood.
+We highlight only some of the features of these tables. First and foremost, PSO, BBPSO-MC, and BBPSOxp-MC almost always do worse than their AT cousins. Adaptively tuning either the scale or inertia parameter leads to gains in all three of our measures, sometimes large. Second, for most algorithms the more restrictive neighborhood appears to be result in algorithms which do a better job of finding the global max. This is not true for the AT algorithms. For the AT-PSO algorithms, it appears that the target improvement rate ($R^*$) and the neighborhood interact. When the rate is high a more restrictive neighborhood is preferable, while when the rate is low a less restrictive neighborhood is preferable. On the other hand, for the AT-BBPSO algorithms, the opposite appears to be true --- when the target improvement rate is high, a less restrictive neighborhood is desirable. In addition, the best AT-BBPSO algorithms often use the global neighborhood.
 
-For the DI-PSO algorithms often there is a parameter-neighborhood combination that does well, typically from setting $\alpha=200$ (20\% of the 500 iterations) and $\beta=1$ and using either the ring-1 or ring-3 neighborhood. One of these combinations typically does the best of all the DI-PSO algorithms but they can sometimes still do much worse than the best alternatives (e.g., for OF2). In the AT-BBPSO algorithms, it is not always clear what the best parameter settings are, but good default values appear to bo $df=3$ or $5$ and $R^*=0.3$ or $0.5$. When these values are good, they often lead to the best performing PSO algorithms we consider. However, it is not always clear whether to use AT-BBPSO-MC or AT-BBPSOxp-MC. For some objective functions, e.g. OF4, the xp version is consistently better than the non-xp alternative, but the opposite is true for others, e.g. OF2.. AT-PSO is also often very competitive with $R^*=0.3$ or $R^*=0.5$, though again sometimes different parameter settings also appear to work well. 
+For the DI-PSO algorithms often there is a parameter-neighborhood combination that does well, typically from setting $\alpha=200$ (20\% of the 500 iterations) and $\beta=1$ and using either the ring-1 or ring-3 neighborhood. One of these combinations typically does the best of all the DI-PSO algorithms but they can sometimes still do much worse than the best alternatives (e.g., for OF2). In the AT-BBPSO algorithms, it is not always clear what the best parameter settings are, but good default values appear to be $df=3$ or $5$ and $R^*=0.3$ or $0.5$. When these values are good, they often lead to the best performing PSO algorithms we consider. However, it is not always clear whether to use AT-BBPSO-MC or AT-BBPSOxp-MC. For some objective functions, e.g. OF4, the xp version is consistently better than the non-xp alternative, but the opposite is true for others, e.g. OF2.. AT-PSO is also often very competitive with $R^*=0.3$ or $R^*=0.5$, though again sometimes different parameter settings also appear to work well. 
 
 The DI-PSO and AT-PSO algorithms are similar conceptually, but often yield very different results. DI-PSO deterministically reduces the inertia parameter over time in the same manner given a fixed set of parameter values ($\alpha$ and $\beta$), while AT-PSO dynamically adjusts the inertia parameter to hit a target improvement rate. Figure \ref{fig:inertia} plots the inertia over time for the DI-PSO algorithm with $\alpha=200$, i.e. 20\% of the total number of PSO iterations, and $\beta=1$, and observed inertia over time for one replication of the $AT-PSO$ algorithm with target rate $R^*=0.5$ and ring-1 neighborhood for OF1 and one replication for OF6. All three algorithms have an initial inertia of $\omega(0)=1$. While DI-PSO smoothly decreases its inertia with a slowly decreasing rate, for OF1 AT-PSO very quickly drops its inertia to about 0.5 then bounces around around near that point. It also jumps up above 1 initially, imploring the particles to cast a wider net in search of higher value areas of the search space. This is pretty typical behavior for the inertia parameter of AT-PSO --- it tends to bounce around a level which is approximately the average over time of the DI-PSO's inertia, though lower values of $R^*$ will result in higher inertias. In this way, AT-PSO alternates periods of exploration (relatively high inertia) and periods of exploitation (relatively low inertia). The main exception to this pattern is when AT-PSO converges around a local maximum. In this case, inertia plummets to zero as the particles settle down. This is precisely what happens for OF6 in Figure \ref{fig:inertia}, though in this case the maximum is not global --- Table \ref{tab:psosim6} indicates that ring-1 AT-PSO with $R^*=0.5$ never converged to the global max. In optimization problems with multiple local optima, both AT-PSO and AT-BBPSO variants can exhibit this behavior prematurely converge to a local optima, so they may not be advantageous for those problems. 
 
@@ -686,7 +881,7 @@ Finally, the Hessian is
 \end{align*}
 
 \section{Alternative MCMC algorithms}\label{app:altmcmc}
-[CURRENTLY THIS SECTION ONLY HAS GENERIC VERSIONS OF THE ALGORTIHMS. DETAILS FOR OUR CASES?]
+[CURRENTLY THIS SECTION ONLY HAS GENERIC VERSIONS OF THE ALGORITHMS. DETAILS FOR OUR CASES?]
 This section describes the alternative MCMC algorithms used for comparisons with PSO assisted Metropolis-Hastings algorithms. In particular, we use two types of adaptive random walk Metropolis within Gibbs algorithms. In the generic problem, suppose we wish to sample from the posterior distribution $p(\bm{\theta}|\bm{y})$ using MCMC methods. Suppose that $\bm{\theta} = (\bm{\theta}_1, \bm{\theta}_2)$ and that the full conditional $p(\bm{\theta}_1|\bm{\theta}_2, \bm{y})$ can be sampled from easily while the full conditional for $\bm{\theta}_2$ may be intractable. Then a single move random walk Metropolis within Gibbs (RWwG) algorithm for this problem is as follows.
 \begin{alg}[Single move random walk Metropolis within Gibbs]\label{alg:RWwG}
 Given target posterior $p(\bm{\theta}_1,\bm{\theta}_2|\bm{y})$ where $\bm{\theta}_2=(\theta_{21},\theta_{22},\dots,\theta_{2n})$, it is easy to sample from $p(\bm{\theta}_1|\bm{\theta}_2,\bm{y})$, and given that the support of $p(\bm{\theta}_{2}|\bm{\theta}_1,\bm{y})$ is $\Re^n$, iteration $t+1$ is obtained from iteration $t$ via

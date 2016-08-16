@@ -37,6 +37,7 @@
  {%\appendix
  \def\thesection{\Alph{section}}
  \def\thesubsection{\Alph{section}.\arabic{subsection}}
+ \def\theequation{\Alph{section}.\arabic{equation}}
  %\def\thesubsection{A.\arabic{subsection}}
  }
 
@@ -142,14 +143,14 @@ A variant of PSO, the bare bones PSO algorithm (BBPSO) is a PSO algorithm introd
 where $N(\mu,\sigma^2)$ is the normal distribution with mean $\mu$ and standard deviation $\sigma^2$. The updates of $\bm{p}_i(t)$ and $\bm{g}_i(t)$ are the same as in \eqref{eq:pso}. There are several variants of this algorithm proposed including using distributions from different location-scale families --- e.g., using the $t$-distribution and modifying the location or the scale parameters, for example \citet{krohling2009bare}, \citet{hsieh2010modified}, \citet{richer2006levy}, and \citet{campos2014bare}. Appendix \ref{app:psodetail} contains more detail on the BBPSO variants in the literature which we employ.
 
 \subsection{Adaptively tuned BBPSO}\label{subsec:ATBBPSO}
-BBPSO adapts the size effective search space of the swarm over time through the variance term: $|p_{ij}(t) - g_{ij}(t)|^2$. As the personal best locations of the swarm move closer together, these variances decrease and the swarm tries locations which are closer to known high value areas in the space. This behavior is desireable, but the adaptation is forced to occur through one channel: the personal and group best locations. If the personal best locations of the swarm are arranged in a rough ring around the global optimum, smaller variances are desireable so that the new particle locations have a tendency to be in the center of the ring. On the other hand, if the personal best locations of the swarm are all to one side of the optimum and fairly far away, larger variances are desireable so that the particles can quickly approach the neighborhood of the optimum. BBPSO cannot distinguish between these two cases. [CAN ADD A GRAPHIC ILLUSTRATING THIS. WORTH IT?] 
+BBPSO adapts the size effective search space of the swarm over time through the variance term: $|p_{ij}(t) - g_{ij}(t)|^2$. As the personal best locations of the swarm move closer together, these variances decrease and the swarm tries locations which are closer to known high value areas in the space. This behavior is desirable, but the adaptation is forced to occur through one channel: the personal and group best locations. If the personal best locations of the swarm are arranged in a rough ring around the global optimum, smaller variances are desirable so that the new particle locations have a tendency to be in the center of the ring. On the other hand, if the personal best locations of the swarm are all to one side of the optimum and fairly far away, larger variances are desirable so that the particles can quickly approach the neighborhood of the optimum. BBPSO cannot distinguish between these two cases. [CAN ADD A GRAPHIC ILLUSTRATING THIS. WORTH IT?] 
 
 In order to allow it to adapt in a more flexible manner, we modify the BBPSO variance to $\sigma^2(t)|p_{ij}(t) - g_{ij}(t)|^2$ and tune $\sigma^2(t)$ in a manner similar to adaptive random walk Metropolis MCMC algorithms \citep{andrieu2008tutorial}. Define the improvement rate of the swarm in period $t$ as $R(t) = \#\{i:Q(\bm{p}_i(t))> Q(\bm{p}_i(t-1))\}/n$ where if $A$ is a set then $\#A$ is the number of members of that set, and let $R^*$ denote the target improvement rate. Then what we term adaptively tuned BBPSO (AT-BBPSO) updates personal best and group best locations as in \eqref{eq:pso}, then updates particle locations as follows:
 \begin{align}\label{eq:at-bbpso}
 \theta_{ij}(t+1) &\sim t_{df}\left(\frac{p_{ij}(t) + g_{ij}(t)}{2}, \sigma^2(t)|p_{ij}(t) - g_{ij}(t)|^2\right),\nonumber\\
 \log \sigma^2(t+1) &= \log\sigma^2(t) + c\times\{R(t+1) - R^*\},
 \end{align}
-where $df$ is a user chosen degrees of freedom parameter and $c$ is another user chosen parameter that controls the speed of adaptation. We use a $t$ kernel instead of a Gaussian in order to allow for more flexibility, and smaller values of $df$ appear to combine well with adaptively tuning $\sigma^2(t)$ --- in particular $df=1$. Since the target rate in AT-BBPSO is similar to the target rate in an adaptive random walk Metropolis algorithm, a priori values around $0.25$ and in particular below $0.5$ seem reasonable \citep{gelman1996efficient}. In practice we find that values from $R^*=0.3$ to $R^*=0.5$ tend to yield good AT-BBPSO algorithms. The parameter $c$ controls the speed of adaptationso that larger values of $c$ mean the algorithm adapts $\sigma^2(t)$ faster. We find that $c=0.1$ to be a good value, though anything within an order of magnitude often yields similar results. The initial value $\sigma^2(0)$ also needs to be chosen, though this does not have much impact on the algorithm as long as $c$ is not too small. We use $\sigma^2(0)=1$ to initialize the algorithm at the standard BBPSO algorithm.
+where $df$ is a user chosen degrees of freedom parameter and $c$ is another user chosen parameter that controls the speed of adaptation. We use a $t$ kernel instead of a Gaussian in order to allow for more flexibility, and smaller values of $df$ appear to combine well with adaptively tuning $\sigma^2(t)$ --- in particular $df=1$. Since the target rate in AT-BBPSO is similar to the target rate in an adaptive random walk Metropolis algorithm, a priori values around $0.25$ and in particular below $0.5$ seem reasonable \citep{gelman1996efficient}. In practice we find that values from $R^*=0.3$ to $R^*=0.5$ tend to yield good AT-BBPSO algorithms. The parameter $c$ controls the speed of adaptation so that larger values of $c$ mean the algorithm adapts $\sigma^2(t)$ faster. We find that $c=0.1$ to be a good value, though anything within an order of magnitude often yields similar results. The initial value $\sigma^2(0)$ also needs to be chosen, though this does not have much impact on the algorithm as long as $c$ is not too small. We use $\sigma^2(0)=1$ to initialize the algorithm at the standard BBPSO algorithm.
 
 Both using a $t$ kernel and adding a fixed scale parameter have been discussed in the BBPSO literature, but as \citet{kennedy2003bare} notes, something about setting $\sigma=1$ is special that causes the algorithm to work well. Another similar BBPSO algorithm in the literature comes from \citet{hsieh2010modified}. They propose a modified version of BBPSO with 
 \begin{align*}
@@ -185,14 +186,14 @@ Generalized linear mixed models with latent Gaussian processes (LGP) provide a p
 
 Three key factors affect the quality of the Laplace approximation for GLMMs: the sample size, how close the data model is to Gaussian at reasonable parameter values for the given dataset, and the structure of $\bm{\Sigma}$. Due to the asymptotic nature of the Laplace approximation, the larger the sample size the better the approximation is for $\bm{\beta}$ and $\phi$. To the extent that the data model is already approximately normal, smaller sample sizes will still yield reasonably good approximations. [I CAN ILLUSTRATE THIS WITH SOME SIMULATIONS IN A GLMM WITH A BETA DATA MODEL. NECESSARY?] The last factor can best be illustrated by considering two extremes: iid random effects where $\bm{\Sigma} = \sigma^2\bm{I}_r$, and fully correlated random effects where $\bm{\Sigma}$ is fully parameterized and unknown. In the iid case when $r$ is moderately large, e.g. $r=10$, $\sigma^2$ or more likely $\log\sigma^2$ is often approximately normal. The ``observations'' directly informing on $\sigma^2$ are the estimated random effects in $\bm{\delta}$ rather than data, but the Laplace approximation works all the same. In the fully correlated case, the only ``observation'' relevant to estimating $\bm{\Sigma}$ is $\bm{\delta}$, and there is only one observation to estimate $r(r+1)/2$ unique parameters. In this case it is unrealistic to expect $\bm{\Sigma}$ or any commonly used transformation of $\bm{\Sigma}$ to be approximately normal in the posterior unless there is strong information in the prior suggesting otherwise. 
 
-When $r=n$ it is more important that the data model is already approximately normal and that the random effects are a priori modeled as Gaussian because there are only $n$ data points informing on $n$ latent random effects. Since the dimension of $\bm{\delta}$ is growing at the same rate as the sample size in that case, aymptotic arguments about $\bm{\delta}$'s posterior distribution do not apply. Additionally, when $n$ is large and $r=n$ it may be difficult to find the posterior mode in a reasonable amount of time using any optimization algorithm. Many GLMMs feature e.g. group specific random effects, so $r$ is often much smaller than $n$ and these concerns do not apply. The same principles apply to other models outside of the GLMM framework --- each model parameter and random effect needs enough effective observations informing it so that the asymptotics can take hold or else other features of the model need to ensure that the parameters are approximately Gaussian in the posterior.
+When $r=n$ it is more important that the data model is already approximately normal and that the random effects are a priori modeled as Gaussian because there are only $n$ data points informing on $n$ latent random effects. Since the dimension of $\bm{\delta}$ is growing at the same rate as the sample size in that case, asymptotic arguments about $\bm{\delta}$'s posterior distribution do not apply. Additionally, when $n$ is large and $r=n$ it may be difficult to find the posterior mode in a reasonable amount of time using any optimization algorithm. Many GLMMs feature e.g. group specific random effects, so $r$ is often much smaller than $n$ and these concerns do not apply. The same principles apply to other models outside of the GLMM framework --- each model parameter and random effect needs enough effective observations informing it so that the asymptotics can take hold or else other features of the model need to ensure that the parameters are approximately Gaussian in the posterior.
 
 \subsection{Laplace approximations for IMH algorithms}\label{subsec:laplaceimh}
 Given any reasonable approximation to the posterior distribution, we can construct an IMH MCMC sampler using that approximation \citep[Chapter~7.4]{robert2013monte}, though typically a $t_{df}$ proposal is used instead with $df$ set small enough so that its tails dominate the posterior's in order to ensure that the Markov chain is uniformly ergodic --- see \citet[Theorem~7.8]{robert2013monte}. As long as the conditions mentioned in Section~\ref{subsec:glm} are satisfied, the Laplace approximation is likely to be good and the IMH algorithm is likely to yield efficient MCMC. In particular, when the approximation is good, IMH has high acceptance rates, converges quickly, and mixes well. This is well known, but the problem lies in finding good approximations. The Laplace approximation is often poor even for the class of GLMMs we discussed in Section~\ref{subsec:glm} because of the random effect covariance matrix. Often there are a small number of random effects or they are allowed to have less structured covariance matrices, so the asymptotics never kick in. Yet the random effects themselves and the fixed effect parameter are often still approximately normal in their conditional posterior. Further, the dispersion parameter and the random effect covariance matrix often have easy conditional posteriors which are easy to sample from.
 
-This suggests an obvious alternative: construct a Metropolis within Gibbs MCMC algorithm \citep[Chapter~10.3]{robert2013monte} with an indpendent Metropolis step for $(\bm{\beta}, \bm{\delta})$, i.e an independent Metropolis-Hastings within Gibbs (IMHwG) algorithm. This algorithm consists of three steps: 1) sample $\bm{\Sigma}$ directly from its full conditional distribution, 2) sample $\phi$ directly from its full conditional distribution, and 3) sample $(\bm{\beta}, \bm{\delta})$ from its full conditional distribution using an independent Metropolis-Hastings step with the Laplace approximation as a proposal. Typically steps 1) and 2) are independent of each other, so the algorithm only consists of two Gibbs steps.
+This suggests an obvious alternative: construct a Metropolis within Gibbs MCMC algorithm \citep[Chapter~10.3]{robert2013monte} with an independent Metropolis step for $(\bm{\beta}, \bm{\delta})$, i.e an independent Metropolis-Hastings within Gibbs (IMHwG) algorithm. This algorithm consists of three steps: 1) sample $\bm{\Sigma}$ directly from its full conditional distribution, 2) sample $\phi$ directly from its full conditional distribution, and 3) sample $(\bm{\beta}, \bm{\delta})$ from its full conditional distribution using an independent Metropolis-Hastings step with the Laplace approximation as a proposal. Typically steps 1) and 2) are independent of each other, so the algorithm only consists of two Gibbs steps.
 
-The naive way to implement this algorithm is to construct the Laplace approximation to $[\bm{\beta},\bm{\delta}|\bm{\Sigma},\phi,\bm{Y},\bm{X}]$ every iteration of the MCMC algorithm to use it as the IMH step proposal. This cost get multiplied by the number of MCMC iterations and can therefore be prohibitive when the optimization is costly. We call this approximation strategy the local conditional Laplace approximation. Alternatively, the joint Laplace approximation to the full joint posterior implies a conditional distribution for $\bm{\beta}, \bm{\delta}|\bm{\Sigma},\phi$, which we call the global conditional Laplace approximation. Let $\bm{\theta}_1 = (\bm{\beta}, \bm{\delta})$ and $\bm{\theta}_2 = (\phi, \bm{\Sigma})$, or rather that $\bm{\theta}_2$ is a vector containing $\phi$ and the unique elements of $\bm{\Sigma}$. Then suppose we have the jointl Laplace approximation to the posterior of $\bm{\theta} = (\bm{\theta}_1, \bm{\theta}_2)$ given by $\bm{\theta}|\bm{Y},\bm{X} \stackrel{a}{\sim} N(\bm{\theta}^*, (-\bm{H}^*)^{-1})$ where $\bm{\theta}^* = (\bm{\theta}^*_1, \bm{\theta}_2^*)$ and 
+The naive way to implement this algorithm is to construct the Laplace approximation to $[\bm{\beta},\bm{\delta}|\bm{\Sigma},\phi,\bm{Y},\bm{X}]$ every iteration of the MCMC algorithm to use it as the IMH step proposal. This cost get multiplied by the number of MCMC iterations and can therefore be prohibitive when the optimization is costly. We call this approximation strategy the local conditional Laplace approximation. Alternatively, the joint Laplace approximation to the full joint posterior implies a conditional distribution for $\bm{\beta}, \bm{\delta}|\bm{\Sigma},\phi$, which we call the global conditional Laplace approximation. Let $\bm{\theta}_1 = (\bm{\beta}, \bm{\delta})$ and $\bm{\theta}_2 = (\phi, \bm{\Sigma})$, or rather that $\bm{\theta}_2$ is a vector containing $\phi$ and the unique elements of $\bm{\Sigma}$. Then suppose we have the joint Laplace approximation to the posterior of $\bm{\theta} = (\bm{\theta}_1, \bm{\theta}_2)$ given by $\bm{\theta}|\bm{Y},\bm{X} \stackrel{a}{\sim} N(\bm{\theta}^*, (-\bm{H}^*)^{-1})$ where $\bm{\theta}^* = (\bm{\theta}^*_1, \bm{\theta}_2^*)$ and 
 \begin{align*}
 \bm{\Omega}^* = (-\bm{H}^*)^{-1} = \begin{bmatrix} \bm{\Omega}^*_{11} & \bm{\Omega}^*_{12} \\ \bm{\Omega}^*_{21} & \bm{\Omega}^*_{22} \end{bmatrix}.
 \end{align*}
@@ -217,44 +218,10 @@ Finally, we consider the two extreme parameterizations of $\bm{\Sigma}(\bm{\thet
 
 Between the two possible parameterizations of $\bm{\Sigma}$ and the two choices for the data model we consider four possible classes of models. Both for implementing PSO algorithms to find the Laplace approximations and for running the IMH and IMHwG algorithms, we reparameterize the variance and covariance matrix parameters so that they have support on an unconstrained space. For $\sigma^2$ and $\phi^2$ we use the log transformation, and for $\bm{\Sigma}$ we use the Cholesky factorization of $\bm{\Sigma}^{-1}$ allowing the diagonal elements to be negative. See Appendix \ref{app:pop} for details about the posterior distributions, including this transformation and relevant full conditionals.
 
+\subsection{County population models PSO and MCMC results}
+We conduct a simulation study using \verb0R0 \citep{R2008} to compare various PSO algorithms at finding the posterior mode in each of the example models from Section \ref{sec:pop} Based on the results of Appendix \ref{app:psocompare}, we limit the study to 14 PSO algorithms: standard PSO, BBPSO-MC, BBPSOxp-MC, AT-BBPSO-MC and AT-BBPSOxp-MC, both with $df\in \{3,5\}$, $R^*\in \{0.3,0.5\}$, and $c=0.1$, DI-PSO with $\alpha = 0.2n_{iter}$ and $\beta=1$ where $n_{iter}$ is the number of iterations of the PSO algorithm, and AT-PSO with $R^*\in \{0.3,0.5\}$, and $c=0.1$. In addition, each algorithm was run using the global, ring-1, and ring-3 neighborhood topologies for a total of 42 algorithms, each for 10 replications of $n_{iter}=1,000$ iterations using 50 particles. See Appendix \ref{app:psodetail} for a detailed description the BBPSO variants we use along with the global and ring neighborhood topologies.
 
-\section{Predicting the 1988 presidential election}\label{sec:pres}
-\citet[Chapter~14]{gelman2006data} describes a model used to predict state-level opinions about the 1988 presidential candidates from national polls in order to predict the outcome of the election. They model the responses to a series of seven polls conducted by CBS News during the week before the 1988 presidential election. The variable of interest is binary: $Z_i=1$ if the $i$th respondent said they supported the Republican candidate and $Z_i=0$ if they said they supported the Democratic candidate, with undecideds being excluded. Focusing on the last poll, they ultimately estimate a logistic regression model with fixed effects for race (whether the respondent was African American or not), sex, and race$\times$sex, and random effects for four age categories, four education categories, and 16 age$\times$education categories, as well as for the respondent's state of residence (including District of Columbia). The mean of the state random effect distribution is one of five region random effects plus the proportion of the state that voted republican in the last election times a slope coefficient. 
-
-The model is somewhat overparameterized since it has age, education, and age$\times$education random effects, so we reduce its size somewhat by omitting the age and education random effects, but keeping the age$\times$education interaction terms. In our model the age$\times$education random effects now represent the random effects for each age$\times$education category rather than an interaction term. The single poll data model is
-\begin{align}
-P(Z_i = 1) &= \theta_i,\ \ \   \theta_i = \exp(Y_i)/\{1 + \exp(Y_i)\}, \nonumber\\
-Y_i &= \beta_0 + f_i\beta_f + b_i\beta_b + f_ib_i\beta_{fb} + \alpha_{ae}[ae_i] + \alpha_{s}[s_i]\mbox{\ \ \ \ (single poll data model), }
-\end{align}
-where $f_i$ indicates whether respondent $i$ identified as female, $b_i$ indicates whether respondent $i$ identified as African American, $ae_i$ indicates respondent $i$'s age$\times$education category, and $s_i$ indicates respondent $i$'s state of residence. Here we use $\alpha_{s}[k]$ to denote the $k$th element of the vector $\bm{\alpha}_s$, so $\bm{\alpha}_{ae}$ contains 16 elements, and $\bm{\alpha}_s$ contains 51 elements (50 states plus the District of Columbia). The single poll process model is
-\begin{align}
-\alpha_s[k] \stackrel{ind}{\sim}& N(\alpha_r[r_k] + prev_k\beta_{prev}, \sigma^2_s) \mbox{ for } k=1,2,\dots,51,\nonumber\\
-\alpha_{ae}[k] \stackrel{iid}{\sim}& N(0, \sigma^2_{ae}) \mbox{ for } k=1,2,\dots,16,\nonumber\\
-\alpha_{r}[k] \stackrel{iid}{\sim}& N(0, \sigma^2_{r}) \mbox{ for } k=1,2,\dots,5 \mbox{\ \ \ \ (single poll process model), }
-\end{align}
-where $\alpha_r[r_k]$ denotes the region containing state $k$ and $prev_k$ denotes the average vote share for the Republicans in the previous three presidential elections. This model expands the class of models discussed in Section \ref{subsec:glm} by allowing the mean of $\bm{\delta}$ to depend on random effects that are further modeled, but adding a level to the hierarchy does not fundamentally change the applicability of the Laplace approximations we use.
-
-The last poll had 2,015 respondents, but together all seven polls have 11,566 respondents. Using each poll with a minimal number of additional parameters to account for poll to poll variability should increase the quality of the model and result in a posterior with better Laplace approximations since there is so much more data. We analyze a model for all of the polls using the following data model
-\begin{align}
-P(Z_i = 1) &= \theta_i,\ \ \   \theta_i = \exp(Y_i)/\{1 + \exp(Y_i)\}, \nonumber\\
-Y_i &= \beta_0 + f_i\beta_f + b_i\beta_b + f_ib_i\beta_{fb} + \alpha_{ae}[ae_i] + \alpha_{s}[s_i] + \alpha_p[p_i]\mbox{\ \ \ \ (all polls data model), }
-\end{align}
-where $p_i$ denotes which poll respondent $i$ was surveyed in. The process model is given by
-\begin{align}
-\alpha_s[k] \stackrel{ind}{\sim}& N(\alpha_r[r_k] + prev_k\beta_{prev}, \sigma^2_s) \mbox{ for } k=1,2,\dots,51,\nonumber\\
-\alpha_{ae}[k] \stackrel{iid}{\sim}& N(0, \sigma^2_{ae}) \mbox{ for } k=1,2,\dots,16,\nonumber\\
-\alpha_{r}[k] \stackrel{iid}{\sim}& N(0, \sigma^2_{r}) \mbox{ for } k=1,2,\dots,5,\\ \nonumber
-\alpha_{p}[k] \stackrel{iid}{\sim}& N(0, \sigma^2_{p}) \mbox{ for } k=1,2,\dots,7 \mbox{\ \ \ \ (all polls process model). }
-\end{align}
-In both models we assume each of the $\beta$s have independent $N(0,1000)$ priors, and each of the 
-$\sigma^2$s have $IG(1,1)$ priors. Including the random effects the single poll model contains 80 parameters while the all polls model contains 89 parameters. Writing down the log posteriors and deriving the Hessians is straightforward but tedious for these models, so we omit these steps, though note that in both the PSO and IMH algorithms the variances should be transformed to the log scale. [SHOULD WE ADD THIS INTO AN APPENDIX]
-
-\section{PSO results for finding posterior modes}\label{sec:psomode}
-[THIS STUFF ALL GETS PUT INTO THE LATTER TWO SECTIONS]
-
-[I HAVE RESULTS USING 10 RANDOM EFFECTS iid MODELS AND 5 IN full; WORTH FINDING SPACE FOR?]
-
-We conduct a simulation study using \verb0R0 \citep{R2008} to compare various PSO algorithms at finding the posterior mode in each of the example models from Sections \ref{sec:pop} and \ref{sec:pres}. Based on the results of  Appendix \ref{app:psocompare}, we limit the study to 7 PSO algorithms: standard PSO algorithm using parameter values suggested by \cite{blum2008swarm} and \cite{clerc2002particle} (PSO in Figures \ref{fig:popmaxboxplot}, \ref{fig:popmaxboxplot2}, and [REFERENCE TO POLL BOX PLOT FIGURE]), the standard BBPSOxp-MC algorithm (BBPSO), DI-PSO with $\alpha = 0.2\times n_{iter} = 200$ and $\beta = 1$ (DI-PSO), AT-PSO with $c=0.1$ and either $R^*=0.3$ or $0.5$ (AT-PSO-0.3 and AT-PSO-0.5), and AT-BBPSOxp-MC with $df=1$, $c=0.1$, and either $R^*=0.3$ or $0.5$ (AT-BBPSO-0.3 and AT-BBPSO-0.5). Each algorithm was tried with one of two initializations. In the ``BFGS'' initialization, we first ran the BFGS algorithm using \verb0R0's \verb0optim0 function \citep{R2008} until convergence using default settings to obtain an initial guess of the argmax, $\widehat{\bm{\theta}}$, then initialized the swarm with one particle at this initial guess and the rest uniformly in a length 2 hypercube centered on $\widehat{\bm{\theta}}$, i.e. $\bm{\theta}_1 = \widehat{\bm{\theta}}$ and $\theta_{ij} = \widehat{\theta}_j + U(-1,1)$ for $i=2,3,\dots,50$ and $j=1,2,\dots,n_{par}$ where $n_{par}$ is the number of parameters in the model and the $U(-1,1)$ random variates are drawn independently. In the ``no BFGS'' initialization, each particle was initialized uniformly in a length 200 hypercube centered at zero, i.e. $\theta_{ij} \stackrel{iid}{\sim}U(-100,100)$ for $i=1,2,\dots,50$ and $j=1,2,\dots,n_{par}$. In addition, each algorithm was run using both the ring-1 and ring-3 neighborhood topologies, for a total of four combinations of initializations and neighborhoods, each for 20 replications of 1,000 iterations using 50 particles.
+[THE DETAILS HERE ARE CURRENTLY OUTDATED]
 
 Figure \ref{fig:popmaxboxplot} contains boxplots of the results of the simulations for the Poisson county population models of Section~\ref{sec:pop}. Models with iid random effects had 30 random effects while models with fully correlated random effects had 15. Each box plot was created using the 10, 25, 50, 75, and 90 percentiles of the maximum value of the log posterior found in all 20 replications after 1,000 iterations. Figure \ref{fig:popmaxboxplot2} is similar, except for the lognormal models. Across all models we see that the ring-3 topology and BFGS initialization both improve each of the algorithms, especially in combination. In  Appendix \ref{app:psocompare} the ring-3 neighborhood performed the best on our suite of test functions, and the same seems to be true here. The BFGS initialization is cheap, taking essentially no time to compute, yet seems to drastically improve the quality of every PSO algorithms. In  Appendix \ref{app:psocompare} we speculated that the AT-PSO algorithms would benefit significantly from some sort of stage one optimization, and our results confirm this for all of the algorithms. Another lesson from these boxplots is that the AT-PSO and AT-BBPSO algorithms tend to do the best, especially when $R^*=0.5$ in both cases. 
 \begin{figure}[!ht]
@@ -277,11 +244,137 @@ Figure \ref{fig:popmaxboxplot} contains boxplots of the results of the simulatio
 \label{fig:popmaxboxplot2}
 \end{figure}
 
-[PARAGRAPH OR TWO AND PLOTS FOR THE ELECTION MODELS]
+Next we move to comparing various MCMC algorithms for both classes of models. The other MCMC algorithms we consider in this section are single move random walk Metropolis within Gibbs (RWwG), block random walk Metropolis within Gibbs (B-RWwG), Hamiltonian Monte Carlo as implemented by the Stan software \citep{carpenter2015stan} using the No U-turn Sampler \citep{homan2014no} and for the lognormal model for county populations, a two step Gibbs sampler (Gibbs). The last algorithm is only considered for the lognormal model because only in that case are all of the full conditionals tractable. We use standard settings to fit each of the models in Stan, though minimal tweaking was required in some cases. In all of the Gibbs algorithms, the blocks are the same as in the IMHwG algorithms detailed in the previous section. Both the RWwG and B-RWwG algorithms are tuned during the burn-in using an adaptive method. Appendix \ref{app:altmcmc} explains the details of the two random walk algorithms we use including how the adaptation was performed. 
+
+We compare these algorithms in Table [TO BE CONSTRUCTED] %\ref{tab:neff}
+ in terms of two measures: the minimum estimated effective sample size for all parameters in the model ($n_{\text{eff}}$, see \citet[Section~12.3.5]{robert2013monte}), and time in seconds per $n_{\text{eff}}$. The effective sample size is the size of an iid sample which yields the same standard error for estimating the mean of some function of the parameters in our MCMC simulations, so we take the minimum estimated $n_{\text{eff}}$ among all elements of the parameter vector and latent process. 
+
+[SIMULATIONS TO BE CONDUCTED - SHOULD TAKE A COUPLE DAYS ONCE THEY'RE RUNNING. FOR THE IMH AND IMHwG ALGORITHMS, THESE WILL ONLY USE ONE PSO ALGORITHM]
+
+
+% For the IMH and IMHwG algorithms, we ran the standard PSO algorithm using the ring-1 neighbhorhood with a swarm of 100 particles for 10,000 iterations in order to estimate the mode, then used $df=100$ in the $t$-proposal for both algorithms. Each algorithm was run until convergence, then a sample of 50,000 was collected. This allows us to compare each algorithm on a per iteration basis, but ignores the setup costs associated with each algorithm. The simulations were written entirely in \verb0R0 and run on a Dell laptop with an Intel Core i7-5600U CPU. Different languages and different CPUs will yield different timing results, but the relative comparisons should be similar.
+
+% For the Poisson model with iid random effects, the IMH and IMHwG algorithms yield significant gains in $n_{\text{eff}}$ over the random walk algorithms. IMH has comparable effective sample sizes to Stan in these cases, but the IMHwG algorithm does significantly better. We see a similar pattern for time per $n_{\text{eff}}$, though IMH and IMHwG are comparable by this measure while Stan requires more time to achieve a similar level of precision to IMH and IMHwG. Stan uses a much more general purpose algorithm that needs several log posterior evaluations per iteration, which hurts it in this relatively simple problem. 
+
+% For the Poisson models with a fully parameterized covariance matrix, IMH has very poor effective sample sizes, but IMHwG still does well. The key here is that even though $\bm{L}$ is not plausibly Gaussian in the posteror, condtional on $\bm{L}$, $(\bm{\beta},\bm{\delta})$ is still plausibly Gaussian. So the normal approximation works well on those parameters. The random walk algorithms do reasonably well in this case due to the smaller size of the random effect vector, but Stan gives much higher effective sample sizes and IMHwG higher still. In terms of time per 1000 effective draws, IMHwG is the best option.
+
+
+% The story for the longnormal models is similar with some caveats. First, in the lognormal model with full random effects the IMH and IMHwG algorithms never work well, even for small $r$. Second, in the model with iid random effects, the IMH algorithm is much less competitive, though IMHwG still does well. The pure Gibbs sampler that is available for the lognormal models does worse than both Stan and IMHwG in terms of time per 1000 $n_{\text{eff}}$ in the iid models, but it does produce the best $n_{\text{eff}}$s. The Gibbs sampler is unambiguously the best algorithm under most conditions, though the difference between it and the IMHwG algorithm with high $df$ is small in terms of time per $n_{\text{eff}}$. This comparison between the IMH results in Poisson and lognormal iid models illustrates something important. The data model in lognormal case is closer to Gaussian than in the Poisson case, leading to $(\bm{\beta}, \bm{\delta})$ being more plausibly Gaussian in the posterior, adding another variance parameter in the lognormal case that is not plausibly Gaussian, $\phi^2$, hurts the normal approximation on the full posterior. Additionally the scale of $\sigma^2$ is different in the lognormal model, attenuating it toward zero. In many cases even with non-normal data models $(\bm{\beta}, \bm{\delta})$ are approximately normal in the posterior because of the amount of data directly informing on them, but higher level variance parameters tend to cause more problems for the approximation. This makes PSO assisted IMHwG a much more generally applicable algorithm than PSO assisted IMH.
+
+% These simulations do ignore the setup costs associated with each algorithm. Stan has an involved adaptation stage, though it converges immediately when it adapts well. The random walk algorithms all converge rather slowly. The PSO assisted IMH and IMHwG algorithms have neither of these setup costs, but trade them for costs of another sort: the time it takes to find the posterior mode. For small $r$ these costs are competitive with Stan and the random walk algorithm, e.g., $r=5$ in the fully parameterized models and $r=10$ in the iid models. We ran the PSO algorithms for 10,000 iterations in order to ensure that the mode was found across all of our simulations, but this is overkill by one or two orders of magnitude for small $r$ --- in Table \ref{tab:longaccrates} we see acceptance rates stabilizing at a very high level after many fewer PSO iterations when $r$ is relatively small. For larger $r$ this cost can become onerous. 
+
+% \begin{table}[ht]
+% \captionsetup{font=footnotesize}
+% \centering
+% \footnotesize{
+% \subfloat[Effective sample size \& time (seconds) per 1,000 effective draws for Poisson models]{
+% \begin{tabular}{r|rrrrr}
+% \multicolumn{6}{l}{iid Poisson $n_{\text{eff}}$} \\
+%   \hline
+%   r & Stan & RWwG & B-RWwG & IMH & IMHwG \\
+%   \hline
+%   10 & 17159 & 0 & 1202 & 19051 & 45883 \\ 
+%   20 & 19125 & 0 & 557 & 23687 & 42283 \\ 
+%   30 & 25229 & 0 & 402 & 26355 & 41462 \\ 
+% \hline
+% \multicolumn{6}{c}{}\\
+% \multicolumn{6}{l}{Full Poisson $n_{\text{eff}}$}\\
+% \hline
+%   5 & 21899 & 7490 & 2318 & 33 & 46874 \\ 
+%   7 & 26592 & 8272 & 1771 & 7 & 45825 \\ 
+%   9 & 26393 & 8404 & 1433 & 66 & 45256 \\ 
+%    \hline
+% \multicolumn{6}{c}{}\\
+% \multicolumn{6}{l}{iid Poisson time$/n_{\text{eff}}\times$1,000}\\
+%   \hline
+%   10 & 173 & 1613304 & 81 & 17 & 13 \\ 
+%   20 & 144 & 35841461 & 288 & 22 & 23 \\ 
+%   30 & 102 & 18105527 & 296 & 29 & 33 \\ 
+% \hline
+% \multicolumn{6}{c}{}\\
+% \multicolumn{6}{l}{Full Poisson time$/n_{\text{eff}}\times$1,000}\\
+% \hline
+%   5 & 201 & 77 & 75 & 10406 & 14 \\ 
+%   7 & 158 & 114 & 104 & 51012 & 17 \\ 
+%   9 & 174 & 117 & 113 & 6268 & 19 \\ 
+%    \hline
+% \end{tabular}
+% }
+% \subfloat[Effective sample size \& time (seconds) per 1,000 effective draws for lognormal models]{
+% \begin{tabular}{r|rrrrrr}
+% \multicolumn{7}{l}{iid lognormal $n_{\text{eff}}$} \\
+%   \hline
+%   r & Stan & Gibbs & RWwG & B-RWwG & IMH & IMHwG\\
+%   \hline
+%   10 & 19753 & 43296 & 81 & 1199 & 5649 & 40498 \\ 
+%   20 & 24665 & 45425 & 93 & 668 & 5594 & 38927 \\ 
+%   30 & 32769 & 44093 & 84 & 425 & 4457 & 38357 \\ 
+% \hline
+% \multicolumn{7}{c}{}\\
+% \multicolumn{7}{l}{Full lognormal $n_{\text{eff}}$}\\
+% \hline
+%   5 & 27289 & 4135 & 745 & 214 & 13 & 109 \\ 
+%   7 & 24981 & 3699 & 558 & 103 & 33 & 4 \\ 
+%   9 & 40000 & 3473 & 469 & 71 & 44 & 5 \\ 
+%    \hline
+% \multicolumn{7}{c}{}\\
+% \multicolumn{7}{l}{iid lognormal time$/n_{\text{eff}}\times$1,000}\\
+% \hline
+%   10 & 19 & 55 & 6327 & 55 & 88 & 25 \\ 
+%   20 & 16 & 54 & 16616 & 172 & 105 & 34 \\ 
+%   30 & 11 & 54 & 33873 & 316 & 180 & 47 \\ 
+% \hline
+% \multicolumn{7}{c}{}\\
+% \multicolumn{7}{l}{Full lognormal time$/n_{\text{eff}}\times$1,000}\\
+% \hline
+%   5 & 121 & 570 & 579 & 692 & 34701 & 9706 \\ 
+%   7 & 188 & 705 & 1222 & 1608 & 13569 & 267879 \\ 
+%   9 & 169 & 675 & 1343 & 1975 & 11678 & 248761 \\ 
+% \hline
+% \end{tabular}
+% }
+% }
+% \caption{Minimum estimated effective sample size for all parameters of the model ($n_{\text{eff}}$) and time in seconds per 1,000 $n_{\text{eff}}$ for the Poisson models (a) and the lognormal models (b) with either iid or fully correlated random effects. The IMH and IMHwG algorithms used standard PSO with 100 particles in the ring-1 neighborhood for 10,000 iterations to find the posterior mode, and used $df=100$ in the $t$ proposal. The parameter $r$ denotes the number of random effects in the model.}
+% \label{tab:neff}
+% \end{table}
+
+
+\section{Predicting the 1988 presidential election}\label{sec:pres}
+\citet[Chapter~14]{gelman2006data} describes a model used to predict state-level opinions about the 1988 presidential candidates from national polls in order to predict the outcome of the election. They model the responses to a series of seven polls conducted by CBS News during the week before the 1988 presidential election. The variable of interest is binary: $Z_i=1$ if the $i$th respondent said they supported the Republican candidate and $Z_i=0$ if they said they supported the Democratic candidate, with undecideds being excluded. Focusing on the last poll, they ultimately estimate a logistic regression model with fixed effects for race (whether the respondent was African American or not), sex, and race$\times$sex, and random effects for four age categories, four education categories, and 16 age$\times$education categories, as well as for the respondent's state of residence (including District of Columbia). The mean of the state random effect distribution is one of five region random effects plus the proportion of the state that voted republican in the last election times a slope coefficient. 
+
+The model is somewhat overparameterized since it has age, education, and age$\times$education random effects, so we reduce its size somewhat by omitting the age and education random effects, but keeping the age$\times$education interaction terms. In our model the age$\times$education random effects now represent the random effects for each age$\times$education category rather than an interaction term. The single poll data model is
+\begin{align*}
+P(Z_i = 1) &= \theta_i,\ \ \   \theta_i = \exp(Y_i)/\{1 + \exp(Y_i)\}, \\
+Y_i &= \beta_0 + f_i\beta_f + b_i\beta_b + f_ib_i\beta_{fb} + \alpha_{ae}[ae_i] + \alpha_{s}[s_i]\mbox{\ \ \ \ (single poll data model), }
+\end{align*}
+where $f_i$ indicates whether respondent $i$ identified as female, $b_i$ indicates whether respondent $i$ identified as African American, $ae_i$ indicates respondent $i$'s age$\times$education category, and $s_i$ indicates respondent $i$'s state of residence. Here we use $\alpha_{s}[k]$ to denote the $k$th element of the vector $\bm{\alpha}_s$, so $\bm{\alpha}_{ae}$ contains 16 elements, and $\bm{\alpha}_s$ contains 51 elements (50 states plus the District of Columbia). The single poll process model is
+\begin{align*}
+\alpha_s[k] \stackrel{ind}{\sim}& N(\alpha_r[r_k] + prev_k\beta_{prev}, \sigma^2_s) \mbox{ for } k=1,2,\dots,51,\\
+\alpha_{ae}[k] \stackrel{iid}{\sim}& N(0, \sigma^2_{ae}) \mbox{ for } k=1,2,\dots,16,\\
+\alpha_{r}[k] \stackrel{iid}{\sim}& N(0, \sigma^2_{r}) \mbox{ for } k=1,2,\dots,5 \mbox{\ \ \ \ (single poll process model), }
+\end{align*}
+where $\alpha_r[r_k]$ denotes the region containing state $k$ and $prev_k$ denotes the average vote share for the Republicans in the previous three presidential elections. This model expands the class of models discussed in Section \ref{subsec:glm} by allowing the mean of $\bm{\delta}$ to depend on random effects that are further modeled, but adding a level to the hierarchy does not fundamentally change the applicability of the Laplace approximations we use.
+
+The last poll had 2,015 respondents, but together all seven polls have 11,566 respondents. Using each poll with a minimal number of additional parameters to account for poll to poll variability should increase the quality of the model and result in a posterior with better Laplace approximations since there is so much more data. We analyze a model for all of the polls using the following data model
+\begin{align*}
+P(Z_i = 1) &= \theta_i,\ \ \   \theta_i = \exp(Y_i)/\{1 + \exp(Y_i)\}, \\
+Y_i &= \beta_0 + f_i\beta_f + b_i\beta_b + f_ib_i\beta_{fb} + \alpha_{ae}[ae_i] + \alpha_{s}[s_i] + \alpha_p[p_i]\mbox{\ \ \ \ (all polls data model), }
+\end{align*}
+where $p_i$ denotes which poll respondent $i$ was surveyed in. The process model is given by
+\begin{align*}
+\alpha_s[k] \stackrel{ind}{\sim}& N(\alpha_r[r_k] + prev_k\beta_{prev}, \sigma^2_s) \mbox{ for } k=1,2,\dots,51,\\
+\alpha_{ae}[k] \stackrel{iid}{\sim}& N(0, \sigma^2_{ae}) \mbox{ for } k=1,2,\dots,16,\\
+\alpha_{r}[k] \stackrel{iid}{\sim}& N(0, \sigma^2_{r}) \mbox{ for } k=1,2,\dots,5,\\ 
+\alpha_{p}[k] \stackrel{iid}{\sim}& N(0, \sigma^2_{p}) \mbox{ for } k=1,2,\dots,7 \mbox{\ \ \ \ (all polls process model). }
+\end{align*}
+In both models we assume each of the $\beta$s have independent $N(0,1000)$ priors, and each of the 
+$\sigma^2$s have $IG(1,1)$ priors. Including the random effects the single poll model contains 80 parameters while the all polls model contains 89 parameters. Writing down the log posteriors and deriving the Hessians is straightforward but tedious for these models, so we omit these steps, though note that in both the PSO and IMH algorithms the variances should be transformed to the log scale. For MCMC algorithms with multiple Gibbs steps, in single poll model of Section~\ref{sec:pres}, we draw $(\beta_0, \beta_f, \beta_b, \bm{\alpha}_{s}, \bm{\alpha}_{ae})$ in the Metropolis step, while in the all polls model we draw all of those parameters and additionally $\bm{\alpha}_p$ in the Metropolis step. Then for both models there are two additional Gibbs steps --- one where each random effect variance is drawn, and one where $(\beta_{prev}, \bm{\alpha}_r)$ is drawn. These full conditionals are straightforward to derive, so we do not reproduce them here. Likewise, the Hessian is easy though tedious to derive, so we omit it as well. [SHOULD WE ADD THESE DETAILS INTO AN APPENDIX?]
+
+\subsection{Election models PSO and MCMC results}
+
+[OUTDATED]
 
 For our purposes, the PSO algorithms are useful only insofar as they allow us to construct IMH and IMHwG algorithms. So we conduct another simulation study to see when each algorithm gets close enough to the posterior mode for the IMH and IMHwG algorithms to have high acceptance rates. To this end we conduct another simulations study using the same 7 PSO algorithms from the previous study, except only using the ring-3 neighborhood topology and BFGS initialization. Next, we run the IMH and IMHwG MCMC algorithms based on 0, 100, 500, 1,000, 1,500, and 2,000 iterations of the PSO algorithm and compute the acceptance rate after 1,000 iterations of the MCMC algorithm. Each MCMC algorithm is initialized at the PSO estimate of the posterior mode used to construct the Laplace approximation. When we run the IMH and IMHwG algorithms after 0 iterations of a PSO algorithm we still run the BFGS initialization, so this serves as a control to see if running the PSO algorithm is necessary to get reasonable acceptance rates. Additionally, we run each IMH and IMHwG algorithm with different choices for the degrees of freedom parameter in the Laplace approximation.
-
-In single poll model of Section~\ref{sec:pres}, we draw $(\beta_0, \beta_f, \beta_b, \bm{\alpha}_{s}, \bm{\alpha}_{ae})$ in the Metropolis step, while in the all polls model we draw all of those parameters and additionally $\bm{\alpha}_p$ in the Metropolis step. Then for both models there are two additional Gibbs steps --- one where each random effect variance is drawn, and one where $(\beta_{prev}, \bm{\alpha}_r)$ is drawn. These full conditionals are straightforward to derive, so we do not reproduce them here. Likewise, the Hessian is easy though tedious to derive, so we omit it as well.
 
 [SIMULATION STUDY TO BE COMPLETED AND PUT HERE - WON'T TAKE VERY LONG, ~ 1 DAY]
 
@@ -410,102 +503,6 @@ In single poll model of Section~\ref{sec:pres}, we draw $(\beta_0, \beta_f, \bet
 
 % Essentially standard PSO allows the particles to explore the space more or less randomly at first and only after the swarm builds up information about the higher value areas of the space does the swarm begin moving in that direction. The various BBPSO variants begin moving the particles toward higher value areas more quickly at first, but are often overtaken by standard PSO when the objective function is relatively well behaved. In practice this means that standard PSO is a advantageous for estimating the posterior mode since the quality of the normal approximation as a Metropolis-Hastings proposal is highly sensity to the quality of the estimate of the posterior mode. If the log posterior is less well behaved and the normal approximation is still desired, AT-BBPSO variants may be better suited to the problem since they appear to be more robust to complicated objective functions as seen in  Appendix \ref{app:psocompare}. In other statistical estimation contexts where stronger optimization power is desired but it is not so crucial to exactly find the optimum, AT-BBPSO variants again seem advantageous.
 
-
-\section{Comparison of MCMC techniques}\label{sec:compest}
-
-Next we move to comparing various MCMC algorithms for both classes of models. The other MCMC algorithms we consider in this section are single move random walk Metropolis within Gibbs (RWwG), block random walk Metropolis within Gibbs (B-RWwG), Hamiltonian Monte Carlo as implemented by the Stan software \citep{carpenter2015stan} using the No U-turn Sampler \citep{homan2014no} and for the lognormal model for county populations, a two step Gibbs sampler (Gibbs). The last algorithm is only considered for the lognormal model because only in that case are all of the full conditionals tractable. We use standard settings to fit each of the models in Stan, though minimal tweaking was required in some cases. In all of the Gibbs algorithms, the blocks are the same as in the IMHwG algorithms detailed in the previous section. Both the RWwG and B-RWwG algorithms are tuned during the burn-in using an adaptive method. Appendix \ref{app:altmcmc} explains the details of the two random walk algorithms we use including how the adaptation was performed. 
-
-We compare these algorithms in Table [TO BE CONSTRUCTED] %\ref{tab:neff}
- in terms of two measures: the minimum estimated effective sample size for all parameters in the model ($n_{\text{eff}}$, see \citet[Section~12.3.5]{robert2013monte}), and time in seconds per $n_{\text{eff}}$. The effective sample size is the size of an iid sample which yields the same standard error for estimating the mean of some function of the parameters in our MCMC simulations, so we take the minimum estimated $n_{\text{eff}}$ among all elements of the parameter vector and latent process. 
-
-[SIMULATIONS TO BE CONDUCTED - SHOULD TAKE A COUPLE DAYS ONCE THEY'RE RUNNING. FOR THE IMH AND IMHwG ALGORITHMS, THESE WILL ONLY USE ONE PSO ALGORITHM]
-
-
-% For the IMH and IMHwG algorithms, we ran the standard PSO algorithm using the ring-1 neighbhorhood with a swarm of 100 particles for 10,000 iterations in order to estimate the mode, then used $df=100$ in the $t$-proposal for both algorithms. Each algorithm was run until convergence, then a sample of 50,000 was collected. This allows us to compare each algorithm on a per iteration basis, but ignores the setup costs associated with each algorithm. The simulations were written entirely in \verb0R0 and run on a Dell laptop with an Intel Core i7-5600U CPU. Different languages and different CPUs will yield different timing results, but the relative comparisons should be similar.
-
-% For the Poisson model with iid random effects, the IMH and IMHwG algorithms yield significant gains in $n_{\text{eff}}$ over the random walk algorithms. IMH has comparable effective sample sizes to Stan in these cases, but the IMHwG algorithm does significantly better. We see a similar pattern for time per $n_{\text{eff}}$, though IMH and IMHwG are comparable by this measure while Stan requires more time to achieve a similar level of precision to IMH and IMHwG. Stan uses a much more general purpose algorithm that needs several log posterior evaluations per iteration, which hurts it in this relatively simple problem. 
-
-% For the Poisson models with a fully parameterized covariance matrix, IMH has very poor effective sample sizes, but IMHwG still does well. The key here is that even though $\bm{L}$ is not plausibly Gaussian in the posteror, condtional on $\bm{L}$, $(\bm{\beta},\bm{\delta})$ is still plausibly Gaussian. So the normal approximation works well on those parameters. The random walk algorithms do reasonably well in this case due to the smaller size of the random effect vector, but Stan gives much higher effective sample sizes and IMHwG higher still. In terms of time per 1000 effective draws, IMHwG is the best option.
-
-
-% The story for the longnormal models is similar with some caveats. First, in the lognormal model with full random effects the IMH and IMHwG algorithms never work well, even for small $r$. Second, in the model with iid random effects, the IMH algorithm is much less competitive, though IMHwG still does well. The pure Gibbs sampler that is available for the lognormal models does worse than both Stan and IMHwG in terms of time per 1000 $n_{\text{eff}}$ in the iid models, but it does produce the best $n_{\text{eff}}$s. The Gibbs sampler is unambiguously the best algorithm under most conditions, though the difference between it and the IMHwG algorithm with high $df$ is small in terms of time per $n_{\text{eff}}$. This comparison between the IMH results in Poisson and lognormal iid models illustrates something important. The data model in lognormal case is closer to Gaussian than in the Poisson case, leading to $(\bm{\beta}, \bm{\delta})$ being more plausibly Gaussian in the posterior, adding another variance parameter in the lognormal case that is not plausibly Gaussian, $\phi^2$, hurts the normal approximation on the full posterior. Additionally the scale of $\sigma^2$ is different in the lognormal model, attenuating it toward zero. In many cases even with non-normal data models $(\bm{\beta}, \bm{\delta})$ are approximately normal in the posterior because of the amount of data directly informing on them, but higher level variance parameters tend to cause more problems for the approximation. This makes PSO assisted IMHwG a much more generally applicable algorithm than PSO assisted IMH.
-
-% These simulations do ignore the setup costs associated with each algorithm. Stan has an involved adaptation stage, though it converges immediately when it adapts well. The random walk algorithms all converge rather slowly. The PSO assisted IMH and IMHwG algorithms have neither of these setup costs, but trade them for costs of another sort: the time it takes to find the posterior mode. For small $r$ these costs are competitive with Stan and the random walk algorithm, e.g., $r=5$ in the fully parameterized models and $r=10$ in the iid models. We ran the PSO algorithms for 10,000 iterations in order to ensure that the mode was found across all of our simulations, but this is overkill by one or two orders of magnitude for small $r$ --- in Table \ref{tab:longaccrates} we see acceptance rates stabilizing at a very high level after many fewer PSO iterations when $r$ is relatively small. For larger $r$ this cost can become onerous. 
-
-% \begin{table}[ht]
-% \captionsetup{font=footnotesize}
-% \centering
-% \footnotesize{
-% \subfloat[Effective sample size \& time (seconds) per 1,000 effective draws for Poisson models]{
-% \begin{tabular}{r|rrrrr}
-% \multicolumn{6}{l}{iid Poisson $n_{\text{eff}}$} \\
-%   \hline
-%   r & Stan & RWwG & B-RWwG & IMH & IMHwG \\
-%   \hline
-%   10 & 17159 & 0 & 1202 & 19051 & 45883 \\ 
-%   20 & 19125 & 0 & 557 & 23687 & 42283 \\ 
-%   30 & 25229 & 0 & 402 & 26355 & 41462 \\ 
-% \hline
-% \multicolumn{6}{c}{}\\
-% \multicolumn{6}{l}{Full Poisson $n_{\text{eff}}$}\\
-% \hline
-%   5 & 21899 & 7490 & 2318 & 33 & 46874 \\ 
-%   7 & 26592 & 8272 & 1771 & 7 & 45825 \\ 
-%   9 & 26393 & 8404 & 1433 & 66 & 45256 \\ 
-%    \hline
-% \multicolumn{6}{c}{}\\
-% \multicolumn{6}{l}{iid Poisson time$/n_{\text{eff}}\times$1,000}\\
-%   \hline
-%   10 & 173 & 1613304 & 81 & 17 & 13 \\ 
-%   20 & 144 & 35841461 & 288 & 22 & 23 \\ 
-%   30 & 102 & 18105527 & 296 & 29 & 33 \\ 
-% \hline
-% \multicolumn{6}{c}{}\\
-% \multicolumn{6}{l}{Full Poisson time$/n_{\text{eff}}\times$1,000}\\
-% \hline
-%   5 & 201 & 77 & 75 & 10406 & 14 \\ 
-%   7 & 158 & 114 & 104 & 51012 & 17 \\ 
-%   9 & 174 & 117 & 113 & 6268 & 19 \\ 
-%    \hline
-% \end{tabular}
-% }
-% \subfloat[Effective sample size \& time (seconds) per 1,000 effective draws for lognormal models]{
-% \begin{tabular}{r|rrrrrr}
-% \multicolumn{7}{l}{iid lognormal $n_{\text{eff}}$} \\
-%   \hline
-%   r & Stan & Gibbs & RWwG & B-RWwG & IMH & IMHwG\\
-%   \hline
-%   10 & 19753 & 43296 & 81 & 1199 & 5649 & 40498 \\ 
-%   20 & 24665 & 45425 & 93 & 668 & 5594 & 38927 \\ 
-%   30 & 32769 & 44093 & 84 & 425 & 4457 & 38357 \\ 
-% \hline
-% \multicolumn{7}{c}{}\\
-% \multicolumn{7}{l}{Full lognormal $n_{\text{eff}}$}\\
-% \hline
-%   5 & 27289 & 4135 & 745 & 214 & 13 & 109 \\ 
-%   7 & 24981 & 3699 & 558 & 103 & 33 & 4 \\ 
-%   9 & 40000 & 3473 & 469 & 71 & 44 & 5 \\ 
-%    \hline
-% \multicolumn{7}{c}{}\\
-% \multicolumn{7}{l}{iid lognormal time$/n_{\text{eff}}\times$1,000}\\
-% \hline
-%   10 & 19 & 55 & 6327 & 55 & 88 & 25 \\ 
-%   20 & 16 & 54 & 16616 & 172 & 105 & 34 \\ 
-%   30 & 11 & 54 & 33873 & 316 & 180 & 47 \\ 
-% \hline
-% \multicolumn{7}{c}{}\\
-% \multicolumn{7}{l}{Full lognormal time$/n_{\text{eff}}\times$1,000}\\
-% \hline
-%   5 & 121 & 570 & 579 & 692 & 34701 & 9706 \\ 
-%   7 & 188 & 705 & 1222 & 1608 & 13569 & 267879 \\ 
-%   9 & 169 & 675 & 1343 & 1975 & 11678 & 248761 \\ 
-% \hline
-% \end{tabular}
-% }
-% }
-% \caption{Minimum estimated effective sample size for all parameters of the model ($n_{\text{eff}}$) and time in seconds per 1,000 $n_{\text{eff}}$ for the Poisson models (a) and the lognormal models (b) with either iid or fully correlated random effects. The IMH and IMHwG algorithms used standard PSO with 100 particles in the ring-1 neighborhood for 10,000 iterations to find the posterior mode, and used $df=100$ in the $t$ proposal. The parameter $r$ denotes the number of random effects in the model.}
-% \label{tab:neff}
-% \end{table}
 
 \section{Discussion}\label{sec:discuss}
 
