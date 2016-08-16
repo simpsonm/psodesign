@@ -597,7 +597,41 @@ Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}
 \label{tab:psosim6}
 \end{table}
 
-\section{Deriving the Hessian}\label{app:hess}
+\section{County Population Model Details}\label{app:pop}
+We consider two possible data models, Poisson and lognormal, and two possible random effect distributions, iid normal and normal with a fully correlated covariance matrix. The posterior distributions for the models with iid random effects can be written as
+\begin{align*}
+p(\bm{\beta},& \sigma^2, \bm{\delta}, \phi^2|\bm{z}, \bm{X}, \bm{S}) \propto (\phi^2)^{-n/2 - a_\phi - 1}\exp\left[-\frac{1}{\phi^2}\left\{\frac{(\log\bm{z} - \bm{y})'(\log\bm{z} - \bm{y})}{2} + b_\phi\right\}\right] \\
+&\times (\sigma^2)^{-\frac{r}{2} - a_{\sigma}-1}\exp\left\{-\frac{1}{\sigma^2}\left(\frac{\bm{\delta}'\bm{\delta}}{2} + b_{\sigma}\right)\right\}\exp\left\{-\frac{(\bm{\beta} - \bm{b})'(\bm{\beta} - \bm{b})}{2v}\right\}\mbox{\ \ \ \ \ (iid lognormal),}\\
+p(\bm{\beta},& \sigma^2, \bm{\delta}|\bm{z}, \bm{X}, \bm{S}) \propto \prod_{i=1}^n \frac{\exp\{-\exp(y_i)\}\exp(y_iz_i)}{z_i!}  \\
+&\times (\sigma^2)^{-\frac{r}{2} - a_{\sigma}-1}\exp\left\{-\frac{1}{\sigma^2}\left(\frac{\bm{\delta}'\bm{\delta}}{2} + b_{\sigma}\right)\right\}\exp\left\{-\frac{(\bm{\beta} - \bm{b})'(\bm{\beta} - \bm{b})}{2v}\right\}\mbox{\ \ \ \ \ (iid Poisson).}
+\end{align*}
+For fully parameterized $\bm{\Sigma}$ we write the posteriors in terms of the precision matrix $\bm{\Omega} = \bm{\Sigma}^{-1}$, yielding
+\begin{align*}
+p(\bm{\beta},& \bm{\Omega}, \bm{\delta}, \phi^2|\bm{z}, \bm{X}, \bm{S}) \propto (\phi^2)^{-n/2 - a_\phi - 1}\exp\left\{-\frac{1}{\phi^2}\left(\frac{(\log\bm{z} - \bm{y})'(\log\bm{z} - \bm{y})}{2} + b_\phi\right)\right\} \\
+&\times |\bm{\Omega}|^{(d - r)/2}\exp\left\{-\frac{1}{2}\left(\bm{\delta}'\bm{\Omega}\bm{\delta}+\frac{(\bm{\beta} - \bm{b})'(\bm{\beta} - \bm{b})}{v} + \mathrm{tr}(\bm{E}\bm{\Omega})\right)\right\}\mbox{\ \ \ \ \ (full lognormal),}\\
+p(\bm{\beta},& \bm{\Omega}, \bm{\delta}|\bm{z}, \bm{X}, \bm{S}) \propto \prod_{i=1}^n \frac{\exp\{-\exp(y_i)\}\exp(y_iz_i)}{z_i!}  \\
+&\times |\bm{\Omega}|^{(d - r)/2}\exp\left\{-\frac{1}{2}\left(\bm{\delta}'\bm{\Omega}\bm{\delta}+\frac{(\bm{\beta} - \bm{b})'(\bm{\beta} - \bm{b})}{v} + \mathrm{tr}(\bm{E}\bm{\Omega})\right)\right\}\mbox{\ \ \ \ \ (full Poisson)}
+\end{align*}
+where $\mathrm{tr}(\cdot)$ denotes the trace operator. For the PSO algorithm and some MCMC algorithms it will be easier to work with the Cholesky decomposition of $\bm{\Omega}$ given by $\bm{L}\bm{L}'=\bm{\Omega}$ where $\bm{L}$ is lower triangular. It is often more convenient to put the prior distribution directly on $\bm{L}$ rather than on $\bm{\Omega}$ or $\bm{\Omega}^{-1}$ and solving for the Jacobian, but this depends in part on which MCMC algorithm is used to fit the model. So while we use the prior distribution on $\bm{L}$ implied by a Wishart prior on $\bm{\Omega}$, in practice it is advantageous to use one of the priors suggested by \citet{chen2003random} or \citet{fruhwirth2008bayesian}. We allow the diagonal entries of $\bm{L}$ to be negative in the PSO and IMH algorithms, so $\bm{L}$ is not strictly speaking a Cholesky decomposition. The determinant of the Jacobian is the same in both cases up to a proportionality constant. The signs of the elements of $\bm{L}$ are not identified, therefore care needs to be taken when interpreting the results of MCMC, but transforming back to the precision matrix in a post processing step is sufficient. Let $\ell_{ij}$ denote the $(i,j)$th element of $\bm{L}$. Then the Jacobian of $\bm{\Omega}\to\bm{L}$ is given by
+\begin{align*}
+|J(\bm{\Omega}\to\bm{L})| \propto \prod_{k=1}^r |\ell_{kk}|^{r + 1 - k}
+\end{align*}
+where $\bm{\Omega}$ is $r\times r$. Under this parameterization the full posteriors can be written as
+\begin{align*}
+p(\bm{\beta}, \bm{L}, \bm{\delta}, \phi^2|\bm{z}, \bm{X}, \bm{S})& \propto (\phi^2)^{-n/2 - a_\phi - 1}\exp\left[-\frac{1}{\phi^2}\left\{\frac{(\log\bm{z} - \bm{y})'(\log\bm{z} - \bm{y})}{2} + b_\phi\right\}\right]\\
+&\times  \prod_{k=1}^r (\ell_{kk}^2)^{(d - k + 1)/2}\\
+&\times \exp\left[-\frac{1}{2}\left\{\bm{\delta}'\bm{L}\bm{L}'\bm{\delta}+\frac{(\bm{\beta} - \bm{b})'(\bm{\beta} - \bm{b})}{v} + \mathrm{tr}(\bm{E}\bm{L}\bm{L}')\right\}\right]\mbox{\ \ \ \ \ (full lognormal),}\\
+p(\bm{\beta}, \bm{L}, \bm{\delta}|\bm{z}, \bm{X}, \bm{S})& \propto \prod_{i=1}^n \frac{\exp\{-\exp(y_i)\}\exp(y_iz_i)}{z_i!} \times \prod_{k=1}^r (\ell_{kk}^2)^{(d - k + 1)/2}  \\
+&\times \exp\left[-\frac{1}{2}\left\{\bm{\delta}'\bm{L}\bm{L}'\bm{\delta}+\frac{(\bm{\beta} - \bm{b})'(\bm{\beta} - \bm{b})}{v} + \mathrm{tr}(\bm{E}\bm{L}\bm{L}')\right\}\right]\mbox{\ \ \ \ \ (full Poisson).}
+\end{align*}
+In Appendix \ref{subapp:hess} we derive the Hessian for the fully parameterized Poisson model. The other models are analogous, though the variances in the iid models and in the lognormal models should be transformed to the log scale first.
+
+\subsection{Full conditionals for MCMC}
+We consider alternative several Gibbs sampling algorithms, detailed in Appendix \ref{app:altmcmc}, which draw the covariance matrix from its full conditional distribution. When the covariance matrix is fully parameterized the full conditional distribution of the precision matrix $\bm{\Omega}$ is Wishart, that is $\bm{\Omega} \sim W(\widetilde{d}, \widetilde{\bm{E}})$. This draw is usually accomplished via the Bartlett decomposition \citep{smith1972algorithm}. Let $\widetilde{\bm{C}}$ be the lower triangular Cholesky decomposition of $\widetilde{\bm{E}}$. Then let $\bm{A}$ be an $r\times r$ random lower triangular matrix with independent elements $\{a_{ij}:0<i\le j\le r\}$ where $a_{ii} \sim \sqrt{\chi^2_{\widetilde{d} - i + 1}}$ for $i=1,2,\dots,r$ and $a_{ij} \sim N(0,1)$ for $0<i\le j\le r$. Then $\bm{\Omega} = \bm{L}\bm{L}' \sim W(\widetilde{d}, \widetilde{\bm{E}})$ where $\bm{L} = \widetilde{\bm{C}}\bm{A}$. In the process of drawing $\bm{\Omega}$ we must first draw $\bm{L}$, so we construct our Gibbs samplers in terms of $\bm{L}$ instead of $\bm{\Omega}$.
+
+IMH applies straightforwardly to each of these models, though see Appendix \ref{subapp:hess} for a detailed derivation of the Hessian for the county population models with a fully parameterized covariance matrix associated. To apply IMHwG in the county population models, we draw $(\bm{\beta},\bm{\delta})$ in the Metropolis step and either $\sigma^2$ or $\bm{L}$ in the conditionally conjugate step, depending on the model. The full conditional distribution of $\sigma^2$ in both iid models is $IG(a_{\sigma} + r/2, b_{\sigma} + \bm{\delta}'\bm{\delta}/2)$. The full conditional distribution of $\bm{\Omega}$ in both fully correlated models is $W(r + 1, (\bm{E} + \bm{\delta}\bm{\delta}')^{-1})$. Then a draw from the full conditional distribution of $\bm{L}$ can be obtained via the Bartlett decomposition as described in the previous paragraph. In the lognormal models the full conditional distribution of $\phi^2$ is $IG(a_{\phi} + n/2, b_{\phi} + (\log \bm{z} - \bm{X}\bm{\beta} - \bm{S}\bm{\delta})'(\log \bm{z} - \bm{X}\bm{\beta} - \bm{S}\bm{\delta})/2)$. 
+
+\subsection{Deriving the Hessian}\label{subapp:hess}
 
 The log posterior in the fully parameterized Poisson case can be written as
 \begin{align*}
