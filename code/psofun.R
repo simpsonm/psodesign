@@ -101,10 +101,11 @@ bbpso <- function(niter, nswarm, sig, rate, init, nbhd, obj, df, tune, pcut, ...
       if(pbestval[i] < nbestval[i]){
         sds <- abs(pbest[,i] - gbest)*sig
         sd0 <- which(sds == 0)
-        if(np - length(sd0) > 0){
-          temp <- rmtfixed(1, (pbest[-sd0,i] + nbest[-sd0,i])/2, diag(sds[-sd0]), df)
-          u <- runif(np-length(sd0))
-          x[-sd0,i] <- ifelse(u > pcut, temp, pbest[-sd0,i])
+        sd1 <- which(sds > 0)
+        if(length(sd1) > 0){
+          temp <- rmtfixed(1, (pbest[sd1,i] + nbest[sd1,i])/2, diag(sds[sd1]), df)
+          u <- runif(length(sd1))
+          x[sd1,i] <- ifelse(u > pcut, temp, pbest[sd1,i])
         }
         if(length(sd0) > 0){
           idxs <- sample(2:nswarm, 3)
