@@ -50,9 +50,18 @@ for(model in models){
                                iteration = 0:niter,
                                maxes = psotemp$maxes)
       pollpsoout <- rbind(pollpsoout, psotempout)
+      print("BBPSO-MC")
+      temp <- bbpso(niter, nswarm, 0, 1, init, nbhd[[m]], lpost, Inf, FALSE,
+                    0, datlist = datlist)
+      psotempout <- data.frame(model = model,
+                               algorithm = "BBPSO-MC",
+                               nbhd = nbhdnames[m], rep = rep,
+                               iteration = 0:niter,
+                               maxes = psotemp$maxes)
+      pollpsoout <- rbind(pollpsoout, psotempout)
       print("BBPSOxp-MC")
       temp <- bbpso(niter, nswarm, 0, 1, init, nbhd[[m]], lpost, Inf, FALSE,
-                    c(.5,.5), datlist = datlist)
+                    .5, datlist = datlist)
       psotempout <- data.frame(model = model,
                                algorithm = "BBPSOxp-MC",
                                nbhd = nbhdnames[m], rep = rep,
@@ -83,7 +92,7 @@ for(model in models){
         for(df in dfs){
           print(paste(c(rate, df)))
           psotemp <- bbpso(niter, nswarm, 1, rate, init, nbhd[[m]], lpost, df,
-                        TRUE, c(0,0), datlist = datlist, ccc = ccc)
+                        TRUE, 0, datlist = datlist, ccc = ccc)
           psotempout <- data.frame(model = model,
                                    algorithm =
                                      paste("AT-BBPSO-MC", df, rate, ccc, sep="-"),
@@ -92,7 +101,7 @@ for(model in models){
                                    maxes = psotemp$maxes)
           pollpsoout <- rbind(pollpsoout, psotempout)
           psotemp <- bbpso(niter, nswarm, 1, rate, init, nbhd[[m]], lpost, df,
-                        TRUE, c(0.5,0.5), datlist = datlist, ccc = ccc)
+                        TRUE, 0.5, datlist = datlist, ccc = ccc)
           psotempout <- data.frame(model = model,
                                    algorithm =
                                      paste("AT-BBPSOxp-MC", df, rate, ccc, sep="-"),

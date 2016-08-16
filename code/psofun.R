@@ -100,16 +100,21 @@ bbpso <- function(niter, nswarm, sig, rate, init, nbhd, obj, df, tune, pcut, ...
     for(i in 1:nswarm){
       if(pbestval[i] < nbestval[i]){
         sds <- abs(pbest[,i] - gbest)*sig
-        sds[sds == 0] <- 0.001
-        temp <- rmtfixed(1, (pbest[,i] + nbest[,i])/2, diag(sds), df)
-        u <- runif(np)
-        x[,i] <- ifelse(u > pcut[1], temp, pbest[,i])
+        sd0 <- which(sds == 0)
+        if(np - length(sd0) > 0){
+          temp <- rmtfixed(1, (pbest[-sd0,i] + nbest[-sd0,i])/2, diag(sds[-sd0]), df)
+          u <- runif(np-length(sd0))
+          x[-sd0,i] <- ifelse(u > pcut, temp, pbest[-sd0,i])
+        }
+        if(length(sd0) > 0){
+          idxs <- sample(2:nswarm, 3)
+          idxs[idxs <= i] <- idxs[idxs <= i] - 1
+          x[sd0,i] <- pbest[sd0,idxs[1]] + (pbest[sd0,idxs[2]] - pbest[sd0,idxs[3]])/2
+        }
       } else {
         idxs <- sample(2:nswarm, 3)
         idxs[idxs <= i] <- idxs[idxs <= i] - 1
-        temp <- pbest[,idxs[1]] + (pbest[,idxs[2]] - pbest[,idxs[3]])/2
-        u <- runif(np)
-        x[,i] <- ifelse(u > pcut[2], temp, gbest)
+        x[,i] <- pbest[,idxs[1]] + (pbest[,idxs[2]] - pbest[,idxs[3]])/2
       }
     }
     vals <- apply(x, 2, obj, ...)

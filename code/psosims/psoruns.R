@@ -56,14 +56,14 @@ for(n in c(1:8)[-c(3,6)]){
                                          time = time, type = "PSO", nbhd = nbhdnames[m], rep = l,
                                          inertias = rep(0, niter+1)))
       print("BBPSO-MC")
-      temp <- bbpso(niter, nswarm, 0, 1, inits, nbhd[[m]], fwrap, Inf, FALSE, c(0,0), opt = n)
+      temp <- bbpso(niter, nswarm, 0, 1, inits, nbhd[[m]], fwrap, Inf, FALSE, 0, opt = n)
       psoout <- rbind(psoout, data.frame(obj = n, logpost= temp[["maxes"]],
                                          argnorm = apply(temp[["argmaxes"]], 2, normvec),
                                          time = time, type = "BBPSO-MC",
                                          nbhd = nbhdnames[m], rep = l,
                                          inertias = rep(0, niter+1)))
       print("BBPSOxp-MC")
-      temp <- bbpso(niter, nswarm, 0, 1, inits, nbhd[[m]], fwrap, Inf, FALSE, c(.5,.5), opt = n)
+      temp <- bbpso(niter, nswarm, 0, 1, inits, nbhd[[m]], fwrap, Inf, FALSE, .5, opt = n)
       psoout <- rbind(psoout, data.frame(obj = n, logpost= temp[["maxes"]],
                                          argnorm = apply(temp[["argmaxes"]], 2, normvec),
                                          time = time, type = "BBPSOxp-MC",
@@ -73,7 +73,7 @@ for(n in c(1:8)[-c(3,6)]){
         for(j in 1:length(rates)){
           print(paste("AT-BBPSO-MC", dfs[i], rates[j], sep="-"))
           temp <- bbpso(niter, nswarm, sig0, rates[j], inits, nbhd[[m]], fwrap, dfs[i],
-                        TRUE, c(0,0),  opt = n)
+                        TRUE, 0,  opt = n)
           psoout <- rbind(psoout, data.frame(obj = n, logpost= temp[["maxes"]],
                                              argnorm = apply(temp[["argmaxes"]], 2, normvec),
                                              time = time,
@@ -82,7 +82,7 @@ for(n in c(1:8)[-c(3,6)]){
                                              inertias = rep(0, niter+1)))
           print(paste("AT-BBPSOxp-MC", dfs[i], rates[j], sep="-"))
           temp <- bbpso(niter, nswarm, sig0, rates[j], inits, nbhd[[m]], fwrap, dfs[i],
-                        TRUE, c(.5,.5),  opt = n)
+                        TRUE, .5,  opt = n)
           psoout <- rbind(psoout,
                           data.frame(obj = n, logpost= temp[["maxes"]],
                                      argnorm = apply(temp[["argmaxes"]], 2, normvec),

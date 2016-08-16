@@ -95,9 +95,18 @@ for(idelta in 1:length(ndeltasiid)){
                                      iteration = 0:niter,
                                      maxes = psotemp$maxes)
             psoout <- rbind(psoout, psotempout)
+            print("BBPSO-MC")
+            psotemp <- bbpso(niter, nswarm, 0, 1, init, nbhd[[m]], lpost, Inf, FALSE,
+                          0, datlist = datlist)
+            psotempout <- data.frame(model = model, ranef = ranef, ndelta = ndelta,
+                                     algorithm = "BBPSO-MC",
+                                     nbhd = nbhdnames[m], rep = rep,
+                                     iteration = 0:niter,
+                                     maxes = psotemp$maxes)
+            psoout <- rbind(psoout, psotempout)            
             print("BBPSOxp-MC")
             psotemp <- bbpso(niter, nswarm, 0, 1, init, nbhd[[m]], lpost, Inf, FALSE,
-                          c(.5,.5), datlist = datlist)
+                          .5, datlist = datlist)
             psotempout <- data.frame(model = model, ranef = ranef, ndelta = ndelta,
                                      algorithm = "BBPSOxp-MC",
                                      nbhd = nbhdnames[m], rep = rep,
@@ -128,7 +137,7 @@ for(idelta in 1:length(ndeltasiid)){
                 print(paste(c(rate, df)))
                 psoout <- rbind(psoout, psotempout)
                 psotemp <- bbpso(niter, nswarm, 1, rate, init, nbhd[[m]], lpost, df,
-                                 TRUE, c(0,0), datlist = datlist, ccc = ccc)
+                                 TRUE, 0, datlist = datlist, ccc = ccc)
                 psotempout <- data.frame(model = model, ranef = ranef, ndelta = ndelta,
                                          algorithm =
                                            paste("AT-BBPSO-MC", df, rate, ccc, sep="-"),
@@ -137,7 +146,7 @@ for(idelta in 1:length(ndeltasiid)){
                                          maxes = psotemp$maxes)
                 psoout <- rbind(psoout, psotempout)
                 psotemp <- bbpso(niter, nswarm, 1, rate, init, nbhd[[m]], lpost, df,
-                                 TRUE, c(0.5,0.5), datlist = datlist, ccc = ccc)
+                                 TRUE, 0.5, datlist = datlist, ccc = ccc)
                 psotempout <- data.frame(model = model, ranef = ranef, ndelta = ndelta,
                                          algorithm =
                                            paste("AT-BBPSOxp-MC", df, rate, ccc, sep="-"),
