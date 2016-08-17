@@ -115,7 +115,7 @@
 
 In Section \ref{sec:pso} we introduce PSO, BBPSO, and our adaptively tuned variants of both. Here we describe in detail several BBPSO variants which we employ as well as a class of neighborhood topologies called the ring topologies.
 
-\subsection{BBPSO}
+\subsection{BBPSO}\label{subapp:bbpso}
 The standard BBPSO algorithm was introduced by \citet{kennedy2003bare} and updates from $t$ to $t+1$ via equation \eqref{eq:bbpso}. A commonly used variant of BBPSO also introduced by \citet{kennedy2003bare} is called BBPSOxp. In this variant, each coordinate of each particle has a 50\% chance of updating according to \eqref{eq:bbpso} and a 50\% chance of moving directly to that particle's personal best location on that coordinate. In other words
 \begin{align}\label{eq:bbpsoxp}
 \theta_{ij}(t+1) = \begin{cases} N\left(\frac{p_{ij}(t) + g_{ij}(t)}{2}, s^2_{ij}(t)\right) & \mbox{with probability }0.5\\
@@ -154,7 +154,7 @@ Similarly, we can create adaptively tuned versions of BBPSO-MC and BBPSOxp-MC by
 \end{align*}
 where $R(t)=\#\{i:Q(\bm{p}_i(t))> Q(\bm{p}_i(t-1))\}/n$, and $df$, $R^*$, and $c$ are defined in Section \ref{subsec:ATBBPSO}. Then AT-BBPSO-MC sets $\rho=0$ and AT-BBPSOxp-MC sets $\rho=0.5$.
 
-\subsection{Ring neighborhood topologies}
+\subsection{Ring neighborhood topologies}\label{subapp:ring}
 For all PSO and BBPSO algorithms, the group best location for a given particle is defined relative to the particle's group. To wit $\bm{g}_i(t+1) = \arg\max_{\{\bm{p}_j(t+1)|j\in\mathcal{N}_i\}}Q(\bm{p}_j(t+1))$ where $\mathcal{N}_i$ is the set of particles that are ``neighbors'' of particle $i$. The default neighborhood topology is $\mathcal{N}_i = \{1, 2, \dots, n\}$ where $n$ is the number of particles, so each particle is in each other particle's group, also called their neighborhood. PSO and BBPSO algorithms using this topology are often call gbest swarms or gbest algorithms. 
 
 The main problem with gbest PSO and BBPSO algorithms is that by allowing each particle to see the best location of the entire swarm, they curtail early exploration of the search space. In order to restrict the flow of information across the swarm and allow for more exploration, it is often useful to only allow each particle to see a subset of the other particles using a more restrictive neighborhood topology. There are several commonly used neighborhood topologies [CITATION], but we will use the ring topologies. The ring-$k$ neighborhood topology for $k=1,2,\dots,\lfloor n/2\rfloor$ is defined as follows. Arrange the particles in a circle, as in Figure \ref{fig:ring}. Then each particle is neighbors with the $k$ particles to its left and the $k$ particles to its right. That is, $\mathcal{N}_i = \{i-k, i-k+1, \dots, i-1, i+1, \dots, i+k-1, i+k\}$ where addition and subtraction are modulo $n$ so that e.g. $n + 1 = 1$.
