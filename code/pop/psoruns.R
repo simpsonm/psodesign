@@ -70,7 +70,7 @@ for(idelta in 1:length(ndeltasiid)){
                         lnormfull = lnormlpostfull)
         npar <- nbeta + ndelta + (1 - nell)*(ranef == "iid") + nell + 1*(model == "lnorm")
         init <- matrix(runif(npar*nswarm, -100, 100), ncol = nswarm)
-        for(m in 3:3){
+        for(m in 1:3){
           for(rep in 1:nrep){
             cat("idelta = ")
             cat(idelta)
@@ -156,7 +156,7 @@ for(idelta in 1:length(ndeltasiid)){
                 psoout <- rbind(psoout, psotempout)
               }
             }
-            write.csv(psoout, file = "psoout3.csv", row.names=FALSE)
+            write.csv(psoout, file = "psoout.csv", row.names=FALSE)
           }
         }
       }
