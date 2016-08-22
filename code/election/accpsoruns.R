@@ -4,7 +4,7 @@ source("mcmcfun.R")
 load("datlistsmall.RData")
 load("datlistplus.RData")
 
-niter <- 20000
+niter <- 100000
 nswarm <- 100
 inertia <- 0.7298
 cognitive <- 1.496
@@ -133,7 +133,7 @@ accout <- NULL
 niters <- c(2000, 4000, 8000, 10000)
 mcmciter <- 10000
 df <- 100
-for(id in 1:max(accpsoout$psoid)){
+for(id in 1:max(accpollpsoout$psoid)){
   cat("\n PSOID = ")
   cat(id)
   cat(", niter = ")

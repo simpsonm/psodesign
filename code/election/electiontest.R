@@ -3,7 +3,7 @@
 library(rstan)
 source("electionfun.R")
 source("mcmcfun.R")
-source("../pop/psofun.R")
+source("../psofun.R")
 
 load("datlistsmall.RData")
 load("datlistplus.RData")
@@ -17,9 +17,42 @@ nstate <- datlistplus$nstate
 stansmall <- stan(file = "election.stan", data = datlistsmall, chains = 1, iter = 2000)
 stanplus <- stan(file = "electionplus.stan", data = datlistplus, chains = 1, iter = 2000)
 
+rwgibbstest <- gelmanrwgibbs(1000, rep(0, 80), datlistsmall)
+
+rwgibbstest <- gelmanrwgibbs(10000, rwgibbstest$draws[10000,], datlistsmall,
+                             logrwsds = rwgibbstest$logrwsds)
+
+str(rwgibbstest)
+
+
+
+par(mfrow=c(3,3))
+for(i in 4 + 51 + 16 + 1:9){
+  plot(ts(rwgibbstest$draws[,i]))
+}
+
+par(mfrow=c(3,3))
+for(i in 1:9){
+  plot(ts(rwgibbstest$draws[,i]))
+}
+
+summary(stansmall, pars = c("betay"))$summary
+library(MCMCpack)
+summary(mcmc(rwgibbstest$draws[-c(1:5000),]))[[1]][1:5,]
+
+
+
+
+
+
+
+
+
+
+
 stanplus2 <- stan(file = "electionplus2.stan", data = datlistplus, chains = 1, iter = 2000)
 
-rstan::traceplot(stanplus2, pars=c("betay"))
+rstan::traceplot(stansmall, pars = c("alpha"))
 
 stansmallmod <- stan_model("election.stan")
 stanplusmod <- stan_model("electionplus.stan")

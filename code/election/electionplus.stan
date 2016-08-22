@@ -21,7 +21,7 @@ data {
 }
 transformed data {
   real<lower=0> betasd;
-  betasd <- sqrt(betavar);
+  betasd = sqrt(betavar);
 }
 parameters {
   vector[nbeta] betay;
@@ -42,13 +42,13 @@ transformed parameters{
   real<lower=0> sigregion;
   real<lower=0> sigageedu;
   real<lower=0> sigpoll;
-  sigstate <- sqrt(sig2state);
-  sigregion <- sqrt(sig2region);
-  sigageedu <- sqrt(sig2ageedu);
-  sigpoll <- sqrt(sig2poll);
-  mu <- xmat*betay + statemat*alphastate + ageedumat*alphaageedu + pollmat*alphapoll;
+  sigstate = sqrt(sig2state);
+  sigregion = sqrt(sig2region);
+  sigageedu = sqrt(sig2ageedu);
+  sigpoll = sqrt(sig2poll);
+  mu = xmat*betay + statemat*alphastate + ageedumat*alphaageedu + pollmat*alphapoll;
   for(n in 1:nobs){
-    p[n] <- exp(mu[n])/(1 + exp(mu[n]));
+    p[n] = exp(mu[n])/(1 + exp(mu[n]));
   }
 }
 model {

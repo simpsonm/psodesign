@@ -286,7 +286,7 @@ for(idelta in 1:length(ndeltasiid)){
                                   accrate2 = length(unique(extract(out)$beta))/mcmciter,
                                   lpbest = max(extract(out)$lp__)), mcmcout)
       print("saving")
-      save(mcmcout, file = "mcmcout.RData")
+      write(mcmcout, file = "mcmcout.csv", row.names=FALSE)
     }
   }
 }
