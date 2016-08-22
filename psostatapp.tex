@@ -344,13 +344,13 @@ In order to compare AT-BBPSO to other PSO variants, we employ a subset of test f
 \label{tab:testfuns}
 \end{table}
 
-We use several PSO algorithms in the simulation study. The standard PSO algorithm uses the parameter values suggested by \cite{blum2008swarm} and \cite{clerc2002particle}. The AT-BBPSO variants are implemented a wide variety of parameter values, but all have the scale parameter initialized at $\sigma(0)=1$, and both set $c=0.1$. The AT-PSO variants are initialized at $\omega(0)=1$ and also set $c=0.1$. In addition, each algorithm is implemented using each of three neighborhood structures --- the global, ring-3, and ring-1 neighborhoods. Each algorithm was used to optimize each objective function for 500 iterations over 50 replications using 20 particles. Initializations were changed across replications but held constant across algorithms. The standard PSO, DI-PSO, and AT-PSO algorithms initialized their velocity terms using the same method as a function of the initial locations of the particles, which we will denote by $\bm{x}_i$ for particle $i$. Let $x_{max,j}$ be the maximum initial value of coordinate $j$ of $\bm{x}_i$ for each particle $i$, and let $x_{min,j}$ be the corresponding minimum. Then let $d_{max} = max_{j}x_{max,j} - x_{min,j}$. Then we initialize the velocities with $v_{ij}(0)\stackrel{iid}{\sim}U(-d_{max}/2,d_{max}/2)$. Tables \ref{tab:psosim1}-\ref{tab:psosim6} contain the simulation results for objective functions 1-6 respectively (OF1, OF2, etc.). We use several measures to quantify how well each algorithm finds the global maximum. First, each table includes the mean and standard deviation of the absolute difference between the true global maximum and the algorithm's estimated global maximum across all 50 replications, denoted by Mean and SD. Second, each table includes a convergence criterion --- the proportion of the replications that came within $0.01$ of the true global maximum, denoted by $\widehat{p}$. Finally, $\widehat{t}$ denotes the median number of iterations until the algorithm reaches the convergence criterion. When $\hat{p}<0.5$ then $\hat{t} = \infty$ since greater than 50\% of the replications did not converge in the maximum number of iterations allowed. Then Mean, $\hat{p}$, and $\hat{t}$ can be thought of how close the algorithm gets to the global maximum on average, what proportion of the time in converges, and long it takes to converge respectively.
+We use several PSO algorithms in the simulation study. The standard PSO algorithm uses the parameter values suggested by \cite{blum2008swarm} and \cite{clerc2002particle}. The AT-BBPSO variants are implemented a wide variety of parameter values, but all have the scale parameter initialized at $\sigma(0)=1$, and both set $c=0.1$. The AT-PSO variants are initialized at $\omega(0)=1$ and also set $c=0.1$. In addition, each algorithm is implemented using each of three neighborhood structures --- the global, ring-3, and ring-1 neighborhoods. Each algorithm was used to optimize each objective function for 500 iterations over 50 replications using 20 particles. Initializations were changed across replications but held constant across algorithms. The standard PSO, DI-PSO, and AT-PSO algorithms initialized their velocity terms using the same method as a function of the initial locations of the particles, which we will denote by $\bm{x}_i$ for particle $i$. Let $x_{max,j}$ be the maximum initial value of coordinate $j$ of $\bm{x}_i$ for each particle $i$, and let $x_{min,j}$ be the corresponding minimum. Then let $d_{max} = max_{j}x_{max,j} - x_{min,j}$. Then we initialize the velocities with $v_{ij}(0)\stackrel{iid}{\sim}U(-d_{max}/2,d_{max}/2)$. Tables \ref{tab:psosim1}-\ref{tab:psosim6} contain the simulation results for objective functions 1-6 respectively (OF1, OF2, etc.). We use several measures to quantify how well each algorithm finds the global maximum. First, each table includes the mean and standard deviation of the absolute difference between the true global maximum and the algorithm's estimated global maximum across all 50 replications, denoted by Mean and SD. Second, each table includes a convergence criterion --- the proportion of the replications that came within $0.01$ of the true global maximum, denoted by $\widehat{p}$. Finally, $\widehat{t}$ denotes the median number of iterations until the algorithm reaches the convergence criterion. When $\hat{p}<0.5$ then $\hat{t} = \infty$ since greater than 50\% of the replications did not converge in the maximum number of iterations allowed. Then Mean, $\hat{p}$, and $\hat{t}$ can be thought of how close the algorithm gets to the global maximum on average, what proportion of the time it converges, and long it takes to converge respectively.
 
-We highlight only some of the features of these tables. First and foremost, PSO, BBPSO-MC, and BBPSOxp-MC almost always do worse than their AT cousins. Adaptively tuning either the scale or inertia parameter leads to gains in all three of our measures, sometimes large. Second, for most non-AT algorithms the more restrictive neighborhood appears to be result in algorithms which do a better job of finding the global max. For the AT-PSO algorithms, it appears that the target improvement rate ($R^*$) and the neighborhood interact. When the rate is high a more restrictive neighborhood is preferable, while when the rate is low a less restrictive neighborhood is preferable. On the other hand, for the AT-BBPSO algorithms, the opposite appears to be true --- when the target improvement rate is high, a less restrictive neighborhood is desirable. In addition, the best AT-BBPSO algorithms often use the global neighborhood while for the other classes of algorithms their best versions typically use the ring-1 or ring-3 neighborhood.
+We highlight only some of the features of these tables. First and foremost, PSO, BBPSO-MC, and BBPSOxp-MC almost always do worse than their AT cousins. Adaptively tuning either the scale or inertia parameter leads to gains in all three of our measures, sometimes large. The comparison is starkest between BBPSO variants and AT-BBPSO variants, partially because BBPSO tends to be pretty bad but also because AT-BBPSO does very well. Second, for most non-AT algorithms the more restrictive neighborhoods appear to yield algorithms which do a better job of finding the global max. For the AT-PSO algorithms, it appears that the target improvement rate ($R^*$) and the neighborhood interact. When the rate is high a more restrictive neighborhood is preferable, while when the rate is low a less restrictive neighborhood is preferable. On the other hand, for the AT-BBPSO algorithms, the opposite appears to be true --- when the target improvement rate is high, a less restrictive neighborhood is desirable and vice versa. In addition, the best AT-BBPSO algorithms often use the global neighborhood while for the other classes of algorithms their best versions typically use the ring-1 or ring-3 neighborhood.
 
 For the DI-PSO algorithms often there is a parameter-neighborhood combination that does well, typically from setting $\alpha=200$ (20\% of the 500 iterations) and $\beta=1$ and using either the ring-1 or ring-3 neighborhood. One of these combinations typically does the best of all the DI-PSO algorithms but they can sometimes still do much worse than the best alternatives (e.g., for OF2). In the AT-BBPSO algorithms, it is not always clear what the best parameter settings are, but good default values appear to be $df=3$ or $5$ and $R^*=0.3$ or $0.5$. When these values are good, they often lead to the best performing PSO algorithms we consider. However, it is not always clear whether to use AT-BBPSO-MC or AT-BBPSOxp-MC. For some objective functions, e.g. OF4, the xp version is consistently better than the non-xp alternative, but the opposite is true for others, e.g. OF2.. AT-PSO is also often very competitive with $R^*=0.3$ or $R^*=0.5$, though again sometimes different parameter settings also appear to work well. 
 
-The DI-PSO and AT-PSO algorithms are similar conceptually, but often yield very different results. DI-PSO deterministically reduces the inertia parameter over time in the same manner given a fixed set of parameter values ($\alpha$ and $\beta$), while AT-PSO dynamically adjusts the inertia parameter to hit a target improvement rate. Figure \ref{fig:inertia} plots the inertia over time for the DI-PSO algorithm with $\alpha=200$ and $\beta=1$, and observed inertia over time for one replication of the AT-PSO algorithm with target rate $R^*=0.5$ and ring-1 neighborhood for OF1 and one replication for OF6. All three algorithms have an initial inertia of $\omega(0)=1$. While DI-PSO smoothly decreases its inertia with a slowly decreasing rate, AT-PSO very quickly drops its inertia for OF1 to about 0.5 then bounces around around near that point. It also jumps up above 1 initially, imploring the particles to cast a wider net in search of higher value areas of the search space. This is pretty typical behavior for the inertia parameter of AT-PSO --- it tends to bounce around a level which is approximately the average over time of the DI-PSO's inertia, though lower values of $R^*$ will result in higher inertias. In this way, AT-PSO alternates periods of exploration (relatively high inertia) and periods of exploitation (relatively low inertia). The main exception to this pattern is when AT-PSO converges around a local maximum. In this case, inertia plummets to zero as the particles settle down. This is precisely what happens for OF6 in Figure \ref{fig:inertia}, though in this case the maximum is not global --- Table \ref{tab:psosim6} indicates that ring-1 AT-PSO with $R^*=0.5$ never converged to the global max. In optimization problems with multiple local optima, both AT-PSO and AT-BBPSO variants can exhibit this behavior and prematurely converge to a local optima, so they may not be advantageous for those problems. 
+The DI-PSO and AT-PSO algorithms are similar conceptually, but often yield very different results. DI-PSO deterministically reduces the inertia parameter over time in the same manner given a fixed set of parameter values ($\alpha$ and $\beta$), while AT-PSO dynamically adjusts the inertia parameter to hit a target improvement rate. Figure \ref{fig:inertia} plots the inertia over time for the DI-PSO algorithm with $\alpha=200$ and $\beta=1$, and observed inertia over time for one replication of the AT-PSO algorithm with target rate $R^*=0.5$ and ring-1 neighborhood for OF1 and one replication for OF6. All three algorithms have an initial inertia of $\omega(0)=1$. While DI-PSO smoothly decreases its inertia with a slowly decreasing rate, AT-PSO very quickly drops its inertia for OF1 to about 0.55 then bounces around around near that point. It also jumps up above 1 initially, imploring the particles to cast a wider net in search of higher value areas of the search space. This is pretty typical behavior for the inertia parameter of AT-PSO --- it tends to bounce around a level which is approximately the average over time of the DI-PSO's inertia, though lower values of $R^*$ will result in higher inertias. In this way, AT-PSO alternates periods of exploration (relatively high inertia) and periods of exploitation (relatively low inertia). The main exception to this pattern is when AT-PSO converges around a local maximum. In this case, inertia plummets to zero as the particles settle down. This is precisely what happens for OF6 in Figure \ref{fig:inertia}, though in this case the maximum is not global --- Table \ref{tab:psosim6} indicates that ring-1 AT-PSO with $R^*=0.5$ never converged to the global max. In optimization problems with multiple local optima, both AT-PSO and AT-BBPSO variants can exhibit this behavior and prematurely converge to a local optima, so they may not be advantageous for those problems. 
 
 \begin{figure}[!ht]
 \centering
@@ -362,6 +362,7 @@ The DI-PSO and AT-PSO algorithms are similar conceptually, but often yield very 
 
 Based on these simulations, our default recommendation is to use AT-BBPSO-MC or AT-BBPSOxp-MC with $R^*=0.3$ or $0.5$ and $df=3$ or $df=5$ along with the global neighborhood. These algorithms will not always be the best of the PSO algorithms, but they will often be very good. AT-PSO with $R^*=0.3$ or $R^*=0.5$ with a restrictive neighborhood topology such as ring-3 also tends to be a very good choice, though perhaps less consistent than the AT-BBPSO variants. Default PSO also performs rather well and is a good baseline algorithm to use for comparisons.
 
+
 \begin{table}[ht]
 \centering
 \tiny{
@@ -370,62 +371,62 @@ Based on these simulations, our default recommendation is to use AT-BBPSO-MC or 
 \hline
 Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}$ & $\widehat{t}$ \\
   \hline
-\multicolumn{1}{l|}{PSO} & 3147.42 & 2726.79 & 0.00 & $\infty$ & 0.00 & 0.00 & 1.00 & 360.50 & 0.01 & 0.01 & 0.58 & 482.50 \\ 
-  \multicolumn{1}{l|}{BBPSO-MC} & 88237.79 & 4013.36 & 0.00 & $\infty$ & 89130.57 & 4684.99 & 0.00 & $\infty$ & 88274.59 & 4528.45 & 0.00 & $\infty$ \\ 
-  \multicolumn{1}{l|}{BBPSOxp-MC} & 81476.62 & 3295.56 & 0.00 & $\infty$ & 75471.96 & 4929.58 & 0.00 & $\infty$ & 59817.42 & 5244.39 & 0.00 & $\infty$ \\ 
+\multicolumn{1}{l|}{PSO} & 4015.81 & 3124.33 & 0.00 & $\infty$ & 0.00 & 0.01 & 0.98 & 362.00 & 0.01 & 0.01 & 0.78 & 488.50 \\ 
+  \multicolumn{1}{l|}{BBPSO-MC} & 84517.26 & 8944.33 & 0.00 & $\infty$ & 83674.80 & 9956.73 & 0.00 & $\infty$ & 84784.51 & 9451.47 & 0.00 & $\infty$ \\ 
+  \multicolumn{1}{l|}{BBPSOxp-MC} & 84104.44 & 8192.44 & 0.00 & $\infty$ & 82952.29 & 9655.82 & 0.00 & $\infty$ & 85886.72 & 7182.36 & 0.00 & $\infty$ \\ 
 \hline
 \multicolumn{1}{l|}{AT-BBPSO-MC} &&&&&&&&&&&&\\
-  $df = 1,\enspace$ $R^* =0.1$ & 1.71 & 0.55 & 0.00 & $\infty$ & 2.01 & 0.57 & 0.00 & $\infty$ & 2.04 & 0.66 & 0.00 & $\infty$ \\ 
-  $df = 1,\enspace$ $R^* =0.3$ & 0.00 & 0.00 & 1.00 & 449.00 & 0.00 & 0.00 & 1.00 & 463.00 & 0.01 & 0.00 & 0.46 & $\infty$ \\ 
-  $df = 1,\enspace$ $R^* =0.5$ & 0.00 & 0.00 & 1.00 & 286.00 & 0.00 & 0.00 & 1.00 & 308.00 & 0.00 & 0.00 & 1.00 & 353.50 \\ 
-  $df = 1,\enspace$ $R^* =0.7$ & 0.00 & 0.00 & 1.00 & 223.00 & 0.00 & 0.00 & 1.00 & 254.50 & 0.00 & 0.00 & 1.00 & 328.00 \\ 
-  $df = 3,\enspace$ $R^* =0.1$ & 7.17 & 2.25 & 0.00 & $\infty$ & 6.91 & 1.65 & 0.00 & $\infty$ & 5.11 & 1.45 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.3$ & 0.02 & 0.01 & 0.10 & $\infty$ & 0.02 & 0.01 & 0.02 & $\infty$ & 0.03 & 0.01 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.5$ & 0.00 & 0.00 & 1.00 & 330.00 & 0.00 & 0.00 & 1.00 & 348.00 & 0.00 & 0.00 & 1.00 & 390.50 \\ 
-  $df = 3,\enspace$ $R^* =0.7$ & 0.00 & 0.00 & 1.00 & 263.00 & 0.00 & 0.00 & 1.00 & 288.50 & 0.00 & 0.00 & 1.00 & 388.00 \\ 
-  $df = 5,\enspace$ $R^* =0.1$ & 12.49 & 3.78 & 0.00 & $\infty$ & 12.42 & 3.39 & 0.00 & $\infty$ & 7.43 & 3.03 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.3$ & 0.03 & 0.01 & 0.00 & $\infty$ & 0.03 & 0.01 & 0.00 & $\infty$ & 0.07 & 0.03 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.5$ & 0.00 & 0.00 & 1.00 & 357.00 & 0.00 & 0.00 & 1.00 & 373.00 & 0.00 & 0.00 & 1.00 & 420.50 \\ 
-  $df = 5,\enspace$ $R^* =0.7$ & 0.00 & 0.00 & 1.00 & 290.00 & 0.00 & 0.00 & 1.00 & 325.50 & 195.94 & 336.65 & 0.06 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.1$ & 43.64 & 10.08 & 0.00 & $\infty$ & 37.75 & 8.20 & 0.00 & $\infty$ & 19.58 & 6.50 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.3$ & 0.14 & 0.03 & 0.00 & $\infty$ & 0.17 & 0.05 & 0.00 & $\infty$ & 0.23 & 0.06 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.5$ & 0.00 & 0.00 & 1.00 & 413.00 & 0.00 & 0.00 & 1.00 & 430.50 & 0.01 & 0.00 & 0.82 & 491.00 \\ 
-  $df = \infty,$ $R^* =0.7$ & 0.00 & 0.00 & 1.00 & 357.00 & 0.00 & 0.00 & 1.00 & 443.00 & 16625.74 & 3842.72 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.1$ & 1.59 & 0.47 & 0.00 & $\infty$ & 2.08 & 0.73 & 0.00 & $\infty$ & 2.10 & 0.89 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.3$ & 0.00 & 0.00 & 1.00 & 445.00 & 0.01 & 0.00 & 0.96 & 467.00 & 0.01 & 0.01 & 0.54 & 499.50 \\ 
+  $df = 1,\enspace$ $R^* =0.5$ & 0.00 & 0.00 & 1.00 & 289.00 & 0.00 & 0.00 & 1.00 & 309.50 & 0.00 & 0.00 & 1.00 & 348.00 \\ 
+  $df = 1,\enspace$ $R^* =0.7$ & 0.00 & 0.00 & 1.00 & 223.00 & 0.00 & 0.00 & 1.00 & 256.00 & 0.00 & 0.00 & 1.00 & 329.00 \\ 
+  $df = 3,\enspace$ $R^* =0.1$ & 6.92 & 2.41 & 0.00 & $\infty$ & 6.92 & 1.79 & 0.00 & $\infty$ & 5.10 & 2.02 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.3$ & 0.01 & 0.00 & 0.22 & $\infty$ & 0.02 & 0.01 & 0.06 & $\infty$ & 0.03 & 0.01 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.5$ & 0.00 & 0.00 & 1.00 & 331.50 & 0.00 & 0.00 & 1.00 & 347.50 & 0.00 & 0.00 & 1.00 & 387.50 \\ 
+  $df = 3,\enspace$ $R^* =0.7$ & 0.00 & 0.00 & 1.00 & 259.50 & 0.00 & 0.00 & 1.00 & 288.50 & 0.00 & 0.00 & 1.00 & 400.50 \\ 
+  $df = 5,\enspace$ $R^* =0.1$ & 11.50 & 2.93 & 0.00 & $\infty$ & 11.72 & 2.53 & 0.00 & $\infty$ & 8.14 & 2.55 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.3$ & 0.03 & 0.01 & 0.00 & $\infty$ & 0.04 & 0.01 & 0.00 & $\infty$ & 0.06 & 0.02 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.5$ & 0.00 & 0.00 & 1.00 & 356.50 & 0.00 & 0.00 & 1.00 & 368.50 & 0.00 & 0.00 & 1.00 & 415.50 \\ 
+  $df = 5,\enspace$ $R^* =0.7$ & 0.00 & 0.00 & 1.00 & 288.50 & 0.00 & 0.00 & 1.00 & 326.50 & 222.69 & 288.53 & 0.02 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.1$ & 42.86 & 10.31 & 0.00 & $\infty$ & 38.44 & 8.12 & 0.00 & $\infty$ & 20.28 & 8.59 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.3$ & 0.14 & 0.05 & 0.00 & $\infty$ & 0.15 & 0.03 & 0.00 & $\infty$ & 0.25 & 0.08 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.5$ & 0.00 & 0.00 & 1.00 & 415.00 & 0.00 & 0.00 & 1.00 & 433.00 & 0.01 & 0.00 & 0.94 & 489.00 \\ 
+  $df = \infty,$ $R^* =0.7$ & 0.00 & 0.00 & 1.00 & 352.00 & 0.00 & 0.00 & 0.98 & 441.50 & 16949.57 & 3141.36 & 0.00 & $\infty$ \\ 
 \hline
 \multicolumn{1}{l|}{AT-BBPSOxp-MC} &&&&&&&&&&&&\\
-  $df = 1,\enspace$ $R^* =0.1$ & 3.77 & 0.91 & 0.00 & $\infty$ & 2.22 & 0.76 & 0.00 & $\infty$ & 0.43 & 0.20 & 0.00 & $\infty$ \\ 
-  $df = 1,\enspace$ $R^* =0.3$ & 0.02 & 0.01 & 0.00 & $\infty$ & 0.01 & 0.01 & 0.22 & $\infty$ & 0.00 & 0.00 & 1.00 & 448.50 \\ 
-  $df = 1,\enspace$ $R^* =0.5$ & 0.00 & 0.00 & 1.00 & 349.50 & 0.00 & 0.00 & 1.00 & 349.50 & 0.00 & 0.00 & 1.00 & 323.00 \\ 
-  $df = 1,\enspace$ $R^* =0.7$ & 0.00 & 0.00 & 1.00 & 283.50 & 0.00 & 0.00 & 1.00 & 295.00 & 0.00 & 0.00 & 1.00 & 285.00 \\ 
-  $df = 3,\enspace$ $R^* =0.1$ & 11.64 & 2.95 & 0.00 & $\infty$ & 6.57 & 2.30 & 0.00 & $\infty$ & 1.52 & 0.91 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.3$ & 0.08 & 0.03 & 0.00 & $\infty$ & 0.05 & 0.02 & 0.00 & $\infty$ & 0.01 & 0.01 & 0.20 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.5$ & 0.00 & 0.00 & 1.00 & 399.50 & 0.00 & 0.00 & 1.00 & 407.50 & 0.00 & 0.00 & 1.00 & 374.00 \\ 
-  $df = 3,\enspace$ $R^* =0.7$ & 0.00 & 0.00 & 1.00 & 340.50 & 0.00 & 0.00 & 1.00 & 365.50 & 0.00 & 0.00 & 1.00 & 365.00 \\ 
-  $df = 5,\enspace$ $R^* =0.1$ & 18.53 & 4.90 & 0.00 & $\infty$ & 9.29 & 2.96 & 0.00 & $\infty$ & 1.86 & 0.75 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.3$ & 0.14 & 0.04 & 0.00 & $\infty$ & 0.10 & 0.03 & 0.00 & $\infty$ & 0.02 & 0.01 & 0.04 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.5$ & 0.00 & 0.00 & 1.00 & 430.50 & 0.00 & 0.00 & 1.00 & 436.00 & 0.00 & 0.00 & 1.00 & 404.00 \\ 
-  $df = 5,\enspace$ $R^* =0.7$ & 0.00 & 0.00 & 1.00 & 389.50 & 0.01 & 0.02 & 0.92 & 451.50 & 0.04 & 0.13 & 0.74 & 454.50 \\ 
-  $df = \infty,$ $R^* =0.1$ & 43.01 & 9.65 & 0.00 & $\infty$ & 23.58 & 7.63 & 0.00 & $\infty$ & 4.82 & 1.83 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.3$ & 0.42 & 0.12 & 0.00 & $\infty$ & 0.32 & 0.09 & 0.00 & $\infty$ & 0.07 & 0.04 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.5$ & 0.01 & 0.00 & 0.96 & 482.50 & 0.01 & 0.00 & 0.84 & 489.00 & 0.00 & 0.00 & 1.00 & 454.00 \\ 
-  $df = \infty,$ $R^* =0.7$ & 0.06 & 0.15 & 0.24 & $\infty$ & 1766.73 & 1214.77 & 0.00 & $\infty$ & 2237.55 & 1691.20 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.1$ & 5.71 & 1.58 & 0.00 & $\infty$ & 6.00 & 1.76 & 0.00 & $\infty$ & 3.91 & 1.75 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.3$ & 0.02 & 0.01 & 0.00 & $\infty$ & 0.04 & 0.01 & 0.00 & $\infty$ & 0.05 & 0.02 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.5$ & 0.00 & 0.00 & 1.00 & 358.00 & 0.00 & 0.00 & 1.00 & 381.00 & 0.00 & 0.00 & 1.00 & 419.50 \\ 
+  $df = 1,\enspace$ $R^* =0.7$ & 0.00 & 0.00 & 1.00 & 291.00 & 0.00 & 0.00 & 1.00 & 326.00 & 0.00 & 0.01 & 0.98 & 432.50 \\ 
+  $df = 3,\enspace$ $R^* =0.1$ & 17.42 & 4.87 & 0.00 & $\infty$ & 16.91 & 4.41 & 0.00 & $\infty$ & 8.64 & 3.12 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.3$ & 0.10 & 0.03 & 0.00 & $\infty$ & 0.12 & 0.04 & 0.00 & $\infty$ & 0.15 & 0.05 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.5$ & 0.00 & 0.00 & 1.00 & 412.00 & 0.00 & 0.00 & 1.00 & 431.50 & 0.01 & 0.00 & 0.92 & 470.50 \\ 
+  $df = 3,\enspace$ $R^* =0.7$ & 0.00 & 0.00 & 1.00 & 350.50 & 0.00 & 0.01 & 0.98 & 438.00 & 4193.16 & 2013.59 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.1$ & 28.39 & 6.37 & 0.00 & $\infty$ & 28.42 & 7.58 & 0.00 & $\infty$ & 13.22 & 5.27 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.3$ & 0.19 & 0.05 & 0.00 & $\infty$ & 0.22 & 0.07 & 0.00 & $\infty$ & 0.26 & 0.10 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.5$ & 0.00 & 0.00 & 1.00 & 440.00 & 0.00 & 0.00 & 1.00 & 466.00 & 0.03 & 0.02 & 0.04 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.7$ & 0.00 & 0.00 & 1.00 & 405.50 & 505.43 & 755.11 & 0.02 & $\infty$ & 17674.52 & 4505.53 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.1$ & 65.18 & 14.92 & 0.00 & $\infty$ & 60.90 & 13.82 & 0.00 & $\infty$ & 26.77 & 10.11 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.3$ & 0.50 & 0.11 & 0.00 & $\infty$ & 0.66 & 0.14 & 0.00 & $\infty$ & 0.82 & 0.25 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.5$ & 0.01 & 0.00 & 0.82 & 492.00 & 0.03 & 0.01 & 0.02 & $\infty$ & 0.85 & 0.75 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.7$ & 0.19 & 0.33 & 0.04 & $\infty$ & 17369.34 & 3631.71 & 0.00 & $\infty$ & 35172.80 & 4377.92 & 0.00 & $\infty$ \\ 
 \hline
 \multicolumn{1}{l|}{DI-PSO} &&&&&&&&&&&&\\
-  $\alpha = 50,\enspace$ $\beta =1$ & 5800.59 & 3155.97 & 0.00 & $\infty$ & 698.71 & 1183.33 & 0.00 & $\infty$ & 35.24 & 79.82 & 0.00 & $\infty$ \\ 
-  $\alpha = 50,\enspace$ $\beta =2$ & 8130.93 & 5431.61 & 0.00 & $\infty$ & 2254.74 & 1775.35 & 0.00 & $\infty$ & 707.41 & 570.80 & 0.00 & $\infty$ \\ 
-  $\alpha = 50,\enspace$ $\beta =4$ & 14881.90 & 8467.41 & 0.00 & $\infty$ & 6133.60 & 3281.73 & 0.00 & $\infty$ & 3051.71 & 2314.76 & 0.00 & $\infty$ \\ 
-  $\alpha = 100,$ $\beta =1$ & 3574.49 & 3170.07 & 0.00 & $\infty$ & 146.17 & 331.79 & 0.00 & $\infty$ & 0.34 & 0.91 & 0.22 & $\infty$ \\ 
-  $\alpha = 100,$ $\beta =2$ & 7903.23 & 4250.18 & 0.00 & $\infty$ & 1248.39 & 1326.94 & 0.00 & $\infty$ & 83.35 & 140.17 & 0.00 & $\infty$ \\ 
-  $\alpha = 100,$ $\beta =4$ & 13455.03 & 6484.96 & 0.00 & $\infty$ & 4378.86 & 3004.31 & 0.00 & $\infty$ & 1591.49 & 1194.36 & 0.00 & $\infty$ \\ 
-  $\alpha = 200,$ $\beta =1$ & 2746.62 & 2890.48 & 0.00 & $\infty$ & 27.67 & 126.87 & 0.00 & $\infty$ & 0.00 & 0.00 & 0.96 & 384.50 \\ 
-  $\alpha = 200,$ $\beta =2$ & 8261.84 & 4537.27 & 0.00 & $\infty$ & 180.57 & 334.02 & 0.00 & $\infty$ & 3.38 & 7.17 & 0.02 & $\infty$ \\ 
-  $\alpha = 200,$ $\beta =4$ & 12100.60 & 6066.27 & 0.00 & $\infty$ & 2947.83 & 2171.07 & 0.00 & $\infty$ & 581.14 & 1413.97 & 0.00 & $\infty$ \\ 
+  $\alpha = 50,\enspace$ $\beta =1$ & 6703.90 & 3993.99 & 0.00 & $\infty$ & 543.02 & 683.48 & 0.00 & $\infty$ & 51.63 & 95.71 & 0.00 & $\infty$ \\ 
+  $\alpha = 50,\enspace$ $\beta =2$ & 7823.89 & 4787.27 & 0.00 & $\infty$ & 1821.42 & 1508.50 & 0.00 & $\infty$ & 499.64 & 441.33 & 0.00 & $\infty$ \\ 
+  $\alpha = 50,\enspace$ $\beta =4$ & 15373.54 & 6906.92 & 0.00 & $\infty$ & 5572.40 & 3137.25 & 0.00 & $\infty$ & 3705.93 & 2324.41 & 0.00 & $\infty$ \\ 
+  $\alpha = 100,$ $\beta =1$ & 3928.51 & 3855.22 & 0.00 & $\infty$ & 236.79 & 733.83 & 0.00 & $\infty$ & 0.99 & 4.03 & 0.20 & $\infty$ \\ 
+  $\alpha = 100,$ $\beta =2$ & 7618.89 & 4250.92 & 0.00 & $\infty$ & 1206.09 & 1393.42 & 0.00 & $\infty$ & 84.99 & 137.32 & 0.00 & $\infty$ \\ 
+  $\alpha = 100,$ $\beta =4$ & 13044.34 & 6195.43 & 0.00 & $\infty$ & 4218.13 & 2881.34 & 0.00 & $\infty$ & 1745.64 & 1532.00 & 0.00 & $\infty$ \\ 
+  $\alpha = 200,$ $\beta =1$ & 2321.68 & 2088.02 & 0.00 & $\infty$ & 178.09 & 618.06 & 0.02 & $\infty$ & 0.00 & 0.00 & 1.00 & 383.50 \\ 
+  $\alpha = 200,$ $\beta =2$ & 6427.62 & 3741.12 & 0.00 & $\infty$ & 305.62 & 523.71 & 0.00 & $\infty$ & 5.45 & 12.55 & 0.00 & $\infty$ \\ 
+  $\alpha = 200,$ $\beta =4$ & 12004.75 & 5708.12 & 0.00 & $\infty$ & 2236.94 & 1729.58 & 0.00 & $\infty$ & 475.93 & 503.87 & 0.00 & $\infty$ \\ 
 \hline
 \multicolumn{1}{l|}{AT-PSO} &&&&&&&&&&&&\\
-  $R^* = 0.1$ & 118.60 & 228.55 & 0.00 & $\infty$ & 188.52 & 718.43 & 0.00 & $\infty$ & 10169.59 & 7405.93 & 0.00 & $\infty$ \\ 
-  $R^* = 0.3$ & 70.10 & 326.06 & 0.04 & $\infty$ & 0.00 & 0.00 & 1.00 & 339.00 & 0.01 & 0.01 & 0.86 & 464.50 \\ 
-  $R^* = 0.5$ & 373.93 & 894.14 & 0.00 & $\infty$ & 0.00 & 0.00 & 1.00 & 275.00 & 0.00 & 0.00 & 1.00 & 302.50 \\ 
-  $R^* = 0.7$ & 1932.49 & 1906.13 & 0.00 & $\infty$ & 0.15 & 0.99 & 0.90 & 395.50 & 0.00 & 0.00 & 0.98 & 343.00 \\ 
+  $R^* = 0.1$ & 111.02 & 237.73 & 0.00 & $\infty$ & 211.79 & 889.18 & 0.00 & $\infty$ & 12223.23 & 9590.30 & 0.00 & $\infty$ \\ 
+  $R^* = 0.3$ & 54.27 & 252.08 & 0.04 & $\infty$ & 0.00 & 0.00 & 1.00 & 347.00 & 0.00 & 0.01 & 0.88 & 457.00 \\ 
+  $R^* = 0.5$ & 329.77 & 586.04 & 0.00 & $\infty$ & 0.00 & 0.00 & 1.00 & 274.50 & 0.00 & 0.00 & 1.00 & 303.50 \\ 
+  $R^* = 0.7$ & 2131.94 & 2209.74 & 0.00 & $\infty$ & 0.04 & 0.21 & 0.92 & 381.50 & 0.00 & 0.00 & 1.00 & 341.50 \\ 
    \hline
 \end{tabular}
 }
@@ -433,7 +434,7 @@ Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}
 \label{tab:psosim1}
 \end{table}
 % latex table generated in R 3.3.1 by xtable 1.8-2 package
-% Mon Aug 15 15:24:52 2016
+% Sun Aug 21 22:17:27 2016
 \begin{table}[ht]
 \centering
 \tiny{
@@ -442,62 +443,62 @@ Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}
   \hline
 Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}$ & $\widehat{t}$ \\
   \hline
-\multicolumn{1}{l|}{PSO} & 9058.41 & 9685.19 & 0.00 & $\infty$ & 1264.42 & 799.32 & 0.00 & $\infty$ & 5339.50 & 3143.93 & 0.00 & $\infty$ \\ 
-  \multicolumn{1}{l|}{BBPSO-MC} & 11883975.00 & 628634.30 & 0.00 & $\infty$ & 12276069.13 & 699375.46 & 0.00 & $\infty$ & 11493578.31 & 1172502.58 & 0.00 & $\infty$ \\ 
-  \multicolumn{1}{l|}{BBPSOxp-MC} & 11010472.51 & 544947.26 & 0.00 & $\infty$ & 10140651.29 & 619325.29 & 0.00 & $\infty$ & 7004850.88 & 1225368.46 & 0.00 & $\infty$ \\ 
+\multicolumn{1}{l|}{PSO} & 10915.05 & 17201.47 & 0.00 & $\infty$ & 1246.38 & 1002.75 & 0.00 & $\infty$ & 5738.34 & 3835.37 & 0.00 & $\infty$ \\ 
+  \multicolumn{1}{l|}{BBPSO-MC} & 9081909.83 & 1958288.73 & 0.00 & $\infty$ & 9194595.70 & 2157840.19 & 0.00 & $\infty$ & 8830368.63 & 2234188.42 & 0.00 & $\infty$ \\ 
+  \multicolumn{1}{l|}{BBPSOxp-MC} & 9138885.89 & 2265920.11 & 0.00 & $\infty$ & 8889637.56 & 2035964.50 & 0.00 & $\infty$ & 9038770.99 & 1858659.66 & 0.00 & $\infty$ \\ 
 \hline
 \multicolumn{1}{l|}{AT-BBPSO-MC} &&&&&&&&&&&&\\
-  $df = 1,\enspace$ $R^* =0.1$ & 945.06 & 802.75 & 0.00 & $\infty$ & 710.80 & 469.14 & 0.00 & $\infty$ & 774.49 & 747.78 & 0.00 & $\infty$ \\ 
-  $df = 1,\enspace$ $R^* =0.3$ & 327.20 & 240.51 & 0.00 & $\infty$ & 926.29 & 1132.84 & 0.00 & $\infty$ & 1008.87 & 1034.00 & 0.00 & $\infty$ \\ 
-  $df = 1,\enspace$ $R^* =0.5$ & 469.09 & 503.21 & 0.00 & $\infty$ & 1468.95 & 1561.26 & 0.00 & $\infty$ & 3253.60 & 2878.65 & 0.00 & $\infty$ \\ 
-  $df = 1,\enspace$ $R^* =0.7$ & 1406.45 & 1261.92 & 0.00 & $\infty$ & 3977.07 & 3875.19 & 0.00 & $\infty$ & 10836.34 & 7853.42 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.1$ & 219.80 & 111.62 & 0.00 & $\infty$ & 202.99 & 142.50 & 0.00 & $\infty$ & 255.86 & 157.95 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.3$ & 19.11 & 13.28 & 0.00 & $\infty$ & 63.30 & 60.89 & 0.00 & $\infty$ & 145.93 & 153.16 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.5$ & 29.80 & 35.95 & 0.00 & $\infty$ & 214.82 & 214.48 & 0.00 & $\infty$ & 846.76 & 697.18 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.7$ & 144.09 & 103.71 & 0.00 & $\infty$ & 1033.32 & 796.45 & 0.00 & $\infty$ & 8079.02 & 20596.37 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.1$ & 185.82 & 78.05 & 0.00 & $\infty$ & 187.84 & 85.91 & 0.00 & $\infty$ & 237.84 & 122.56 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.3$ & 10.85 & 8.18 & 0.00 & $\infty$ & 24.21 & 18.38 & 0.00 & $\infty$ & 55.58 & 39.08 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.5$ & 11.60 & 10.52 & 0.00 & $\infty$ & 54.75 & 40.96 & 0.00 & $\infty$ & 468.53 & 369.98 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.7$ & 72.38 & 51.38 & 0.00 & $\infty$ & 422.19 & 277.83 & 0.00 & $\infty$ & 8889.40 & 7833.07 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.1$ & 282.38 & 102.62 & 0.00 & $\infty$ & 262.49 & 79.80 & 0.00 & $\infty$ & 281.59 & 115.66 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.3$ & 7.83 & 6.04 & 0.00 & $\infty$ & 16.43 & 10.41 & 0.00 & $\infty$ & 37.22 & 23.14 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.5$ & 6.84 & 5.16 & 0.00 & $\infty$ & 35.82 & 32.97 & 0.00 & $\infty$ & 261.12 & 152.46 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.7$ & 50.86 & 36.80 & 0.00 & $\infty$ & 484.76 & 270.15 & 0.00 & $\infty$ & 1167787.27 & 401166.29 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.1$ & 950.30 & 809.12 & 0.00 & $\infty$ & 690.95 & 535.97 & 0.00 & $\infty$ & 743.12 & 728.28 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.3$ & 300.03 & 258.36 & 0.00 & $\infty$ & 685.68 & 458.39 & 0.00 & $\infty$ & 1091.45 & 1375.54 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.5$ & 440.38 & 436.08 & 0.00 & $\infty$ & 1419.88 & 1239.43 & 0.00 & $\infty$ & 3652.45 & 4072.28 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.7$ & 1615.81 & 1539.22 & 0.00 & $\infty$ & 4330.31 & 4863.92 & 0.00 & $\infty$ & 8858.46 & 4578.27 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.1$ & 196.07 & 88.33 & 0.00 & $\infty$ & 226.17 & 163.16 & 0.00 & $\infty$ & 252.63 & 187.08 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.3$ & 23.27 & 17.11 & 0.00 & $\infty$ & 54.95 & 48.43 & 0.00 & $\infty$ & 189.83 & 399.03 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.5$ & 30.94 & 29.21 & 0.00 & $\infty$ & 185.87 & 161.77 & 0.00 & $\infty$ & 1073.22 & 1233.74 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.7$ & 222.12 & 524.53 & 0.00 & $\infty$ & 939.33 & 789.54 & 0.00 & $\infty$ & 5897.58 & 4513.86 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.1$ & 198.27 & 75.35 & 0.00 & $\infty$ & 175.31 & 80.21 & 0.00 & $\infty$ & 205.86 & 117.06 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.3$ & 12.25 & 9.35 & 0.00 & $\infty$ & 24.76 & 18.02 & 0.00 & $\infty$ & 60.79 & 63.04 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.5$ & 11.51 & 7.41 & 0.00 & $\infty$ & 63.91 & 51.53 & 0.00 & $\infty$ & 458.47 & 317.21 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.7$ & 61.67 & 36.27 & 0.00 & $\infty$ & 378.27 & 218.82 & 0.00 & $\infty$ & 7696.71 & 5485.99 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.1$ & 280.79 & 97.77 & 0.00 & $\infty$ & 267.44 & 87.93 & 0.00 & $\infty$ & 287.37 & 128.28 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.3$ & 6.75 & 3.83 & 0.00 & $\infty$ & 13.91 & 9.02 & 0.00 & $\infty$ & 39.37 & 32.01 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.5$ & 4.96 & 3.73 & 0.00 & $\infty$ & 30.82 & 22.83 & 0.00 & $\infty$ & 269.58 & 161.10 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.7$ & 51.31 & 38.92 & 0.00 & $\infty$ & 550.48 & 301.85 & 0.00 & $\infty$ & 1100097.72 & 493290.33 & 0.00 & $\infty$ \\ 
 \hline
 \multicolumn{1}{l|}{AT-BBPSOxp-MC} &&&&&&&&&&&&\\
-  $df = 1,\enspace$ $R^* =0.1$ & 1872.52 & 1038.69 & 0.00 & $\infty$ & 1799.53 & 862.91 & 0.00 & $\infty$ & 942.70 & 590.06 & 0.00 & $\infty$ \\ 
-  $df = 1,\enspace$ $R^* =0.3$ & 1204.75 & 814.82 & 0.00 & $\infty$ & 1864.65 & 1185.93 & 0.00 & $\infty$ & 961.45 & 928.89 & 0.00 & $\infty$ \\ 
-  $df = 1,\enspace$ $R^* =0.5$ & 1881.72 & 1041.49 & 0.00 & $\infty$ & 3108.80 & 1482.50 & 0.00 & $\infty$ & 2519.47 & 1307.36 & 0.00 & $\infty$ \\ 
-  $df = 1,\enspace$ $R^* =0.7$ & 5161.81 & 3212.03 & 0.00 & $\infty$ & 7854.74 & 4468.87 & 0.00 & $\infty$ & 7775.57 & 4525.87 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.1$ & 565.47 & 256.64 & 0.00 & $\infty$ & 665.17 & 307.78 & 0.00 & $\infty$ & 508.77 & 268.54 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.3$ & 191.75 & 130.61 & 0.00 & $\infty$ & 363.46 & 260.03 & 0.00 & $\infty$ & 267.88 & 190.70 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.5$ & 438.28 & 273.27 & 0.00 & $\infty$ & 654.47 & 404.48 & 0.00 & $\infty$ & 1110.91 & 1424.90 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.7$ & 1384.56 & 909.83 & 0.00 & $\infty$ & 3503.63 & 3161.16 & 0.00 & $\infty$ & 4256.67 & 3547.43 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.1$ & 480.63 & 187.88 & 0.00 & $\infty$ & 504.39 & 220.77 & 0.00 & $\infty$ & 400.66 & 214.64 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.3$ & 115.80 & 68.47 & 0.00 & $\infty$ & 197.49 & 138.10 & 0.00 & $\infty$ & 225.22 & 142.07 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.5$ & 181.62 & 128.13 & 0.00 & $\infty$ & 333.87 & 159.91 & 0.00 & $\infty$ & 472.13 & 276.68 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.7$ & 660.28 & 313.88 & 0.00 & $\infty$ & 1817.45 & 834.00 & 0.00 & $\infty$ & 4632.54 & 4302.74 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.1$ & 586.91 & 176.77 & 0.00 & $\infty$ & 595.51 & 179.25 & 0.00 & $\infty$ & 541.43 & 255.32 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.3$ & 81.20 & 47.02 & 0.00 & $\infty$ & 128.97 & 94.06 & 0.00 & $\infty$ & 176.75 & 109.79 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.5$ & 119.58 & 66.07 & 0.00 & $\infty$ & 232.02 & 163.01 & 0.00 & $\infty$ & 559.93 & 315.23 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.7$ & 971.24 & 600.68 & 0.00 & $\infty$ & 118742.43 & 156281.96 & 0.00 & $\infty$ & 34066.02 & 28609.67 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.1$ & 1620.04 & 724.59 & 0.00 & $\infty$ & 1434.81 & 637.94 & 0.00 & $\infty$ & 1004.77 & 608.51 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.3$ & 1117.65 & 614.18 & 0.00 & $\infty$ & 1541.55 & 913.10 & 0.00 & $\infty$ & 1372.47 & 1108.92 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.5$ & 2424.76 & 1458.65 & 0.00 & $\infty$ & 3639.53 & 2048.74 & 0.00 & $\infty$ & 5212.21 & 3221.11 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.7$ & 5685.79 & 3365.32 & 0.00 & $\infty$ & 6746.82 & 4254.76 & 0.00 & $\infty$ & 13170.58 & 7291.81 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.1$ & 609.04 & 289.92 & 0.00 & $\infty$ & 568.65 & 326.15 & 0.00 & $\infty$ & 562.17 & 301.77 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.3$ & 231.40 & 167.47 & 0.00 & $\infty$ & 320.46 & 308.01 & 0.00 & $\infty$ & 366.68 & 274.58 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.5$ & 360.34 & 224.38 & 0.00 & $\infty$ & 1026.42 & 709.48 & 0.00 & $\infty$ & 5089.66 & 5857.62 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.7$ & 1426.88 & 1209.92 & 0.00 & $\infty$ & 5568.83 & 7882.29 & 0.00 & $\infty$ & 38081.89 & 31747.85 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.1$ & 476.81 & 215.75 & 0.00 & $\infty$ & 497.74 & 194.10 & 0.00 & $\infty$ & 540.99 & 263.49 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.3$ & 109.01 & 45.98 & 0.00 & $\infty$ & 170.67 & 120.10 & 0.00 & $\infty$ & 272.26 & 192.17 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.5$ & 243.73 & 154.52 & 0.00 & $\infty$ & 448.77 & 241.51 & 0.00 & $\infty$ & 2147.17 & 1308.53 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.7$ & 794.68 & 388.65 & 0.00 & $\infty$ & 17971.50 & 16875.10 & 0.00 & $\infty$ & 507347.01 & 409181.08 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.1$ & 609.19 & 197.59 & 0.00 & $\infty$ & 585.88 & 163.05 & 0.00 & $\infty$ & 536.88 & 263.19 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.3$ & 70.82 & 44.69 & 0.00 & $\infty$ & 111.39 & 79.50 & 0.00 & $\infty$ & 220.30 & 168.06 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.5$ & 114.86 & 88.86 & 0.00 & $\infty$ & 329.69 & 169.04 & 0.00 & $\infty$ & 2889.16 & 2088.86 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.7$ & 2469.49 & 2799.80 & 0.00 & $\infty$ & 1483405.94 & 407996.51 & 0.00 & $\infty$ & 2535125.64 & 778910.46 & 0.00 & $\infty$ \\ 
 \hline
 \multicolumn{1}{l|}{DI-PSO} &&&&&&&&&&&&\\
-  $\alpha = 50,\enspace$ $\beta =1$ & 40389.25 & 24692.95 & 0.00 & $\infty$ & 18720.02 & 11239.63 & 0.00 & $\infty$ & 8622.85 & 4980.17 & 0.00 & $\infty$ \\ 
-  $\alpha = 50,\enspace$ $\beta =2$ & 44518.25 & 22261.16 & 0.00 & $\infty$ & 21028.28 & 10707.64 & 0.00 & $\infty$ & 12726.73 & 5322.96 & 0.00 & $\infty$ \\ 
-  $\alpha = 50,\enspace$ $\beta =4$ & 51851.57 & 25120.63 & 0.00 & $\infty$ & 29532.84 & 13000.01 & 0.00 & $\infty$ & 16540.60 & 8846.75 & 0.00 & $\infty$ \\ 
-  $\alpha = 100,$ $\beta =1$ & 24843.60 & 15674.35 & 0.00 & $\infty$ & 10917.91 & 7294.55 & 0.00 & $\infty$ & 5011.53 & 2384.94 & 0.00 & $\infty$ \\ 
-  $\alpha = 100,$ $\beta =2$ & 37890.78 & 24040.40 & 0.00 & $\infty$ & 17226.82 & 8980.99 & 0.00 & $\infty$ & 10305.47 & 5737.74 & 0.00 & $\infty$ \\ 
-  $\alpha = 100,$ $\beta =4$ & 52019.62 & 25824.86 & 0.00 & $\infty$ & 30086.99 & 20743.14 & 0.00 & $\infty$ & 12073.62 & 5451.03 & 0.00 & $\infty$ \\ 
-  $\alpha = 200,$ $\beta =1$ & 22007.15 & 13078.38 & 0.00 & $\infty$ & 5785.75 & 4635.98 & 0.00 & $\infty$ & 3694.82 & 2434.96 & 0.00 & $\infty$ \\ 
-  $\alpha = 200,$ $\beta =2$ & 32862.70 & 16618.65 & 0.00 & $\infty$ & 13173.95 & 6095.13 & 0.00 & $\infty$ & 8033.58 & 4532.79 & 0.00 & $\infty$ \\ 
-  $\alpha = 200,$ $\beta =4$ & 50850.73 & 21907.04 & 0.00 & $\infty$ & 21202.31 & 11345.72 & 0.00 & $\infty$ & 14321.18 & 7476.13 & 0.00 & $\infty$ \\ 
+  $\alpha = 50,\enspace$ $\beta =1$ & 40714.56 & 24208.86 & 0.00 & $\infty$ & 16548.67 & 9312.34 & 0.00 & $\infty$ & 7839.43 & 5031.49 & 0.00 & $\infty$ \\ 
+  $\alpha = 50,\enspace$ $\beta =2$ & 47763.21 & 31361.92 & 0.00 & $\infty$ & 24627.59 & 11610.10 & 0.00 & $\infty$ & 11660.25 & 6362.56 & 0.00 & $\infty$ \\ 
+  $\alpha = 50,\enspace$ $\beta =4$ & 62225.74 & 28459.35 & 0.00 & $\infty$ & 31511.13 & 15145.07 & 0.00 & $\infty$ & 16416.52 & 7831.71 & 0.00 & $\infty$ \\ 
+  $\alpha = 100,$ $\beta =1$ & 26613.11 & 14611.63 & 0.00 & $\infty$ & 10168.37 & 6029.10 & 0.00 & $\infty$ & 5378.87 & 3302.21 & 0.00 & $\infty$ \\ 
+  $\alpha = 100,$ $\beta =2$ & 46177.71 & 37974.29 & 0.00 & $\infty$ & 17795.63 & 8897.56 & 0.00 & $\infty$ & 9818.51 & 4708.72 & 0.00 & $\infty$ \\ 
+  $\alpha = 100,$ $\beta =4$ & 64833.73 & 36534.52 & 0.00 & $\infty$ & 28627.71 & 14257.04 & 0.00 & $\infty$ & 14536.17 & 7921.94 & 0.00 & $\infty$ \\ 
+  $\alpha = 200,$ $\beta =1$ & 21611.55 & 12914.90 & 0.00 & $\infty$ & 5699.97 & 3916.44 & 0.00 & $\infty$ & 3499.49 & 1865.32 & 0.00 & $\infty$ \\ 
+  $\alpha = 200,$ $\beta =2$ & 36405.44 & 27997.69 & 0.00 & $\infty$ & 12492.90 & 6829.93 & 0.00 & $\infty$ & 6944.87 & 4559.84 & 0.00 & $\infty$ \\ 
+  $\alpha = 200,$ $\beta =4$ & 57723.16 & 30860.32 & 0.00 & $\infty$ & 21807.81 & 11567.18 & 0.00 & $\infty$ & 12201.41 & 5365.69 & 0.00 & $\infty$ \\ 
 \hline
 \multicolumn{1}{l|}{AT-PSO} &&&&&&&&&&&&\\
-  $R^* = 0.1$ & 7359.75 & 6803.21 & 0.00 & $\infty$ & 8340.43 & 7908.49 & 0.00 & $\infty$ & 56057.72 & 26008.24 & 0.00 & $\infty$ \\ 
-  $R^* = 0.3$ & 7582.23 & 12259.21 & 0.00 & $\infty$ & 593.85 & 754.83 & 0.00 & $\infty$ & 5252.44 & 4221.37 & 0.00 & $\infty$ \\ 
-  $R^* = 0.5$ & 17909.32 & 16070.66 & 0.00 & $\infty$ & 1397.43 & 1598.40 & 0.00 & $\infty$ & 1846.47 & 1312.13 & 0.00 & $\infty$ \\ 
-  $R^* = 0.7$ & 43178.25 & 24887.81 & 0.00 & $\infty$ & 6301.86 & 5349.85 & 0.00 & $\infty$ & 5760.60 & 3355.07 & 0.00 & $\infty$ \\ 
+  $R^* = 0.1$ & 8823.66 & 9727.43 & 0.00 & $\infty$ & 8852.96 & 6912.25 & 0.00 & $\infty$ & 58369.56 & 38288.17 & 0.00 & $\infty$ \\ 
+  $R^* = 0.3$ & 6658.84 & 6659.87 & 0.00 & $\infty$ & 769.74 & 850.01 & 0.00 & $\infty$ & 5183.03 & 4046.47 & 0.00 & $\infty$ \\ 
+  $R^* = 0.5$ & 20994.61 & 16398.66 & 0.00 & $\infty$ & 1713.89 & 2589.20 & 0.00 & $\infty$ & 1877.08 & 1465.51 & 0.00 & $\infty$ \\ 
+  $R^* = 0.7$ & 35128.87 & 17886.90 & 0.00 & $\infty$ & 7126.76 & 5756.50 & 0.00 & $\infty$ & 5771.37 & 3581.95 & 0.00 & $\infty$ \\ 
    \hline
 \end{tabular}
 }
@@ -505,7 +506,7 @@ Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}
 \label{tab:psosim2}
 \end{table}
 % latex table generated in R 3.3.1 by xtable 1.8-2 package
-% Mon Aug 15 15:24:52 2016
+% Sun Aug 21 22:17:27 2016
 \begin{table}[ht]
 \centering
 \tiny{
@@ -514,62 +515,62 @@ Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}
   \hline
 Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}$ & $\widehat{t}$ \\ 
   \hline
-\multicolumn{1}{l|}{PSO} & 970637.16 & 1719993.18 & 0.00 & $\infty$ & 144.21 & 197.18 & 0.00 & $\infty$ & 207.96 & 306.95 & 0.00 & $\infty$ \\ 
-  \multicolumn{1}{l|}{BBPSO-MC} & 121023363.91 & 13812838.21 & 0.00 & $\infty$ & 154011414.01 & 16232288.40 & 0.00 & $\infty$ & 174968862.42 & 23613990.88 & 0.00 & $\infty$ \\ 
-  \multicolumn{1}{l|}{BBPSOxp-MC} & 138645962.86 & 15657816.44 & 0.00 & $\infty$ & 132653861.04 & 13853873.26 & 0.00 & $\infty$ & 89975682.91 & 15709701.24 & 0.00 & $\infty$ \\ 
+\multicolumn{1}{l|}{PSO} & 1242764.67 & 2075592.00 & 0.00 & $\infty$ & 121.33 & 104.18 & 0.00 & $\infty$ & 241.45 & 255.69 & 0.00 & $\infty$ \\ 
+  \multicolumn{1}{l|}{BBPSO-MC} & 232830400.95 & 37473167.09 & 0.00 & $\infty$ & 247662755.14 & 43820300.43 & 0.00 & $\infty$ & 247321508.63 & 39096259.33 & 0.00 & $\infty$ \\ 
+  \multicolumn{1}{l|}{BBPSOxp-MC} & 235491326.54 & 42124202.61 & 0.00 & $\infty$ & 242679907.63 & 42872974.55 & 0.00 & $\infty$ & 253599464.23 & 43615037.04 & 0.00 & $\infty$ \\ 
 \hline
 \multicolumn{1}{l|}{AT-BBPSO-MC} &&&&&&&&&&&&\\
-  $df = 1,\enspace$ $R^* =0.1$ & 502.81 & 549.75 & 0.00 & $\infty$ & 489.99 & 659.01 & 0.00 & $\infty$ & 417.60 & 453.85 & 0.00 & $\infty$ \\ 
-  $df = 1,\enspace$ $R^* =0.3$ & 238.76 & 403.40 & 0.00 & $\infty$ & 241.03 & 308.07 & 0.00 & $\infty$ & 221.48 & 324.13 & 0.00 & $\infty$ \\ 
-  $df = 1,\enspace$ $R^* =0.5$ & 195.84 & 235.99 & 0.00 & $\infty$ & 122.20 & 115.62 & 0.00 & $\infty$ & 230.69 & 508.80 & 0.00 & $\infty$ \\ 
-  $df = 1,\enspace$ $R^* =0.7$ & 226.04 & 526.49 & 0.00 & $\infty$ & 274.61 & 575.37 & 0.00 & $\infty$ & 225.18 & 415.80 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.1$ & 872.47 & 954.91 & 0.00 & $\infty$ & 603.26 & 714.65 & 0.00 & $\infty$ & 657.78 & 863.02 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.3$ & 187.54 & 155.35 & 0.00 & $\infty$ & 140.43 & 115.93 & 0.00 & $\infty$ & 267.09 & 432.14 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.5$ & 179.88 & 235.11 & 0.00 & $\infty$ & 156.27 & 214.31 & 0.00 & $\infty$ & 172.14 & 335.49 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.7$ & 217.20 & 455.21 & 0.00 & $\infty$ & 123.77 & 165.76 & 0.00 & $\infty$ & 207.58 & 550.05 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.1$ & 781.19 & 711.43 & 0.00 & $\infty$ & 679.51 & 634.98 & 0.00 & $\infty$ & 541.45 & 530.74 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.3$ & 221.15 & 284.28 & 0.00 & $\infty$ & 214.66 & 361.21 & 0.00 & $\infty$ & 221.80 & 250.50 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.5$ & 206.31 & 228.63 & 0.00 & $\infty$ & 144.48 & 112.27 & 0.00 & $\infty$ & 165.02 & 319.30 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.7$ & 182.94 & 257.84 & 0.00 & $\infty$ & 48.60 & 73.43 & 0.00 & $\infty$ & 108.13 & 360.85 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.1$ & 1382.42 & 1071.14 & 0.00 & $\infty$ & 1089.55 & 708.37 & 0.00 & $\infty$ & 704.85 & 580.05 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.3$ & 269.15 & 320.43 & 0.00 & $\infty$ & 141.57 & 144.43 & 0.00 & $\infty$ & 160.88 & 290.82 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.5$ & 191.11 & 147.95 & 0.00 & $\infty$ & 194.51 & 297.34 & 0.00 & $\infty$ & 165.00 & 212.70 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.7$ & 146.08 & 127.14 & 0.00 & $\infty$ & 61.55 & 73.27 & 0.00 & $\infty$ & 317.42 & 999.55 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.1$ & 382.54 & 325.35 & 0.00 & $\infty$ & 486.70 & 533.46 & 0.00 & $\infty$ & 669.09 & 932.66 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.3$ & 233.17 & 429.80 & 0.00 & $\infty$ & 182.89 & 272.06 & 0.00 & $\infty$ & 352.64 & 465.63 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.5$ & 315.43 & 497.55 & 0.00 & $\infty$ & 159.55 & 216.03 & 0.00 & $\infty$ & 254.78 & 669.72 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.7$ & 235.08 & 455.38 & 0.00 & $\infty$ & 96.32 & 106.25 & 0.00 & $\infty$ & 189.20 & 288.45 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.1$ & 545.05 & 481.33 & 0.00 & $\infty$ & 629.79 & 657.37 & 0.00 & $\infty$ & 567.75 & 585.07 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.3$ & 176.81 & 186.22 & 0.00 & $\infty$ & 172.84 & 204.18 & 0.00 & $\infty$ & 256.32 & 426.46 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.5$ & 159.09 & 170.77 & 0.00 & $\infty$ & 128.99 & 127.25 & 0.00 & $\infty$ & 137.56 & 202.68 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.7$ & 155.74 & 399.33 & 0.00 & $\infty$ & 132.16 & 339.64 & 0.00 & $\infty$ & 82.12 & 170.21 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.1$ & 833.71 & 627.25 & 0.00 & $\infty$ & 928.42 & 982.63 & 0.00 & $\infty$ & 450.93 & 444.86 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.3$ & 283.78 & 431.37 & 0.00 & $\infty$ & 135.95 & 98.01 & 0.00 & $\infty$ & 229.39 & 314.25 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.5$ & 198.53 & 185.97 & 0.00 & $\infty$ & 173.66 & 278.73 & 0.00 & $\infty$ & 118.79 & 114.49 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.7$ & 142.06 & 190.31 & 0.00 & $\infty$ & 64.57 & 98.26 & 0.00 & $\infty$ & 108.71 & 538.33 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.1$ & 1343.31 & 757.87 & 0.00 & $\infty$ & 1056.96 & 522.89 & 0.00 & $\infty$ & 958.18 & 773.33 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.3$ & 230.32 & 320.08 & 0.00 & $\infty$ & 138.02 & 120.68 & 0.00 & $\infty$ & 212.78 & 331.90 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.5$ & 225.28 & 219.75 & 0.00 & $\infty$ & 156.78 & 132.24 & 0.00 & $\infty$ & 120.23 & 106.23 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.7$ & 131.34 & 91.53 & 0.00 & $\infty$ & 56.10 & 76.80 & 0.00 & $\infty$ & 179.69 & 683.04 & 0.00 & $\infty$ \\ 
 \hline
 \multicolumn{1}{l|}{AT-BBPSOxp-MC} &&&&&&&&&&&&\\
-  $df = 1,\enspace$ $R^* =0.1$ & 611.07 & 434.02 & 0.00 & $\infty$ & 402.89 & 264.11 & 0.00 & $\infty$ & 216.75 & 152.59 & 0.00 & $\infty$ \\ 
-  $df = 1,\enspace$ $R^* =0.3$ & 221.23 & 231.63 & 0.00 & $\infty$ & 129.90 & 92.90 & 0.00 & $\infty$ & 92.61 & 60.58 & 0.00 & $\infty$ \\ 
-  $df = 1,\enspace$ $R^* =0.5$ & 170.81 & 394.57 & 0.00 & $\infty$ & 107.35 & 136.60 & 0.00 & $\infty$ & 104.84 & 110.07 & 0.00 & $\infty$ \\ 
-  $df = 1,\enspace$ $R^* =0.7$ & 136.87 & 248.84 & 0.00 & $\infty$ & 131.50 & 432.59 & 0.00 & $\infty$ & 98.33 & 135.63 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.1$ & 720.92 & 215.53 & 0.00 & $\infty$ & 560.46 & 249.45 & 0.00 & $\infty$ & 275.19 & 192.65 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.3$ & 174.45 & 244.90 & 0.00 & $\infty$ & 127.44 & 58.88 & 0.00 & $\infty$ & 150.36 & 127.50 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.5$ & 151.95 & 244.27 & 0.00 & $\infty$ & 92.78 & 78.27 & 0.00 & $\infty$ & 109.43 & 148.82 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.7$ & 104.03 & 181.86 & 0.00 & $\infty$ & 168.15 & 436.88 & 0.00 & $\infty$ & 36.17 & 52.63 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.1$ & 946.03 & 410.19 & 0.00 & $\infty$ & 555.51 & 250.59 & 0.00 & $\infty$ & 278.16 & 196.26 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.3$ & 121.66 & 80.43 & 0.00 & $\infty$ & 120.35 & 74.89 & 0.00 & $\infty$ & 109.47 & 91.42 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.5$ & 106.68 & 49.70 & 0.00 & $\infty$ & 129.63 & 124.28 & 0.00 & $\infty$ & 76.17 & 45.36 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.7$ & 54.18 & 64.54 & 0.00 & $\infty$ & 39.95 & 84.35 & 0.00 & $\infty$ & 37.37 & 59.62 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.1$ & 1429.56 & 774.39 & 0.00 & $\infty$ & 896.51 & 333.33 & 0.00 & $\infty$ & 390.78 & 225.22 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.3$ & 109.28 & 76.19 & 0.00 & $\infty$ & 112.02 & 95.78 & 0.00 & $\infty$ & 115.01 & 89.85 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.5$ & 103.74 & 35.01 & 0.00 & $\infty$ & 118.78 & 171.39 & 0.00 & $\infty$ & 90.54 & 74.14 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.7$ & 43.35 & 75.92 & 0.00 & $\infty$ & 18.13 & 12.93 & 0.00 & $\infty$ & 19.99 & 20.18 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.1$ & 616.80 & 278.83 & 0.00 & $\infty$ & 633.00 & 276.25 & 0.00 & $\infty$ & 490.75 & 350.79 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.3$ & 152.80 & 179.75 & 0.00 & $\infty$ & 163.64 & 131.42 & 0.00 & $\infty$ & 140.13 & 158.06 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.5$ & 139.49 & 269.65 & 0.00 & $\infty$ & 99.39 & 225.41 & 0.00 & $\infty$ & 202.26 & 429.55 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.7$ & 149.01 & 459.29 & 0.00 & $\infty$ & 73.54 & 126.07 & 0.00 & $\infty$ & 188.28 & 370.67 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.1$ & 961.94 & 370.97 & 0.00 & $\infty$ & 931.38 & 294.49 & 0.00 & $\infty$ & 709.41 & 452.45 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.3$ & 168.44 & 279.24 & 0.00 & $\infty$ & 144.15 & 200.78 & 0.00 & $\infty$ & 120.33 & 48.68 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.5$ & 123.39 & 102.98 & 0.00 & $\infty$ & 97.56 & 50.88 & 0.00 & $\infty$ & 77.47 & 81.83 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.7$ & 49.75 & 70.72 & 0.00 & $\infty$ & 33.96 & 52.12 & 0.00 & $\infty$ & 3586.02 & 9973.24 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.1$ & 1229.87 & 526.97 & 0.00 & $\infty$ & 1171.93 & 406.81 & 0.00 & $\infty$ & 727.95 & 436.07 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.3$ & 267.86 & 435.67 & 0.00 & $\infty$ & 124.80 & 75.86 & 0.00 & $\infty$ & 157.72 & 217.77 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.5$ & 137.08 & 104.13 & 0.00 & $\infty$ & 91.44 & 86.38 & 0.00 & $\infty$ & 75.74 & 95.04 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.7$ & 66.87 & 126.23 & 0.00 & $\infty$ & 19.28 & 17.08 & 0.00 & $\infty$ & 82498.29 & 102684.12 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.1$ & 2002.70 & 822.46 & 0.00 & $\infty$ & 1718.67 & 698.34 & 0.00 & $\infty$ & 1158.47 & 903.16 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.3$ & 137.09 & 84.51 & 0.00 & $\infty$ & 116.46 & 66.60 & 0.00 & $\infty$ & 114.47 & 57.68 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.5$ & 121.71 & 103.55 & 0.00 & $\infty$ & 104.78 & 67.31 & 0.00 & $\infty$ & 41.15 & 33.00 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.7$ & 24.31 & 24.58 & 0.00 & $\infty$ & 24.31 & 20.57 & 0.00 & $\infty$ & 2088154.00 & 1258187.91 & 0.00 & $\infty$ \\ 
 \hline
 \multicolumn{1}{l|}{DI-PSO} &&&&&&&&&&&&\\
-  $\alpha = 50,\enspace$ $\beta =1$ & 3854178.52 & 3563712.76 & 0.00 & $\infty$ & 476166.48 & 1068595.33 & 0.00 & $\infty$ & 49808.17 & 90745.61 & 0.00 & $\infty$ \\ 
-  $\alpha = 50,\enspace$ $\beta =2$ & 6562468.86 & 8285814.85 & 0.00 & $\infty$ & 1595754.13 & 1624066.71 & 0.00 & $\infty$ & 1327935.46 & 1951123.16 & 0.00 & $\infty$ \\ 
-  $\alpha = 50,\enspace$ $\beta =4$ & 19701402.98 & 12961045.13 & 0.00 & $\infty$ & 10884269.41 & 8299038.15 & 0.00 & $\infty$ & 5985429.81 & 3917709.91 & 0.00 & $\infty$ \\ 
-  $\alpha = 100,$ $\beta =1$ & 1870977.66 & 2324247.39 & 0.00 & $\infty$ & 57070.98 & 164749.98 & 0.00 & $\infty$ & 1760.17 & 3897.70 & 0.00 & $\infty$ \\ 
-  $\alpha = 100,$ $\beta =2$ & 7530967.66 & 8856235.46 & 0.00 & $\infty$ & 866151.25 & 1270221.03 & 0.00 & $\infty$ & 207921.17 & 463007.58 & 0.00 & $\infty$ \\ 
-  $\alpha = 100,$ $\beta =4$ & 22584490.35 & 22402688.80 & 0.00 & $\infty$ & 7448049.14 & 6263068.66 & 0.00 & $\infty$ & 4916024.35 & 4602692.81 & 0.00 & $\infty$ \\ 
-  $\alpha = 200,$ $\beta =1$ & 1217548.01 & 1884033.63 & 0.00 & $\infty$ & 3621.58 & 8954.06 & 0.00 & $\infty$ & 483.36 & 1129.34 & 0.00 & $\infty$ \\ 
-  $\alpha = 200,$ $\beta =2$ & 4461093.42 & 4947722.54 & 0.00 & $\infty$ & 120433.51 & 307696.11 & 0.00 & $\infty$ & 3403.48 & 4242.88 & 0.00 & $\infty$ \\ 
-  $\alpha = 200,$ $\beta =4$ & 17327523.00 & 13868599.90 & 0.00 & $\infty$ & 3061892.74 & 3273826.33 & 0.00 & $\infty$ & 1189001.99 & 1583478.70 & 0.00 & $\infty$ \\ 
+  $\alpha = 50,\enspace$ $\beta =1$ & 4180196.82 & 4677639.48 & 0.00 & $\infty$ & 354071.40 & 579847.34 & 0.00 & $\infty$ & 70128.62 & 165037.08 & 0.00 & $\infty$ \\ 
+  $\alpha = 50,\enspace$ $\beta =2$ & 6964209.15 & 8322398.93 & 0.00 & $\infty$ & 2341768.78 & 4277548.98 & 0.00 & $\infty$ & 1232022.80 & 1464906.82 & 0.00 & $\infty$ \\ 
+  $\alpha = 50,\enspace$ $\beta =4$ & 20143670.82 & 15026478.57 & 0.00 & $\infty$ & 11740754.91 & 8374232.25 & 0.00 & $\infty$ & 6766696.51 & 4472751.26 & 0.00 & $\infty$ \\ 
+  $\alpha = 100,$ $\beta =1$ & 1610827.18 & 3342137.70 & 0.00 & $\infty$ & 55104.82 & 171942.01 & 0.00 & $\infty$ & 1691.16 & 3160.57 & 0.00 & $\infty$ \\ 
+  $\alpha = 100,$ $\beta =2$ & 6945649.64 & 6844592.19 & 0.00 & $\infty$ & 1001725.17 & 1774982.73 & 0.00 & $\infty$ & 150478.59 & 213009.16 & 0.00 & $\infty$ \\ 
+  $\alpha = 100,$ $\beta =4$ & 21536033.79 & 15337048.80 & 0.00 & $\infty$ & 6691579.83 & 5932202.88 & 0.00 & $\infty$ & 4328277.03 & 4060546.38 & 0.00 & $\infty$ \\ 
+  $\alpha = 200,$ $\beta =1$ & 1543367.07 & 2077471.63 & 0.00 & $\infty$ & 4350.55 & 16257.10 & 0.00 & $\infty$ & 266.44 & 453.75 & 0.00 & $\infty$ \\ 
+  $\alpha = 200,$ $\beta =2$ & 6626917.67 & 9093854.31 & 0.00 & $\infty$ & 299834.83 & 1040979.02 & 0.00 & $\infty$ & 5848.88 & 14329.18 & 0.00 & $\infty$ \\ 
+  $\alpha = 200,$ $\beta =4$ & 17830796.63 & 14245007.26 & 0.00 & $\infty$ & 3367710.63 & 3194612.95 & 0.00 & $\infty$ & 776424.69 & 865443.75 & 0.00 & $\infty$ \\ 
 \hline
 \multicolumn{1}{l|}{AT-PSO} &&&&&&&&&&&&\\
-  $R^* = 0.1$ & 5135.53 & 14617.98 & 0.00 & $\infty$ & 446469.66 & 2260240.37 & 0.00 & $\infty$ & 34766227.37 & 32913538.16 & 0.00 & $\infty$ \\ 
-  $R^* = 0.3$ & 1577.07 & 4053.03 & 0.00 & $\infty$ & 176.34 & 324.07 & 0.00 & $\infty$ & 168.65 & 155.33 & 0.00 & $\infty$ \\ 
-  $R^* = 0.5$ & 19154.96 & 47380.82 & 0.00 & $\infty$ & 315.71 & 711.01 & 0.00 & $\infty$ & 110.71 & 98.15 & 0.00 & $\infty$ \\ 
-  $R^* = 0.7$ & 1297015.56 & 3307403.64 & 0.00 & $\infty$ & 395.90 & 933.41 & 0.00 & $\infty$ & 239.90 & 394.68 & 0.00 & $\infty$ \\ 
+  $R^* = 0.1$ & 5779.95 & 14928.86 & 0.00 & $\infty$ & 297272.41 & 1261108.56 & 0.00 & $\infty$ & 33785179.04 & 23020834.78 & 0.00 & $\infty$ \\ 
+  $R^* = 0.3$ & 869.69 & 2100.98 & 0.00 & $\infty$ & 131.15 & 175.33 & 0.00 & $\infty$ & 184.15 & 186.17 & 0.00 & $\infty$ \\ 
+  $R^* = 0.5$ & 71363.37 & 218211.42 & 0.00 & $\infty$ & 190.13 & 271.20 & 0.00 & $\infty$ & 134.32 & 200.92 & 0.00 & $\infty$ \\ 
+  $R^* = 0.7$ & 1572669.78 & 3884482.27 & 0.00 & $\infty$ & 391.10 & 857.02 & 0.00 & $\infty$ & 535.09 & 1277.83 & 0.00 & $\infty$ \\ 
    \hline
 \end{tabular}
 }
@@ -577,7 +578,7 @@ Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}
 \label{tab:psosim3}
 \end{table}
 % latex table generated in R 3.3.1 by xtable 1.8-2 package
-% Mon Aug 15 15:24:52 2016
+% Sun Aug 21 22:17:27 2016
 \begin{table}[ht]
 \centering
 \tiny{
@@ -586,62 +587,62 @@ Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}
   \hline
 Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}$ & $\widehat{t}$ \\ 
   \hline
-\multicolumn{1}{l|}{PSO} & 26.31 & 11.97 & 0.00 & $\infty$ & 4.45 & 2.63 & 0.02 & $\infty$ & 3.17 & 1.81 & 0.00 & $\infty$ \\ 
-  \multicolumn{1}{l|}{BBPSO-MC} & 151.12 & 10.61 & 0.00 & $\infty$ & 144.75 & 15.12 & 0.00 & $\infty$ & 124.80 & 14.36 & 0.00 & $\infty$ \\ 
-  \multicolumn{1}{l|}{BBPSOxp-MC} & 165.73 & 5.44 & 0.00 & $\infty$ & 159.62 & 8.67 & 0.00 & $\infty$ & 132.89 & 13.23 & 0.00 & $\infty$ \\ 
+\multicolumn{1}{l|}{PSO} & 29.94 & 15.21 & 0.00 & $\infty$ & 5.37 & 3.47 & 0.02 & $\infty$ & 3.24 & 1.44 & 0.00 & $\infty$ \\ 
+  \multicolumn{1}{l|}{BBPSO-MC} & 237.31 & 18.67 & 0.00 & $\infty$ & 232.86 & 24.40 & 0.00 & $\infty$ & 232.69 & 21.86 & 0.00 & $\infty$ \\ 
+  \multicolumn{1}{l|}{BBPSOxp-MC} & 229.80 & 22.24 & 0.00 & $\infty$ & 236.60 & 25.20 & 0.00 & $\infty$ & 230.84 & 21.05 & 0.00 & $\infty$ \\ 
 \hline
 \multicolumn{1}{l|}{AT-BBPSO-MC} &&&&&&&&&&&&\\
-  $df = 1,\enspace$ $R^* =0.1$ & 5.11 & 2.09 & 0.00 & $\infty$ & 4.13 & 1.43 & 0.00 & $\infty$ & 3.82 & 1.43 & 0.00 & $\infty$ \\ 
-  $df = 1,\enspace$ $R^* =0.3$ & 4.87 & 1.98 & 0.02 & $\infty$ & 3.05 & 1.54 & 0.02 & $\infty$ & 2.88 & 1.66 & 0.06 & $\infty$ \\ 
-  $df = 1,\enspace$ $R^* =0.5$ & 6.74 & 1.77 & 0.00 & $\infty$ & 4.62 & 2.09 & 0.00 & $\infty$ & 3.96 & 1.84 & 0.00 & $\infty$ \\ 
-  $df = 1,\enspace$ $R^* =0.7$ & 8.20 & 2.12 & 0.00 & $\infty$ & 7.04 & 2.17 & 0.00 & $\infty$ & 5.75 & 1.94 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.1$ & 5.58 & 1.31 & 0.00 & $\infty$ & 5.60 & 1.33 & 0.00 & $\infty$ & 5.77 & 1.80 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.3$ & 3.24 & 1.93 & 0.08 & $\infty$ & 1.41 & 0.97 & 0.16 & $\infty$ & 1.15 & 0.94 & 0.24 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.5$ & 4.30 & 1.80 & 0.00 & $\infty$ & 2.49 & 1.56 & 0.06 & $\infty$ & 2.38 & 1.23 & 0.06 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.7$ & 5.18 & 2.00 & 0.00 & $\infty$ & 3.41 & 1.44 & 0.00 & $\infty$ & 3.84 & 1.82 & 0.02 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.1$ & 6.30 & 1.42 & 0.00 & $\infty$ & 6.44 & 1.59 & 0.00 & $\infty$ & 6.60 & 1.63 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.3$ & 2.63 & 1.46 & 0.04 & $\infty$ & 1.51 & 1.14 & 0.18 & $\infty$ & 1.07 & 1.05 & 0.20 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.5$ & 3.60 & 2.01 & 0.04 & $\infty$ & 2.13 & 1.28 & 0.08 & $\infty$ & 1.77 & 1.22 & 0.14 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.7$ & 4.36 & 1.40 & 0.00 & $\infty$ & 3.01 & 1.58 & 0.02 & $\infty$ & 3.10 & 1.47 & 0.02 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.1$ & 9.32 & 1.28 & 0.00 & $\infty$ & 9.44 & 1.44 & 0.00 & $\infty$ & 9.11 & 1.73 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.3$ & 1.54 & 1.02 & 0.00 & $\infty$ & 0.86 & 1.08 & 0.00 & $\infty$ & 0.68 & 0.86 & 0.02 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.5$ & 2.68 & 1.60 & 0.10 & $\infty$ & 1.41 & 1.07 & 0.16 & $\infty$ & 1.39 & 1.11 & 0.20 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.7$ & 3.23 & 1.87 & 0.04 & $\infty$ & 1.88 & 1.51 & 0.18 & $\infty$ & 1.69 & 1.31 & 0.24 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.1$ & 4.96 & 1.58 & 0.00 & $\infty$ & 3.93 & 1.29 & 0.00 & $\infty$ & 4.07 & 1.88 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.3$ & 5.14 & 1.89 & 0.00 & $\infty$ & 2.76 & 1.45 & 0.06 & $\infty$ & 2.48 & 1.57 & 0.06 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.5$ & 6.32 & 2.16 & 0.00 & $\infty$ & 4.68 & 1.94 & 0.00 & $\infty$ & 4.24 & 2.36 & 0.02 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.7$ & 8.56 & 2.84 & 0.00 & $\infty$ & 5.78 & 1.67 & 0.00 & $\infty$ & 6.03 & 2.01 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.1$ & 5.44 & 1.30 & 0.00 & $\infty$ & 5.40 & 1.17 & 0.00 & $\infty$ & 5.39 & 1.54 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.3$ & 3.56 & 1.76 & 0.00 & $\infty$ & 1.59 & 1.24 & 0.20 & $\infty$ & 1.43 & 1.00 & 0.18 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.5$ & 4.07 & 1.85 & 0.00 & $\infty$ & 2.70 & 1.57 & 0.08 & $\infty$ & 2.57 & 1.44 & 0.02 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.7$ & 4.70 & 1.73 & 0.00 & $\infty$ & 3.83 & 1.72 & 0.00 & $\infty$ & 3.43 & 1.75 & 0.06 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.1$ & 6.63 & 1.34 & 0.00 & $\infty$ & 6.45 & 1.92 & 0.00 & $\infty$ & 6.72 & 1.86 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.3$ & 2.80 & 1.51 & 0.02 & $\infty$ & 1.24 & 1.12 & 0.24 & $\infty$ & 1.13 & 1.21 & 0.30 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.5$ & 4.11 & 2.16 & 0.02 & $\infty$ & 2.26 & 1.60 & 0.12 & $\infty$ & 1.90 & 1.43 & 0.16 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.7$ & 4.40 & 2.00 & 0.00 & $\infty$ & 2.91 & 1.48 & 0.00 & $\infty$ & 3.56 & 1.84 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.1$ & 9.12 & 1.88 & 0.00 & $\infty$ & 9.17 & 1.58 & 0.00 & $\infty$ & 9.42 & 1.70 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.3$ & 2.15 & 1.31 & 0.00 & $\infty$ & 0.72 & 0.92 & 0.00 & $\infty$ & 0.61 & 0.74 & 0.04 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.5$ & 2.74 & 1.55 & 0.04 & $\infty$ & 1.62 & 1.38 & 0.18 & $\infty$ & 1.01 & 0.91 & 0.26 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.7$ & 3.22 & 1.78 & 0.06 & $\infty$ & 2.11 & 1.56 & 0.18 & $\infty$ & 2.13 & 1.30 & 0.10 & $\infty$ \\ 
 \hline
 \multicolumn{1}{l|}{AT-BBPSOxp-MC} &&&&&&&&&&&&\\
-  $df = 1,\enspace$ $R^* =0.1$ & 3.25 & 1.09 & 0.00 & $\infty$ & 2.05 & 0.79 & 0.00 & $\infty$ & 0.57 & 0.41 & 0.00 & $\infty$ \\ 
-  $df = 1,\enspace$ $R^* =0.3$ & 0.66 & 0.76 & 0.26 & $\infty$ & 0.26 & 0.46 & 0.62 & 490.50 & 0.59 & 0.72 & 0.54 & 445.00 \\ 
-  $df = 1,\enspace$ $R^* =0.5$ & 1.43 & 0.98 & 0.20 & $\infty$ & 1.20 & 1.10 & 0.32 & $\infty$ & 1.47 & 1.25 & 0.22 & $\infty$ \\ 
-  $df = 1,\enspace$ $R^* =0.7$ & 2.78 & 1.75 & 0.08 & $\infty$ & 2.45 & 1.45 & 0.06 & $\infty$ & 2.58 & 1.56 & 0.06 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.1$ & 4.33 & 1.11 & 0.00 & $\infty$ & 3.33 & 1.04 & 0.00 & $\infty$ & 0.80 & 0.53 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.3$ & 0.22 & 0.44 & 0.02 & $\infty$ & 0.12 & 0.31 & 0.38 & $\infty$ & 0.31 & 0.49 & 0.70 & 458.50 \\ 
-  $df = 3,\enspace$ $R^* =0.5$ & 0.51 & 0.72 & 0.60 & 335.50 & 0.51 & 0.93 & 0.64 & 327.50 & 0.84 & 0.99 & 0.48 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.7$ & 1.24 & 0.95 & 0.22 & $\infty$ & 1.18 & 0.99 & 0.24 & $\infty$ & 1.58 & 1.21 & 0.20 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.1$ & 5.12 & 1.04 & 0.00 & $\infty$ & 4.14 & 1.26 & 0.00 & $\infty$ & 0.91 & 0.62 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.3$ & 0.17 & 0.35 & 0.00 & $\infty$ & 0.05 & 0.19 & 0.24 & $\infty$ & 0.27 & 0.43 & 0.72 & 458.00 \\ 
-  $df = 5,\enspace$ $R^* =0.5$ & 0.34 & 0.57 & 0.70 & 334.00 & 0.30 & 0.49 & 0.70 & 327.50 & 0.74 & 0.82 & 0.46 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.7$ & 1.10 & 0.99 & 0.34 & $\infty$ & 0.89 & 0.95 & 0.40 & $\infty$ & 1.94 & 1.57 & 0.14 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.1$ & 6.79 & 1.32 & 0.00 & $\infty$ & 5.75 & 1.36 & 0.00 & $\infty$ & 1.29 & 0.60 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.3$ & 0.03 & 0.01 & 0.00 & $\infty$ & 0.08 & 0.23 & 0.00 & $\infty$ & 0.20 & 0.38 & 0.78 & 470.50 \\ 
-  $df = \infty,$ $R^* =0.5$ & 0.25 & 0.46 & 0.76 & 340.50 & 0.21 & 0.40 & 0.78 & 334.00 & 0.63 & 0.76 & 0.52 & 323.00 \\ 
-  $df = \infty,$ $R^* =0.7$ & 0.71 & 0.83 & 0.46 & $\infty$ & 0.95 & 1.02 & 0.42 & $\infty$ & 1.50 & 1.11 & 0.22 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.1$ & 4.25 & 1.24 & 0.00 & $\infty$ & 4.70 & 1.25 & 0.00 & $\infty$ & 6.34 & 1.56 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.3$ & 0.74 & 0.87 & 0.04 & $\infty$ & 0.23 & 0.44 & 0.02 & $\infty$ & 0.51 & 0.74 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.5$ & 1.75 & 1.24 & 0.12 & $\infty$ & 0.95 & 1.00 & 0.38 & $\infty$ & 1.41 & 1.16 & 0.18 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.7$ & 3.07 & 1.65 & 0.02 & $\infty$ & 2.14 & 1.20 & 0.06 & $\infty$ & 3.10 & 1.62 & 0.02 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.1$ & 5.34 & 1.01 & 0.00 & $\infty$ & 6.29 & 1.31 & 0.00 & $\infty$ & 7.39 & 1.59 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.3$ & 0.25 & 0.45 & 0.00 & $\infty$ & 0.08 & 0.23 & 0.00 & $\infty$ & 0.19 & 0.41 & 0.02 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.5$ & 0.65 & 0.78 & 0.52 & 345.50 & 0.30 & 0.52 & 0.72 & 342.00 & 0.56 & 0.66 & 0.46 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.7$ & 1.43 & 1.21 & 0.22 & $\infty$ & 1.24 & 1.02 & 0.24 & $\infty$ & 1.85 & 1.12 & 0.08 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.1$ & 6.02 & 1.08 & 0.00 & $\infty$ & 6.50 & 1.08 & 0.00 & $\infty$ & 7.94 & 1.31 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.3$ & 0.10 & 0.26 & 0.00 & $\infty$ & 0.08 & 0.23 & 0.00 & $\infty$ & 0.10 & 0.33 & 0.02 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.5$ & 0.40 & 0.61 & 0.66 & 338.00 & 0.25 & 0.42 & 0.74 & 338.50 & 0.46 & 0.70 & 0.64 & 367.00 \\ 
+  $df = 5,\enspace$ $R^* =0.7$ & 1.13 & 1.01 & 0.28 & $\infty$ & 0.75 & 0.85 & 0.44 & $\infty$ & 1.74 & 1.10 & 0.04 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.1$ & 7.81 & 1.19 & 0.00 & $\infty$ & 8.10 & 1.36 & 0.00 & $\infty$ & 9.02 & 1.36 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.3$ & 0.09 & 0.23 & 0.00 & $\infty$ & 0.03 & 0.01 & 0.00 & $\infty$ & 0.05 & 0.13 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.5$ & 0.25 & 0.57 & 0.80 & 346.00 & 0.13 & 0.33 & 0.86 & 345.00 & 0.17 & 0.42 & 0.84 & 352.50 \\ 
+  $df = \infty,$ $R^* =0.7$ & 0.90 & 0.89 & 0.36 & $\infty$ & 0.77 & 0.92 & 0.46 & $\infty$ & 2.66 & 1.39 & 0.00 & $\infty$ \\ 
 \hline
 \multicolumn{1}{l|}{DI-PSO} &&&&&&&&&&&&\\
-  $\alpha = 50,\enspace$ $\beta =1$ & 32.00 & 14.44 & 0.00 & $\infty$ & 12.58 & 5.43 & 0.00 & $\infty$ & 6.46 & 3.78 & 0.00 & $\infty$ \\ 
-  $\alpha = 50,\enspace$ $\beta =2$ & 35.82 & 12.86 & 0.00 & $\infty$ & 18.69 & 7.41 & 0.00 & $\infty$ & 9.51 & 4.88 & 0.00 & $\infty$ \\ 
-  $\alpha = 50,\enspace$ $\beta =4$ & 54.12 & 18.93 & 0.00 & $\infty$ & 28.25 & 10.10 & 0.00 & $\infty$ & 15.24 & 5.62 & 0.00 & $\infty$ \\ 
-  $\alpha = 100,$ $\beta =1$ & 23.66 & 12.32 & 0.00 & $\infty$ & 11.01 & 6.22 & 0.00 & $\infty$ & 4.88 & 2.75 & 0.00 & $\infty$ \\ 
-  $\alpha = 100,$ $\beta =2$ & 32.56 & 13.79 & 0.00 & $\infty$ & 13.56 & 5.63 & 0.00 & $\infty$ & 7.34 & 4.10 & 0.00 & $\infty$ \\ 
-  $\alpha = 100,$ $\beta =4$ & 52.63 & 21.66 & 0.00 & $\infty$ & 24.35 & 9.50 & 0.00 & $\infty$ & 13.91 & 5.97 & 0.00 & $\infty$ \\ 
-  $\alpha = 200,$ $\beta =1$ & 19.10 & 6.98 & 0.00 & $\infty$ & 8.20 & 4.44 & 0.00 & $\infty$ & 4.53 & 2.38 & 0.00 & $\infty$ \\ 
-  $\alpha = 200,$ $\beta =2$ & 36.31 & 12.85 & 0.00 & $\infty$ & 11.45 & 5.21 & 0.00 & $\infty$ & 5.46 & 2.87 & 0.00 & $\infty$ \\ 
-  $\alpha = 200,$ $\beta =4$ & 51.61 & 20.50 & 0.00 & $\infty$ & 20.01 & 7.50 & 0.00 & $\infty$ & 10.15 & 3.55 & 0.00 & $\infty$ \\ 
+  $\alpha = 50,\enspace$ $\beta =1$ & 32.08 & 11.51 & 0.00 & $\infty$ & 13.04 & 5.65 & 0.00 & $\infty$ & 6.33 & 3.37 & 0.00 & $\infty$ \\ 
+  $\alpha = 50,\enspace$ $\beta =2$ & 38.18 & 17.28 & 0.00 & $\infty$ & 15.90 & 5.67 & 0.00 & $\infty$ & 10.13 & 4.19 & 0.00 & $\infty$ \\ 
+  $\alpha = 50,\enspace$ $\beta =4$ & 56.49 & 22.89 & 0.00 & $\infty$ & 28.28 & 11.13 & 0.00 & $\infty$ & 15.83 & 7.08 & 0.00 & $\infty$ \\ 
+  $\alpha = 100,$ $\beta =1$ & 28.51 & 12.71 & 0.00 & $\infty$ & 11.32 & 5.72 & 0.00 & $\infty$ & 4.66 & 2.48 & 0.00 & $\infty$ \\ 
+  $\alpha = 100,$ $\beta =2$ & 32.85 & 13.96 & 0.00 & $\infty$ & 14.35 & 7.57 & 0.00 & $\infty$ & 6.86 & 2.78 & 0.00 & $\infty$ \\ 
+  $\alpha = 100,$ $\beta =4$ & 49.67 & 16.91 & 0.00 & $\infty$ & 24.47 & 9.82 & 0.00 & $\infty$ & 13.74 & 6.18 & 0.00 & $\infty$ \\ 
+  $\alpha = 200,$ $\beta =1$ & 22.39 & 12.14 & 0.00 & $\infty$ & 7.53 & 4.31 & 0.00 & $\infty$ & 3.92 & 2.11 & 0.02 & $\infty$ \\ 
+  $\alpha = 200,$ $\beta =2$ & 36.56 & 14.29 & 0.00 & $\infty$ & 11.21 & 5.42 & 0.00 & $\infty$ & 5.28 & 2.77 & 0.00 & $\infty$ \\ 
+  $\alpha = 200,$ $\beta =4$ & 55.67 & 19.91 & 0.00 & $\infty$ & 19.67 & 8.61 & 0.00 & $\infty$ & 11.18 & 5.41 & 0.00 & $\infty$ \\ 
 \hline
 \multicolumn{1}{l|}{AT-PSO} &&&&&&&&&&&&\\
-  $R^* = 0.1$ & 7.78 & 3.44 & 0.00 & $\infty$ & 5.20 & 2.00 & 0.00 & $\infty$ & 23.42 & 13.89 & 0.00 & $\infty$ \\ 
-  $R^* = 0.3$ & 15.00 & 6.19 & 0.00 & $\infty$ & 7.59 & 3.13 & 0.00 & $\infty$ & 4.11 & 2.31 & 0.00 & $\infty$ \\ 
-  $R^* = 0.5$ & 22.59 & 8.87 & 0.00 & $\infty$ & 11.60 & 5.14 & 0.00 & $\infty$ & 6.01 & 2.99 & 0.00 & $\infty$ \\ 
-  $R^* = 0.7$ & 35.35 & 14.56 & 0.00 & $\infty$ & 15.32 & 4.51 & 0.00 & $\infty$ & 9.60 & 4.15 & 0.00 & $\infty$ \\ 
+  $R^* = 0.1$ & 7.73 & 5.50 & 0.00 & $\infty$ & 5.72 & 1.90 & 0.00 & $\infty$ & 23.02 & 10.87 & 0.00 & $\infty$ \\ 
+  $R^* = 0.3$ & 14.10 & 6.74 & 0.00 & $\infty$ & 6.67 & 3.74 & 0.00 & $\infty$ & 3.77 & 2.04 & 0.02 & $\infty$ \\ 
+  $R^* = 0.5$ & 23.89 & 8.43 & 0.00 & $\infty$ & 11.39 & 5.91 & 0.00 & $\infty$ & 6.06 & 2.92 & 0.00 & $\infty$ \\ 
+  $R^* = 0.7$ & 34.91 & 12.20 & 0.00 & $\infty$ & 14.91 & 5.84 & 0.00 & $\infty$ & 9.80 & 3.78 & 0.00 & $\infty$ \\ 
    \hline
 \end{tabular}
 }
@@ -649,7 +650,7 @@ Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}
 \label{tab:psosim4}
 \end{table}
 % latex table generated in R 3.3.1 by xtable 1.8-2 package
-% Mon Aug 15 15:24:52 2016
+% Sun Aug 21 22:17:27 2016
 \begin{table}[ht]
 \centering
 \tiny{
@@ -658,62 +659,62 @@ Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}
   \hline
 Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}$ & $\widehat{t}$ \\ 
   \hline
-\multicolumn{1}{l|}{PSO} & 28.03 & 26.04 & 0.00 & $\infty$ & 0.04 & 0.05 & 0.24 & $\infty$ & 0.10 & 0.09 & 0.00 & $\infty$ \\ 
-  \multicolumn{1}{l|}{BBPSO-MC} & 874.83 & 38.75 & 0.00 & $\infty$ & 871.43 & 40.28 & 0.00 & $\infty$ & 841.29 & 53.32 & 0.00 & $\infty$ \\ 
-  \multicolumn{1}{l|}{BBPSOxp-MC} & 777.25 & 29.42 & 0.00 & $\infty$ & 723.32 & 36.24 & 0.00 & $\infty$ & 580.79 & 51.18 & 0.00 & $\infty$ \\ 
+\multicolumn{1}{l|}{PSO} & 27.55 & 20.12 & 0.00 & $\infty$ & 0.03 & 0.03 & 0.28 & $\infty$ & 0.08 & 0.07 & 0.04 & $\infty$ \\ 
+  \multicolumn{1}{l|}{BBPSO-MC} & 762.36 & 82.36 & 0.00 & $\infty$ & 785.33 & 69.84 & 0.00 & $\infty$ & 751.88 & 80.37 & 0.00 & $\infty$ \\ 
+  \multicolumn{1}{l|}{BBPSOxp-MC} & 766.30 & 80.16 & 0.00 & $\infty$ & 785.43 & 64.92 & 0.00 & $\infty$ & 771.17 & 76.11 & 0.00 & $\infty$ \\ 
 \hline
 \multicolumn{1}{l|}{AT-BBPSO-MC} &&&&&&&&&&&&\\
-  $df = 1,\enspace$ $R^* =0.1$ & 0.86 & 0.09 & 0.00 & $\infty$ & 0.90 & 0.07 & 0.00 & $\infty$ & 0.91 & 0.06 & 0.00 & $\infty$ \\ 
-  $df = 1,\enspace$ $R^* =0.3$ & 0.02 & 0.01 & 0.34 & $\infty$ & 0.02 & 0.01 & 0.38 & $\infty$ & 0.03 & 0.02 & 0.00 & $\infty$ \\ 
-  $df = 1,\enspace$ $R^* =0.5$ & 0.01 & 0.01 & 0.54 & 432.50 & 0.01 & 0.01 & 0.56 & 457.00 & 0.01 & 0.01 & 0.54 & 464.50 \\ 
-  $df = 1,\enspace$ $R^* =0.7$ & 0.02 & 0.02 & 0.44 & $\infty$ & 0.01 & 0.02 & 0.60 & 413.50 & 0.04 & 0.05 & 0.10 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.1$ & 1.06 & 0.02 & 0.00 & $\infty$ & 1.06 & 0.02 & 0.00 & $\infty$ & 1.04 & 0.02 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.3$ & 0.08 & 0.03 & 0.00 & $\infty$ & 0.12 & 0.04 & 0.00 & $\infty$ & 0.31 & 0.13 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.5$ & 0.01 & 0.01 & 0.52 & 461.00 & 0.01 & 0.01 & 0.72 & 467.50 & 0.10 & 0.09 & 0.02 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.7$ & 0.02 & 0.01 & 0.44 & $\infty$ & 0.09 & 0.12 & 0.08 & $\infty$ & 225.75 & 51.35 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.1$ & 1.11 & 0.03 & 0.00 & $\infty$ & 1.11 & 0.03 & 0.00 & $\infty$ & 1.08 & 0.03 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.3$ & 0.17 & 0.05 & 0.00 & $\infty$ & 0.30 & 0.11 & 0.00 & $\infty$ & 0.64 & 0.14 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.5$ & 0.02 & 0.01 & 0.34 & $\infty$ & 0.02 & 0.01 & 0.22 & $\infty$ & 0.73 & 0.20 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.7$ & 0.02 & 0.01 & 0.30 & $\infty$ & 31.72 & 19.26 & 0.00 & $\infty$ & 476.26 & 46.12 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.1$ & 1.46 & 0.10 & 0.00 & $\infty$ & 1.47 & 0.13 & 0.00 & $\infty$ & 1.22 & 0.07 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.3$ & 0.68 & 0.13 & 0.00 & $\infty$ & 0.84 & 0.09 & 0.00 & $\infty$ & 0.97 & 0.05 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.5$ & 0.04 & 0.01 & 0.00 & $\infty$ & 0.25 & 0.11 & 0.00 & $\infty$ & 6.49 & 6.73 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.7$ & 0.88 & 0.18 & 0.00 & $\infty$ & 377.73 & 43.53 & 0.00 & $\infty$ & 655.88 & 49.74 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.1$ & 0.83 & 0.10 & 0.00 & $\infty$ & 0.88 & 0.09 & 0.00 & $\infty$ & 0.92 & 0.06 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.3$ & 0.02 & 0.01 & 0.24 & $\infty$ & 0.02 & 0.01 & 0.34 & $\infty$ & 0.05 & 0.03 & 0.02 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.5$ & 0.01 & 0.01 & 0.52 & 455.50 & 0.01 & 0.01 & 0.56 & 455.00 & 0.01 & 0.01 & 0.48 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.7$ & 0.02 & 0.01 & 0.36 & $\infty$ & 0.02 & 0.02 & 0.46 & $\infty$ & 0.04 & 0.04 & 0.16 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.1$ & 1.06 & 0.02 & 0.00 & $\infty$ & 1.05 & 0.02 & 0.00 & $\infty$ & 1.04 & 0.02 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.3$ & 0.08 & 0.03 & 0.00 & $\infty$ & 0.12 & 0.04 & 0.00 & $\infty$ & 0.32 & 0.15 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.5$ & 0.01 & 0.01 & 0.54 & 459.00 & 0.01 & 0.01 & 0.62 & 481.00 & 0.09 & 0.07 & 0.02 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.7$ & 0.01 & 0.01 & 0.46 & $\infty$ & 0.12 & 0.15 & 0.04 & $\infty$ & 205.76 & 57.74 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.1$ & 1.11 & 0.03 & 0.00 & $\infty$ & 1.11 & 0.03 & 0.00 & $\infty$ & 1.09 & 0.03 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.3$ & 0.18 & 0.05 & 0.00 & $\infty$ & 0.29 & 0.09 & 0.00 & $\infty$ & 0.66 & 0.15 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.5$ & 0.02 & 0.01 & 0.32 & $\infty$ & 0.02 & 0.01 & 0.26 & $\infty$ & 0.69 & 0.21 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.7$ & 0.01 & 0.01 & 0.32 & $\infty$ & 39.11 & 26.34 & 0.00 & $\infty$ & 480.85 & 48.89 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.1$ & 1.47 & 0.11 & 0.00 & $\infty$ & 1.45 & 0.09 & 0.00 & $\infty$ & 1.25 & 0.08 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.3$ & 0.69 & 0.11 & 0.00 & $\infty$ & 0.85 & 0.07 & 0.00 & $\infty$ & 0.97 & 0.05 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.5$ & 0.04 & 0.02 & 0.00 & $\infty$ & 0.26 & 0.09 & 0.00 & $\infty$ & 9.61 & 10.88 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.7$ & 0.82 & 0.19 & 0.00 & $\infty$ & 395.75 & 42.10 & 0.00 & $\infty$ & 638.33 & 59.56 & 0.00 & $\infty$ \\ 
 \hline
 \multicolumn{1}{l|}{AT-BBPSOxp-MC} &&&&&&&&&&&&\\
-  $df = 1,\enspace$ $R^* =0.1$ & 0.98 & 0.04 & 0.00 & $\infty$ & 0.89 & 0.10 & 0.00 & $\infty$ & 0.48 & 0.18 & 0.00 & $\infty$ \\ 
-  $df = 1,\enspace$ $R^* =0.3$ & 0.05 & 0.02 & 0.00 & $\infty$ & 0.06 & 0.03 & 0.00 & $\infty$ & 0.02 & 0.02 & 0.22 & $\infty$ \\ 
-  $df = 1,\enspace$ $R^* =0.5$ & 0.01 & 0.01 & 0.74 & 419.50 & 0.01 & 0.01 & 0.66 & 438.50 & 0.01 & 0.01 & 0.52 & 482.50 \\ 
-  $df = 1,\enspace$ $R^* =0.7$ & 0.02 & 0.03 & 0.58 & 439.50 & 0.02 & 0.02 & 0.60 & 437.50 & 0.02 & 0.02 & 0.48 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.1$ & 1.10 & 0.03 & 0.00 & $\infty$ & 1.06 & 0.02 & 0.00 & $\infty$ & 0.93 & 0.09 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.3$ & 0.47 & 0.10 & 0.00 & $\infty$ & 0.47 & 0.12 & 0.00 & $\infty$ & 0.17 & 0.07 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.5$ & 0.04 & 0.03 & 0.00 & $\infty$ & 0.07 & 0.05 & 0.02 & $\infty$ & 0.04 & 0.03 & 0.02 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.7$ & 1.57 & 1.96 & 0.00 & $\infty$ & 74.80 & 39.86 & 0.00 & $\infty$ & 95.06 & 41.38 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.1$ & 1.19 & 0.06 & 0.00 & $\infty$ & 1.10 & 0.03 & 0.00 & $\infty$ & 1.00 & 0.05 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.3$ & 0.70 & 0.10 & 0.00 & $\infty$ & 0.71 & 0.11 & 0.00 & $\infty$ & 0.28 & 0.12 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.5$ & 0.14 & 0.07 & 0.00 & $\infty$ & 0.34 & 0.15 & 0.00 & $\infty$ & 0.22 & 0.13 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.7$ & 116.60 & 42.47 & 0.00 & $\infty$ & 306.40 & 53.78 & 0.00 & $\infty$ & 261.33 & 43.65 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.1$ & 1.49 & 0.12 & 0.00 & $\infty$ & 1.26 & 0.09 & 0.00 & $\infty$ & 1.05 & 0.03 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.3$ & 0.96 & 0.06 & 0.00 & $\infty$ & 0.93 & 0.07 & 0.00 & $\infty$ & 0.64 & 0.11 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.5$ & 0.73 & 0.12 & 0.00 & $\infty$ & 0.95 & 0.07 & 0.00 & $\infty$ & 0.89 & 0.15 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.7$ & 395.68 & 33.71 & 0.00 & $\infty$ & 504.84 & 39.71 & 0.00 & $\infty$ & 389.26 & 40.73 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.1$ & 1.01 & 0.02 & 0.00 & $\infty$ & 1.01 & 0.02 & 0.00 & $\infty$ & 1.00 & 0.03 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.3$ & 0.07 & 0.04 & 0.00 & $\infty$ & 0.13 & 0.06 & 0.00 & $\infty$ & 0.25 & 0.13 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.5$ & 0.01 & 0.01 & 0.54 & 465.50 & 0.01 & 0.01 & 0.44 & $\infty$ & 0.06 & 0.08 & 0.06 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.7$ & 0.02 & 0.02 & 0.46 & $\infty$ & 0.02 & 0.03 & 0.46 & $\infty$ & 1.20 & 0.54 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.1$ & 1.17 & 0.04 & 0.00 & $\infty$ & 1.16 & 0.04 & 0.00 & $\infty$ & 1.09 & 0.03 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.3$ & 0.56 & 0.12 & 0.00 & $\infty$ & 0.73 & 0.08 & 0.00 & $\infty$ & 0.87 & 0.09 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.5$ & 0.04 & 0.02 & 0.00 & $\infty$ & 0.33 & 0.14 & 0.00 & $\infty$ & 5.84 & 7.01 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.7$ & 7.20 & 9.68 & 0.00 & $\infty$ & 295.56 & 44.31 & 0.00 & $\infty$ & 439.15 & 53.40 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.1$ & 1.26 & 0.06 & 0.00 & $\infty$ & 1.30 & 0.06 & 0.00 & $\infty$ & 1.16 & 0.06 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.3$ & 0.80 & 0.08 & 0.00 & $\infty$ & 0.92 & 0.05 & 0.00 & $\infty$ & 1.00 & 0.02 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.5$ & 0.22 & 0.10 & 0.00 & $\infty$ & 0.93 & 0.09 & 0.00 & $\infty$ & 72.53 & 27.81 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.7$ & 172.86 & 53.14 & 0.00 & $\infty$ & 491.44 & 39.13 & 0.00 & $\infty$ & 527.93 & 56.57 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.1$ & 1.71 & 0.13 & 0.00 & $\infty$ & 1.70 & 0.17 & 0.00 & $\infty$ & 1.34 & 0.14 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.3$ & 0.99 & 0.04 & 0.00 & $\infty$ & 1.03 & 0.01 & 0.00 & $\infty$ & 1.06 & 0.03 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.5$ & 0.82 & 0.12 & 0.00 & $\infty$ & 2.65 & 1.75 & 0.00 & $\infty$ & 255.87 & 50.83 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.7$ & 451.87 & 38.28 & 0.00 & $\infty$ & 622.22 & 35.60 & 0.00 & $\infty$ & 586.09 & 47.80 & 0.00 & $\infty$ \\ 
 \hline
 \multicolumn{1}{l|}{DI-PSO} &&&&&&&&&&&&\\
-  $\alpha = 50,\enspace$ $\beta =1$ & 60.30 & 38.12 & 0.00 & $\infty$ & 7.26 & 10.66 & 0.00 & $\infty$ & 1.14 & 0.61 & 0.00 & $\infty$ \\ 
-  $\alpha = 50,\enspace$ $\beta =2$ & 66.12 & 33.41 & 0.00 & $\infty$ & 21.06 & 15.97 & 0.00 & $\infty$ & 6.18 & 4.13 & 0.00 & $\infty$ \\ 
-  $\alpha = 50,\enspace$ $\beta =4$ & 127.46 & 57.77 & 0.00 & $\infty$ & 56.24 & 25.74 & 0.00 & $\infty$ & 24.65 & 13.98 & 0.00 & $\infty$ \\ 
-  $\alpha = 100,$ $\beta =1$ & 28.60 & 21.21 & 0.00 & $\infty$ & 1.62 & 1.71 & 0.00 & $\infty$ & 0.27 & 0.24 & 0.00 & $\infty$ \\ 
-  $\alpha = 100,$ $\beta =2$ & 73.41 & 67.24 & 0.00 & $\infty$ & 7.98 & 8.39 & 0.00 & $\infty$ & 1.90 & 1.34 & 0.00 & $\infty$ \\ 
-  $\alpha = 100,$ $\beta =4$ & 129.76 & 51.11 & 0.00 & $\infty$ & 36.80 & 25.83 & 0.00 & $\infty$ & 14.49 & 11.96 & 0.00 & $\infty$ \\ 
-  $\alpha = 200,$ $\beta =1$ & 25.75 & 23.08 & 0.00 & $\infty$ & 0.91 & 2.29 & 0.00 & $\infty$ & 0.06 & 0.07 & 0.28 & $\infty$ \\ 
-  $\alpha = 200,$ $\beta =2$ & 72.48 & 45.02 & 0.00 & $\infty$ & 4.38 & 6.49 & 0.00 & $\infty$ & 0.66 & 0.34 & 0.00 & $\infty$ \\ 
-  $\alpha = 200,$ $\beta =4$ & 126.67 & 76.77 & 0.00 & $\infty$ & 23.59 & 19.07 & 0.00 & $\infty$ & 4.98 & 4.04 & 0.00 & $\infty$ \\ 
+  $\alpha = 50,\enspace$ $\beta =1$ & 55.37 & 25.87 & 0.00 & $\infty$ & 7.99 & 9.84 & 0.00 & $\infty$ & 1.07 & 0.35 & 0.00 & $\infty$ \\ 
+  $\alpha = 50,\enspace$ $\beta =2$ & 73.04 & 43.14 & 0.00 & $\infty$ & 21.12 & 16.40 & 0.00 & $\infty$ & 6.20 & 4.72 & 0.00 & $\infty$ \\ 
+  $\alpha = 50,\enspace$ $\beta =4$ & 142.00 & 66.28 & 0.00 & $\infty$ & 61.48 & 36.04 & 0.00 & $\infty$ & 27.71 & 18.29 & 0.00 & $\infty$ \\ 
+  $\alpha = 100,$ $\beta =1$ & 32.00 & 20.76 & 0.00 & $\infty$ & 2.52 & 2.93 & 0.00 & $\infty$ & 0.22 & 0.19 & 0.00 & $\infty$ \\ 
+  $\alpha = 100,$ $\beta =2$ & 78.45 & 51.91 & 0.00 & $\infty$ & 12.10 & 18.31 & 0.00 & $\infty$ & 1.76 & 1.50 & 0.00 & $\infty$ \\ 
+  $\alpha = 100,$ $\beta =4$ & 139.13 & 62.71 & 0.00 & $\infty$ & 42.32 & 21.23 & 0.00 & $\infty$ & 15.40 & 12.26 & 0.00 & $\infty$ \\ 
+  $\alpha = 200,$ $\beta =1$ & 28.74 & 20.48 & 0.00 & $\infty$ & 0.56 & 0.70 & 0.00 & $\infty$ & 0.06 & 0.07 & 0.18 & $\infty$ \\ 
+  $\alpha = 200,$ $\beta =2$ & 76.70 & 56.65 & 0.00 & $\infty$ & 4.61 & 6.06 & 0.00 & $\infty$ & 0.52 & 0.34 & 0.00 & $\infty$ \\ 
+  $\alpha = 200,$ $\beta =4$ & 130.62 & 67.27 & 0.00 & $\infty$ & 21.48 & 17.97 & 0.00 & $\infty$ & 5.24 & 5.82 & 0.00 & $\infty$ \\ 
 \hline
 \multicolumn{1}{l|}{AT-PSO} &&&&&&&&&&&&\\
-  $R^* = 0.1$ & 2.25 & 1.98 & 0.00 & $\infty$ & 1.91 & 1.98 & 0.00 & $\infty$ & 98.02 & 57.26 & 0.00 & $\infty$ \\ 
-  $R^* = 0.3$ & 1.09 & 1.89 & 0.00 & $\infty$ & 0.02 & 0.03 & 0.44 & $\infty$ & 0.05 & 0.05 & 0.16 & $\infty$ \\ 
-  $R^* = 0.5$ & 5.65 & 11.07 & 0.00 & $\infty$ & 0.06 & 0.08 & 0.28 & $\infty$ & 0.02 & 0.02 & 0.46 & $\infty$ \\ 
-  $R^* = 0.7$ & 32.51 & 39.20 & 0.00 & $\infty$ & 0.13 & 0.18 & 0.14 & $\infty$ & 0.07 & 0.17 & 0.26 & $\infty$ \\ 
+  $R^* = 0.1$ & 3.28 & 6.03 & 0.00 & $\infty$ & 2.22 & 2.69 & 0.00 & $\infty$ & 111.55 & 65.99 & 0.00 & $\infty$ \\ 
+  $R^* = 0.3$ & 0.74 & 1.00 & 0.02 & $\infty$ & 0.02 & 0.02 & 0.34 & $\infty$ & 0.06 & 0.06 & 0.16 & $\infty$ \\ 
+  $R^* = 0.5$ & 4.06 & 8.44 & 0.00 & $\infty$ & 0.07 & 0.13 & 0.22 & $\infty$ & 0.01 & 0.02 & 0.56 & 414.50 \\ 
+  $R^* = 0.7$ & 28.82 & 33.05 & 0.00 & $\infty$ & 0.43 & 1.25 & 0.04 & $\infty$ & 0.07 & 0.16 & 0.22 & $\infty$ \\ 
    \hline
 \end{tabular}
 }
@@ -721,7 +722,7 @@ Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}
 \label{tab:psosim5}
 \end{table}
 % latex table generated in R 3.3.1 by xtable 1.8-2 package
-% Mon Aug 15 15:24:52 2016
+% Sun Aug 21 22:17:27 2016
 \begin{table}[ht]
 \centering
 \tiny{
@@ -730,62 +731,62 @@ Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}
   \hline
 Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}$ & $\widehat{t}$ \\ 
   \hline
-\multicolumn{1}{l|}{PSO} & 19.59 & 1.20 & 0.00 & $\infty$ & 15.41 & 8.13 & 0.04 & $\infty$ & 17.89 & 5.35 & 0.00 & $\infty$ \\ 
-  \multicolumn{1}{l|}{BBPSO-MC} & 20.16 & 0.47 & 0.00 & $\infty$ & 20.24 & 0.50 & 0.00 & $\infty$ & 20.49 & 0.45 & 0.00 & $\infty$ \\ 
-  \multicolumn{1}{l|}{BBPSOxp-MC} & 20.11 & 0.19 & 0.00 & $\infty$ & 20.23 & 0.16 & 0.00 & $\infty$ & 20.06 & 0.11 & 0.00 & $\infty$ \\ 
+\multicolumn{1}{l|}{PSO} & 19.66 & 0.56 & 0.00 & $\infty$ & 14.77 & 8.35 & 0.02 & $\infty$ & 19.48 & 2.63 & 0.00 & $\infty$ \\ 
+  \multicolumn{1}{l|}{BBPSO-MC} & 20.72 & 0.23 & 0.00 & $\infty$ & 20.74 & 0.22 & 0.00 & $\infty$ & 20.74 & 0.21 & 0.00 & $\infty$ \\ 
+  \multicolumn{1}{l|}{BBPSOxp-MC} & 20.75 & 0.18 & 0.00 & $\infty$ & 20.73 & 0.18 & 0.00 & $\infty$ & 20.73 & 0.18 & 0.00 & $\infty$ \\ 
 \hline
 \multicolumn{1}{l|}{AT-BBPSO-MC} &&&&&&&&&&&&\\
-  $df = 1,\enspace$ $R^* =0.1$ & 17.10 & 6.89 & 0.00 & $\infty$ & 9.21 & 9.18 & 0.00 & $\infty$ & 6.23 & 8.00 & 0.00 & $\infty$ \\ 
-  $df = 1,\enspace$ $R^* =0.3$ & 18.66 & 4.77 & 0.00 & $\infty$ & 15.62 & 8.27 & 0.00 & $\infty$ & 13.05 & 9.54 & 0.00 & $\infty$ \\ 
-  $df = 1,\enspace$ $R^* =0.5$ & 19.05 & 3.82 & 0.02 & $\infty$ & 17.29 & 6.59 & 0.06 & $\infty$ & 16.41 & 7.57 & 0.04 & $\infty$ \\ 
-  $df = 1,\enspace$ $R^* =0.7$ & 19.31 & 3.54 & 0.00 & $\infty$ & 18.57 & 4.73 & 0.00 & $\infty$ & 19.05 & 3.24 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.1$ & 19.61 & 2.52 & 0.00 & $\infty$ & 18.65 & 4.81 & 0.00 & $\infty$ & 17.12 & 7.06 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.3$ & 19.82 & 0.05 & 0.00 & $\infty$ & 19.87 & 0.28 & 0.00 & $\infty$ & 19.08 & 3.97 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.5$ & 19.85 & 0.17 & 0.00 & $\infty$ & 19.60 & 2.85 & 0.02 & $\infty$ & 20.08 & 0.55 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.7$ & 19.89 & 0.22 & 0.00 & $\infty$ & 20.13 & 0.40 & 0.00 & $\infty$ & 20.35 & 0.42 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.1$ & 19.99 & 0.06 & 0.00 & $\infty$ & 19.75 & 2.52 & 0.00 & $\infty$ & 17.90 & 6.25 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.3$ & 19.83 & 0.03 & 0.00 & $\infty$ & 19.87 & 0.24 & 0.00 & $\infty$ & 19.66 & 2.85 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.5$ & 19.84 & 0.09 & 0.00 & $\infty$ & 19.90 & 0.25 & 0.00 & $\infty$ & 20.12 & 0.62 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.7$ & 19.83 & 0.05 & 0.00 & $\infty$ & 20.00 & 0.33 & 0.00 & $\infty$ & 20.33 & 0.39 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.1$ & 20.10 & 0.07 & 0.00 & $\infty$ & 20.10 & 0.09 & 0.00 & $\infty$ & 20.47 & 0.29 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.3$ & 19.83 & 0.02 & 0.00 & $\infty$ & 19.84 & 0.15 & 0.00 & $\infty$ & 19.68 & 2.83 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.5$ & 19.83 & 0.03 & 0.00 & $\infty$ & 19.92 & 0.26 & 0.00 & $\infty$ & 20.10 & 0.39 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.7$ & 19.83 & 0.03 & 0.00 & $\infty$ & 19.99 & 0.33 & 0.00 & $\infty$ & 20.36 & 0.38 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.1$ & 18.35 & 5.39 & 0.00 & $\infty$ & 9.73 & 9.19 & 0.00 & $\infty$ & 6.24 & 7.88 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.3$ & 18.65 & 4.66 & 0.00 & $\infty$ & 14.66 & 8.70 & 0.00 & $\infty$ & 11.40 & 9.71 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.5$ & 19.93 & 0.37 & 0.00 & $\infty$ & 18.90 & 4.71 & 0.04 & $\infty$ & 16.91 & 6.85 & 0.06 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.7$ & 19.69 & 2.00 & 0.00 & $\infty$ & 19.52 & 2.28 & 0.00 & $\infty$ & 18.05 & 5.13 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.1$ & 19.98 & 0.09 & 0.00 & $\infty$ & 19.48 & 3.55 & 0.00 & $\infty$ & 14.60 & 8.47 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.3$ & 19.82 & 0.05 & 0.00 & $\infty$ & 19.48 & 2.82 & 0.00 & $\infty$ & 19.94 & 0.54 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.5$ & 19.83 & 0.06 & 0.00 & $\infty$ & 19.95 & 0.30 & 0.00 & $\infty$ & 20.24 & 0.38 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.7$ & 19.85 & 0.10 & 0.00 & $\infty$ & 20.05 & 0.37 & 0.00 & $\infty$ & 20.34 & 0.39 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.1$ & 20.00 & 0.07 & 0.00 & $\infty$ & 20.12 & 0.25 & 0.00 & $\infty$ & 17.83 & 6.21 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.3$ & 19.83 & 0.04 & 0.00 & $\infty$ & 19.87 & 0.21 & 0.00 & $\infty$ & 20.12 & 0.45 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.5$ & 19.83 & 0.04 & 0.00 & $\infty$ & 19.90 & 0.26 & 0.00 & $\infty$ & 20.32 & 0.45 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.7$ & 19.85 & 0.12 & 0.00 & $\infty$ & 20.06 & 0.35 & 0.00 & $\infty$ & 20.42 & 0.39 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.1$ & 20.09 & 0.08 & 0.00 & $\infty$ & 20.16 & 0.14 & 0.00 & $\infty$ & 20.32 & 0.27 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.3$ & 19.83 & 0.03 & 0.00 & $\infty$ & 19.85 & 0.17 & 0.00 & $\infty$ & 19.98 & 0.33 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.5$ & 19.83 & 0.03 & 0.00 & $\infty$ & 19.89 & 0.20 & 0.00 & $\infty$ & 20.14 & 0.38 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.7$ & 19.83 & 0.06 & 0.00 & $\infty$ & 20.06 & 0.36 & 0.00 & $\infty$ & 20.36 & 0.37 & 0.00 & $\infty$ \\ 
 \hline
 \multicolumn{1}{l|}{AT-BBPSOxp-MC} &&&&&&&&&&&&\\
-  $df = 1,\enspace$ $R^* =0.1$ & 14.13 & 8.56 & 0.00 & $\infty$ & 11.18 & 9.07 & 0.00 & $\infty$ & 12.71 & 9.05 & 0.00 & $\infty$ \\ 
-  $df = 1,\enspace$ $R^* =0.3$ & 18.04 & 6.04 & 0.00 & $\infty$ & 16.06 & 7.84 & 0.00 & $\infty$ & 16.02 & 7.64 & 0.00 & $\infty$ \\ 
-  $df = 1,\enspace$ $R^* =0.5$ & 18.96 & 4.84 & 0.06 & $\infty$ & 18.16 & 5.26 & 0.00 & $\infty$ & 17.59 & 5.83 & 0.06 & $\infty$ \\ 
-  $df = 1,\enspace$ $R^* =0.7$ & 20.17 & 0.17 & 0.00 & $\infty$ & 20.04 & 0.87 & 0.00 & $\infty$ & 19.60 & 2.01 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.1$ & 20.22 & 0.11 & 0.00 & $\infty$ & 20.17 & 0.11 & 0.00 & $\infty$ & 19.70 & 2.21 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.3$ & 19.70 & 2.82 & 0.00 & $\infty$ & 20.12 & 0.15 & 0.00 & $\infty$ & 19.99 & 0.16 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.5$ & 20.17 & 0.13 & 0.00 & $\infty$ & 20.20 & 0.12 & 0.00 & $\infty$ & 20.02 & 0.12 & 0.00 & $\infty$ \\ 
-  $df = 3,\enspace$ $R^* =0.7$ & 20.20 & 0.12 & 0.00 & $\infty$ & 20.21 & 0.10 & 0.00 & $\infty$ & 20.06 & 0.12 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.1$ & 20.22 & 0.10 & 0.00 & $\infty$ & 20.19 & 0.11 & 0.00 & $\infty$ & 20.03 & 0.12 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.3$ & 20.08 & 0.16 & 0.00 & $\infty$ & 20.15 & 0.13 & 0.00 & $\infty$ & 20.03 & 0.12 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.5$ & 20.12 & 0.13 & 0.00 & $\infty$ & 20.21 & 0.12 & 0.00 & $\infty$ & 20.03 & 0.12 & 0.00 & $\infty$ \\ 
-  $df = 5,\enspace$ $R^* =0.7$ & 20.19 & 0.12 & 0.00 & $\infty$ & 20.22 & 0.10 & 0.00 & $\infty$ & 20.05 & 0.11 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.1$ & 20.18 & 0.09 & 0.00 & $\infty$ & 20.19 & 0.09 & 0.00 & $\infty$ & 20.03 & 0.11 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.3$ & 20.03 & 0.14 & 0.00 & $\infty$ & 20.09 & 0.16 & 0.00 & $\infty$ & 20.02 & 0.13 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.5$ & 20.08 & 0.14 & 0.00 & $\infty$ & 20.15 & 0.13 & 0.00 & $\infty$ & 20.02 & 0.09 & 0.00 & $\infty$ \\ 
-  $df = \infty,$ $R^* =0.7$ & 20.12 & 0.15 & 0.00 & $\infty$ & 20.19 & 0.10 & 0.00 & $\infty$ & 20.04 & 0.10 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.1$ & 15.26 & 7.90 & 0.00 & $\infty$ & 11.33 & 8.97 & 0.00 & $\infty$ & 9.05 & 8.54 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.3$ & 18.42 & 5.50 & 0.00 & $\infty$ & 17.06 & 6.87 & 0.00 & $\infty$ & 14.76 & 8.83 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.5$ & 20.19 & 0.20 & 0.00 & $\infty$ & 19.48 & 3.44 & 0.02 & $\infty$ & 17.05 & 6.20 & 0.00 & $\infty$ \\ 
+  $df = 1,\enspace$ $R^* =0.7$ & 20.22 & 0.26 & 0.00 & $\infty$ & 20.08 & 0.67 & 0.00 & $\infty$ & 19.74 & 2.08 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.1$ & 20.19 & 0.16 & 0.00 & $\infty$ & 20.26 & 0.13 & 0.00 & $\infty$ & 19.58 & 3.36 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.3$ & 20.08 & 0.17 & 0.00 & $\infty$ & 20.23 & 0.18 & 0.00 & $\infty$ & 20.27 & 0.18 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.5$ & 20.19 & 0.13 & 0.00 & $\infty$ & 20.27 & 0.13 & 0.00 & $\infty$ & 20.33 & 0.25 & 0.00 & $\infty$ \\ 
+  $df = 3,\enspace$ $R^* =0.7$ & 20.21 & 0.13 & 0.00 & $\infty$ & 20.32 & 0.11 & 0.00 & $\infty$ & 20.39 & 0.11 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.1$ & 20.25 & 0.08 & 0.00 & $\infty$ & 20.27 & 0.11 & 0.00 & $\infty$ & 20.32 & 0.12 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.3$ & 20.07 & 0.16 & 0.00 & $\infty$ & 20.20 & 0.17 & 0.00 & $\infty$ & 20.21 & 0.18 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.5$ & 20.14 & 0.15 & 0.00 & $\infty$ & 20.23 & 0.12 & 0.00 & $\infty$ & 20.33 & 0.14 & 0.00 & $\infty$ \\ 
+  $df = 5,\enspace$ $R^* =0.7$ & 20.20 & 0.11 & 0.00 & $\infty$ & 20.31 & 0.13 & 0.00 & $\infty$ & 20.37 & 0.11 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.1$ & 20.18 & 0.08 & 0.00 & $\infty$ & 20.27 & 0.08 & 0.00 & $\infty$ & 20.29 & 0.12 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.3$ & 20.01 & 0.17 & 0.00 & $\infty$ & 20.14 & 0.18 & 0.00 & $\infty$ & 20.20 & 0.19 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.5$ & 20.06 & 0.15 & 0.00 & $\infty$ & 20.22 & 0.14 & 0.00 & $\infty$ & 20.27 & 0.15 & 0.00 & $\infty$ \\ 
+  $df = \infty,$ $R^* =0.7$ & 20.14 & 0.15 & 0.00 & $\infty$ & 20.30 & 0.13 & 0.00 & $\infty$ & 20.36 & 0.14 & 0.00 & $\infty$ \\ 
 \hline
 \multicolumn{1}{l|}{DI-PSO} &&&&&&&&&&&&\\
-  $\alpha = 50,\enspace$ $\beta =1$ & 19.81 & 0.52 & 0.00 & $\infty$ & 18.11 & 3.34 & 0.00 & $\infty$ & 18.80 & 3.52 & 0.00 & $\infty$ \\ 
-  $\alpha = 50,\enspace$ $\beta =2$ & 19.72 & 1.24 & 0.00 & $\infty$ & 18.36 & 2.48 & 0.00 & $\infty$ & 19.59 & 1.65 & 0.00 & $\infty$ \\ 
-  $\alpha = 50,\enspace$ $\beta =4$ & 19.85 & 0.60 & 0.00 & $\infty$ & 19.54 & 0.81 & 0.00 & $\infty$ & 20.03 & 0.42 & 0.00 & $\infty$ \\ 
-  $\alpha = 100,$ $\beta =1$ & 19.09 & 2.07 & 0.00 & $\infty$ & 15.60 & 6.01 & 0.00 & $\infty$ & 18.20 & 4.53 & 0.00 & $\infty$ \\ 
-  $\alpha = 100,$ $\beta =2$ & 19.39 & 1.51 & 0.00 & $\infty$ & 18.33 & 3.97 & 0.00 & $\infty$ & 19.48 & 2.42 & 0.00 & $\infty$ \\ 
-  $\alpha = 100,$ $\beta =4$ & 20.18 & 0.62 & 0.00 & $\infty$ & 19.71 & 1.32 & 0.00 & $\infty$ & 20.22 & 0.42 & 0.00 & $\infty$ \\ 
-  $\alpha = 200,$ $\beta =1$ & 18.96 & 2.05 & 0.00 & $\infty$ & 14.66 & 6.67 & 0.00 & $\infty$ & 17.95 & 4.74 & 0.00 & $\infty$ \\ 
-  $\alpha = 200,$ $\beta =2$ & 20.15 & 0.64 & 0.00 & $\infty$ & 19.78 & 1.46 & 0.00 & $\infty$ & 20.29 & 0.35 & 0.00 & $\infty$ \\ 
-  $\alpha = 200,$ $\beta =4$ & 20.32 & 0.69 & 0.00 & $\infty$ & 20.17 & 0.81 & 0.00 & $\infty$ & 20.42 & 0.41 & 0.00 & $\infty$ \\ 
+  $\alpha = 50,\enspace$ $\beta =1$ & 19.42 & 1.48 & 0.00 & $\infty$ & 18.52 & 3.08 & 0.00 & $\infty$ & 19.02 & 3.09 & 0.00 & $\infty$ \\ 
+  $\alpha = 50,\enspace$ $\beta =2$ & 19.50 & 1.04 & 0.00 & $\infty$ & 17.94 & 3.01 & 0.00 & $\infty$ & 19.33 & 1.89 & 0.00 & $\infty$ \\ 
+  $\alpha = 50,\enspace$ $\beta =4$ & 19.83 & 0.64 & 0.00 & $\infty$ & 19.66 & 1.00 & 0.00 & $\infty$ & 19.76 & 1.07 & 0.00 & $\infty$ \\ 
+  $\alpha = 100,$ $\beta =1$ & 18.71 & 2.25 & 0.00 & $\infty$ & 16.04 & 5.48 & 0.00 & $\infty$ & 17.63 & 5.10 & 0.00 & $\infty$ \\ 
+  $\alpha = 100,$ $\beta =2$ & 19.75 & 1.02 & 0.00 & $\infty$ & 19.27 & 1.95 & 0.00 & $\infty$ & 18.96 & 3.30 & 0.00 & $\infty$ \\ 
+  $\alpha = 100,$ $\beta =4$ & 19.99 & 1.04 & 0.00 & $\infty$ & 19.80 & 1.11 & 0.00 & $\infty$ & 20.13 & 0.75 & 0.00 & $\infty$ \\ 
+  $\alpha = 200,$ $\beta =1$ & 19.13 & 2.10 & 0.00 & $\infty$ & 14.83 & 6.47 & 0.00 & $\infty$ & 16.77 & 5.92 & 0.00 & $\infty$ \\ 
+  $\alpha = 200,$ $\beta =2$ & 20.00 & 1.29 & 0.00 & $\infty$ & 19.63 & 2.37 & 0.00 & $\infty$ & 20.27 & 0.32 & 0.00 & $\infty$ \\ 
+  $\alpha = 200,$ $\beta =4$ & 20.38 & 0.65 & 0.00 & $\infty$ & 20.19 & 0.65 & 0.00 & $\infty$ & 20.47 & 0.31 & 0.00 & $\infty$ \\ 
 \hline
 \multicolumn{1}{l|}{AT-PSO} &&&&&&&&&&&&\\
-  $R^* = 0.1$ & 19.31 & 2.85 & 0.00 & $\infty$ & 16.16 & 6.93 & 0.00 & $\infty$ & 20.25 & 0.32 & 0.00 & $\infty$ \\ 
-  $R^* = 0.3$ & 19.58 & 1.24 & 0.00 & $\infty$ & 14.64 & 7.42 & 0.04 & $\infty$ & 16.28 & 7.41 & 0.04 & $\infty$ \\ 
-  $R^* = 0.5$ & 19.84 & 0.67 & 0.00 & $\infty$ & 19.00 & 2.47 & 0.00 & $\infty$ & 19.84 & 2.12 & 0.00 & $\infty$ \\ 
-  $R^* = 0.7$ & 20.00 & 0.23 & 0.00 & $\infty$ & 19.61 & 1.19 & 0.00 & $\infty$ & 20.11 & 0.29 & 0.00 & $\infty$ \\ 
+  $R^* = 0.1$ & 18.67 & 4.43 & 0.00 & $\infty$ & 18.18 & 5.06 & 0.00 & $\infty$ & 20.18 & 0.66 & 0.00 & $\infty$ \\ 
+  $R^* = 0.3$ & 19.44 & 1.34 & 0.00 & $\infty$ & 16.84 & 6.30 & 0.04 & $\infty$ & 15.62 & 7.72 & 0.00 & $\infty$ \\ 
+  $R^* = 0.5$ & 19.69 & 0.92 & 0.00 & $\infty$ & 18.88 & 3.16 & 0.00 & $\infty$ & 19.66 & 2.29 & 0.00 & $\infty$ \\ 
+  $R^* = 0.7$ & 19.97 & 0.53 & 0.00 & $\infty$ & 19.76 & 0.69 & 0.00 & $\infty$ & 20.12 & 0.32 & 0.00 & $\infty$ \\ 
    \hline
 \end{tabular}
 }
