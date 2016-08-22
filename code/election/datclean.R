@@ -132,6 +132,7 @@ for(i in 1:npoll){
   colnames(pollmat)[i] <- paste("poll", unique(polldatsmall$survey)[i], sep = ".")
 }
 
+xzmat <- cbind(xmat, statemat, ageedumat)
 datlistsmall <- list(y = polldatsmall$bush, statedat = statedat, xmat = xmat,
                     statemat = statemat, ageedumat = ageedumat,
                     regionmat = regionmat, prev = v.prev, agemat = agemat,
