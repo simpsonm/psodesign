@@ -4,7 +4,7 @@ source("mcmcfun.R")
 load("datlistsmall.RData")
 load("datlistplus.RData")
 
-niter <- 10000
+niter <- 20000
 nswarm <- 100
 inertia <- 0.7298
 cognitive <- 1.496
