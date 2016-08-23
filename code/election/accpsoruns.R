@@ -120,7 +120,6 @@ for(model in models){
                                  pars = c(psotemp$argmaxes), psoid = psoid)
         psoid <- psoid + 1        
         accpollpsoout <- rbind(accpollpsoout, psotempout)
-        
       }
     }
     write.csv(accpollpsoout, file = "accpollpsoout.csv", row.names=FALSE)
