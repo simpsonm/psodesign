@@ -522,7 +522,7 @@ gelmanplusblockrwgibbs <- function(niter, init, datlist, sighat, tune = TRUE,
   accs <- rep(0, niter)
   lambdabar <- c(betamn, rep(0, nregion))
   muold <- drop(xzmat%*%alphabetas)
-  ldatold <-  sum(y*muold)  - sum(log(1 + exp(muold)))
+  lpdatold <-  sum(y*muold)  - sum(log(1 + exp(muold)))
   rwalphas <- rep(0, nbeta + nstate + nageedu + npoll)
   for(iter in 1:niter){
     ## draw the variances

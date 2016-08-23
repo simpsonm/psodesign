@@ -48,6 +48,17 @@ rwplusblockgibbstest <- gelmanplusblockrwgibbs(50000, rwplusblockgibbstest$draws
 
 par(mfrow=c(3,3))
 for(i in 1:9){
+  plot(ts(rwplusblockgibbstest$draws[,i]))
+}
+
+mean(rwplusblockgibbstest$accs)
+
+summary(mcmc(rwplusblockgibbstest$draws[,1:4]))[[1]]
+summary(mcmc(rwplusgibbstest$draws[,1:4]))[[1]]
+
+
+par(mfrow=c(3,3))
+for(i in 1:9){
   plot(ts(rwplusgibbstest$draws[,i]))
 }
 
