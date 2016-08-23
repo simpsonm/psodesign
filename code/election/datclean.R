@@ -49,7 +49,7 @@ ageedumat <- matrix(0, nrow(polldat), nageedu)
 pollmat <- matrix(0, nrow(polldat), npoll)
 colnames(statemat) <- rep("", ncol(statemat))
 colnames(ageedumat) <- rep("", ncol(ageedumat))
-colnames(pollmat) <- rep("", ncol(pollmat))
+pcolnames(pollmat) <- rep("", ncol(pollmat))
 colnames(agemat) <- rep("", ncol(agemat))
 colnames(edumat) <- rep("", ncol(edumat))
 for(i in 1:nstate){
@@ -85,7 +85,7 @@ for(i in 1:nregion){
 colnames(regionmat) <- c(paste("region", 1:nregion, sep = "."))
 
 wmat <- cbind(v.prev, regionmat)
-xzmat <- cbind(xmat, statemat, ageedumat)
+xzmat <- cbind(xmat, statemat, ageedumat, pollmat)
 
 datlistplus <- list(y = polldat$bush, statedat = statedat, xmat = xmat,
                     statemat = statemat, ageedumat = ageedumat,
