@@ -7,11 +7,82 @@ psoout <- read.csv("psoout.csv")
 
 sumlast <- subset(psoout, iteration == max(psoout$iteration))
 
-mean(subset(sumlast, model == "lnorm" & ranef == "iid" & ndelta == 10 & nbhd == "ring-1" &
-                algorithm == "AT-BBPSOxp-MC-1-0.3-0.1")$maxes) -
-mean(subset(sumlast, model == "lnorm" & ranef == "iid" & ndelta == 10 & nbhd == "ring-1" &
-                algorithm == "AT-BBPSOxp-MC-1-0.3-1e-05")$maxes)
 
+psosum <- ddply(sumlast, .(model, ranef, ndelta, algorithm, nbhd), summarise,
+                mean = mean(maxes), median = median(maxes), sd = sd(maxes),
+                min=min(maxes), q10=quantile(maxes, 0.1), q25=quantile(maxes, 0.25),
+                q75=quantile(maxes, 0.75), q90=quantile(maxes, 0.9), max=max(maxes))
+
+psosum <- psosum[rev(1:nrow(psosum)),]
+
+algset <- c("PSO", "DI-PSO", "BBPSO-MC", "BBPSOxp-MC", "AT-PSO-0.5-0.1", "AT-BBPSOxp-MC-5-0.5-0.1",
+            "AT-BBPSO-MC-5-0.5-0.1")
+
+psosum <- subset(psosum, algorithm %in% algset)
+
+psosum$algorithm <-
+  mapvalues(psosum$algorithm,
+            c("AT-PSO-0.5-0.1", "AT-BBPSO-MC-5-0.5-0.1", "AT-BBPSOxp-MC-5-0.5-0.1"),
+            c("AT-PSO", "AT-BBPSO-MC", "AT-BBPSOxp-MC"))
+         
+
+
+poisiid <- subset(psosum, model == "pois" & ranef == "iid" & ndelta == 30)[,c(4,5,6,8)]
+poisiid$mean <- round(poisiid$mean - poisiid$mean[3],2)
+poisiid$sd[poisiid$mean < -100000] <- NA
+poisiid$mean[poisiid$mean < -100000] <- NA
+poisiid <- rbind(subset(poisiid, nbhd == "global")[c(1,4,3,2,5,7,6),],
+                 subset(poisiid, nbhd == "ring-3")[c(1,4,3,2,5,7,6),],
+                 subset(poisiid, nbhd == "ring-1")[c(1,4,3,2,5,7,6),])
+poisiid
+
+poisfull <- subset(psosum, model == "pois" & ranef == "full" & ndelta == 15)[,c(4,5,6,8)]
+poisfull$mean <- round(poisfull$mean - poisfull$mean[1],2)
+poisfull$sd[poisfull$mean < -100000] <- NA
+poisfull$mean[poisfull$mean < -100000] <- NA
+poisfull <- rbind(subset(poisfull, nbhd == "global")[c(1,4,3,2,5,7,6),],
+                  subset(poisfull, nbhd == "ring-3")[c(1,4,3,2,5,7,6),],
+                  subset(poisfull, nbhd == "ring-1")[c(1,4,3,2,5,7,6),])
+poisfull
+
+lnormiid <- subset(psosum, model == "lnorm" & ranef == "iid" & ndelta == 30)[,c(4,5,6,8)]
+lnormiid$mean <- round(lnormiid$mean - lnormiid$mean[1],2)
+lnormiid$sd[lnormiid$mean < -100000] <- NA
+lnormiid$mean[lnormiid$mean < -100000] <- NA
+lnormiid <- rbind(subset(lnormiid, nbhd == "global")[c(1,4,3,2,5,7,6),],
+                  subset(lnormiid, nbhd == "ring-3")[c(1,4,3,2,5,7,6),],
+                  subset(lnormiid, nbhd == "ring-1")[c(1,4,3,2,5,7,6),])
+lnormiid
+
+lnormfull <- subset(psosum, model == "lnorm" & ranef == "full" & ndelta == 15)[,c(4,5,6,8)]
+lnormfull$mean <- round(lnormfull$mean - lnormfull$mean[3],2)
+lnormfull$sd[lnormfull$mean < -100000] <- NA
+lnormfull$mean[lnormfull$mean < -100000] <- NA
+lnormfull <- rbind(subset(lnormfull, nbhd == "global")[c(1,4,3,2,5,7,6),],
+                   subset(lnormfull, nbhd == "ring-3")[c(1,4,3,2,5,7,6),],
+                   subset(lnormfull, nbhd == "ring-1")[c(1,4,3,2,5,7,6),])
+lnormfull
+
+
+
+library(xtable)
+print(xtable(lnormfull), include.rownames=FALSE)
+
+
+
+
+
+
+
+which.min(poisiid$mean)
+
+subset(psosum, model == "pois" & ranef == "iid" & ndelta == 30 & nbhd == "ring-3")
+subset(psosum, model == "pois" & ranef == "iid" & ndelta == 30 & nbhd == "global")
+
+subset(psosum, model == "pois" & ranef == "iid" & ndelta == 30 & nbhd == "global")[14,]
+subset(psosum, model == "pois" & ranef == "iid" & ndelta == 30 & nbhd == "ring-3")[10,]
+
+subset(psosum, model == "pois" & ranef == "iid" & ndelta == 30 & nbhd == "ring-3")[10,]
 
 load("accout.RData")
 

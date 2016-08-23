@@ -8,6 +8,68 @@ source("../psofun.R")
 load("datlistsmall.RData")
 load("datlistplus.RData")
 
+
+
+smalltest <- optim(rep(0, 80), gelmanlpost, datlist = datlistsmall,
+              control=list(fnscale=-1, reltol = .Machine$double.eps, maxit = 10000))
+
+smalltest <- optim(smalltest$par, gelmanlpost, datlist = datlistsmall,
+                   control=list(fnscale=-1, reltol = .Machine$double.eps, maxit = 100000))
+
+
+
+musmall <- smalltest$par
+lpbestsmall <- smalltest$value
+
+imhsmall <- indmetrop(10000, gelmanlpost, gelmanlposthess, musmall, musmall, 100, lpbestsmall,
+                      datlist = datlistsmall, tune = FALSE)
+
+mean(imhsmall$acc)
+
+
+imhwgsmall <- gelmanindwithingibbs(10000, musmall, musmall, 100, datlistsmall)
+
+mean(imhwgsmall$acc)
+
+
+
+plustest <- optim(rep(0, 89), gelmanpluslpost, datlist = datlistplus,
+              control=list(fnscale=-1, reltol = .Machine$double.eps, maxit = 10000))
+
+plustest <- optim(plustest$par, gelmanpluslpost, datlist = datlistplus,
+              control=list(fnscale=-1, reltol = .Machine$double.eps, maxit = 1000000))
+
+muplus <- plustest$par
+lpbestplus <- plustest$value
+
+plushess <- gelmanpluslposthess(muplus, datlistplus)
+pluscov <- chol2inv(chol(-plushess))
+
+nswarm <- 50
+plusinit <- matrix(runif(nswarm*89, -10, 10), ncol = nswarm)
+plusinit[,1] <- muplus
+nbhd <- matrix(rep(1:nswarm, nswarm), ncol = nswarm)
+plusbbpso <- bbpso(50000, nswarm, 1, 0.5, plusinit, nbhd, gelmanpluslpost, 5, TRUE, 0.5,
+                   datlist = datlistplus)
+
+muplus <- plusbbpso$argmax
+lpbestplus <- plusbbpso$max
+lpbestplus
+
+plustest <- optim(muplus, gelmanpluslpost, datlist = datlistplus,
+              control=list(fnscale=-1, reltol = .Machine$double.eps, maxit = 1000000))
+
+muplus <- plustest$par
+lpbestplus <- plustest$value
+
+imhplus <- indmetrop(10000, gelmanpluslpost, gelmanpluslposthess, muplus, muplus, 100,
+                     lpbestplus, datlist = datlistplus, tune = FALSE)
+
+imhwgplus <- gelmanplusindwithingibbs(10000, muplus, muplus, 100, datlistplus)
+
+mean(imhplus$acc)
+mean(imhwgplus$acc)
+
 nbeta <- datlistplus$nbeta
 nageedu <- datlistplus$nageedu
 npoll <- datlistplus$npoll
