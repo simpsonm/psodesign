@@ -38,6 +38,14 @@ rwplusgibbstest <- gelmanplusrwgibbs(1000, rep(0, 89), datlistplus)
 rwplusgibbstest <- gelmanplusrwgibbs(10000, rwplusgibbstest$draws[1000,], datlistplus,
                                      logrwsds = rwplusgibbstest$logrwsds)
 
+sighat <- cov(rwplusgibbstest$draws[-c(1:5000), 1:(4 + 51 + 16 + npoll)])
+
+rwplusblockgibbstest <- gelmanplusblockrwgibbs(20000, rep(0, 89), datlistplus, sighat)
+
+rwplusblockgibbstest <- gelmanplusblockrwgibbs(50000, rwplusblockgibbstest$draws[20000,],
+                                               datlistplus, sighat,
+                                               logrwsd = rwplusblockgibbstest$logrwsd)
+
 par(mfrow=c(3,3))
 for(i in 1:9){
   plot(ts(rwplusgibbstest$draws[,i]))

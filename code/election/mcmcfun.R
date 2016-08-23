@@ -397,7 +397,7 @@ gelmanblockrwgibbs <- function(niter, init, datlist, sighat, tune = TRUE,
   prev <- statedat$prev
   region <- statedat$region
   betas <- par[1:nbeta]
-  alpha.state <- par[4 + 1:nstate]
+  alpha.state <- par[nbeta + 1:nstate]
   alpha.ageedu <- matrix(par[nbeta + nstate + 1:nageedu], ncol = nage, nrow = nedu)
   beta.prev <- par[nbeta + nstate + nageedu + 1]
   alpha.region <- par[nbeta + nstate + nageedu + 1 + 1:nregion]
@@ -418,11 +418,8 @@ gelmanblockrwgibbs <- function(niter, init, datlist, sighat, tune = TRUE,
                        "beta.prev",
                        paste("alpha", "region", 1:nregion, sep="."),
                        paste("sigma2", c("state", "ageedu", "region"), sep="."))
-  accs <- matrix(0, ncol = nbeta + nstate + nageedu, nrow = niter)
+  accs <- rep(0, niter)
   lambdabar <- c(betamn, rep(0, nregion))
-  alpha.state.prop <- alpha.state
-  alpha.ageedu.prop <- alpha.ageedu
-  alpha.regionprop <- alpha.region
   rwalphas <- rep(0, nbeta + nstate + nageedu)
   for(iter in 1:niter){
     ## draw the variances
@@ -476,6 +473,112 @@ gelmanblockrwgibbs <- function(niter, init, datlist, sighat, tune = TRUE,
   return(out)
 }
 
+
+gelmanplusblockrwgibbs <- function(niter, init, datlist, sighat, tune = TRUE,
+                               logrwsd = 0,
+                               rwc = 0.1, rwtarget = 0.245){
+  nstate <- datlist$nstate
+  nage <- datlist$nage
+  nedu <- datlist$nedu
+  nageedu <- nage*nedu
+  nregion <- datlist$nregion
+  npoll <- datlist$npoll
+  rwsd <- exp(logrwsd)
+  cholsig <- chol(sighat)
+  par <- init
+  statedat <- datlist$statedat
+  betamn <- datlist$betamn
+  betavar <- datlist$betavar
+  sig2a <- datlist$sig2a
+  sig2b <- datlist$sig2b
+  xzmat <- datlist$xzmat
+  wmat <- datlist$wmat
+  y <- datlist$y
+  prev <- statedat$prev
+  region <- statedat$region
+  betas <- par[1:nbeta]
+  alpha.state <- par[nbeta + 1:nstate]
+  alpha.ageedu <- matrix(par[nbeta + nstate + 1:nageedu], ncol = nage, nrow = nedu)
+  alpha.poll <- par[nbeta + nstate + nageedu + 1:npoll]
+  beta.prev <- par[nbeta + nstate + nageedu + npoll + 1]
+  alpha.region <- par[nbeta + nstate + nageedu + npoll + 1 + 1:nregion]
+  lambdas <- c(beta.prev, alpha.region)
+  sig2.state  <- par[nbeta + nstate + nageedu + npoll + 1 + nregion + 1]
+  sig2.ageedu <- par[nbeta + nstate + nageedu + npoll + 1 + nregion + 2]
+  sig2.poll   <- par[nbeta + nstate + nageedu + npoll + 1 + nregion + 3]
+  sig2.region <- par[nbeta + nstate + nageedu + npoll + 1 + nregion + 4]  
+  sig2s <- c(sig2.state, sig2.ageedu, sig2.region)
+  alphabetas <- c(betas, alpha.state, alpha.ageedu, alpha.poll)
+  nab <- length(alphabetas)
+  draws <- matrix(0, ncol = nbeta + nstate + nageedu + npoll + 1 + nregion + 4, nrow = niter)
+  colnames(draws) <- c(paste("beta", c(0, "f", "b", "fb"), sep="."),
+                       paste("alpha", "state", 1:nstate, sep = "."),
+                       paste("alpha", "age", "edu", rep(1:nage, nedu),
+                             rep(1:nedu, nage)[order(rep(1:nedu, nage))], sep="."),
+                       paste("alpha", "poll", 1:npoll, sep = "."),
+                       "beta.prev",
+                       paste("alpha", "region", 1:nregion, sep="."),
+                       paste("sigma2", c("state", "ageedu", "poll", "region"), sep="."))
+  accs <- rep(0, niter)
+  lambdabar <- c(betamn, rep(0, nregion))
+  muold <- drop(xzmat%*%alphabetas)
+  ldatold <-  sum(y*muold)  - sum(log(1 + exp(muold)))
+  rwalphas <- rep(0, nbeta + nstate + nageedu + npoll)
+  for(iter in 1:niter){
+    ## draw the variances
+    sig2.state <- 1/rgamma(1, shape = sig2a + nstate/2,
+                           rate = sig2b + crossprod(alpha.state - wmat%*%lambdas)/2)
+    sig2.ageedu <- 1/rgamma(1, shape = sig2a + nageedu/2,
+                             rate = sig2b + crossprod(c(alpha.ageedu))/2)
+    sig2.region <- 1/rgamma(1, shape = sig2a + nregion/2,
+                            rate = sig2b + crossprod(alpha.region)/2)
+    sig2.poll <- 1/rgamma(1, shape = sig2a + npoll/2,
+                          rate = sig2b + crossprod(alpha.poll)/2)
+    ## draw lambda = (alpha.region, beta.prev)
+    Sinv <- diag(c(1/betavar, rep(1/sig2.region, nregion)))
+    Sigmainv <- diag(rep(1/sig2.state, nstate))
+    Omegahat <- crossprod(wmat, Sigmainv)%*%wmat + Sinv
+    chat <- crossprod(wmat, Sigmainv)%*%alpha.state + Sinv%*%lambdabar
+    Sigmahat <- chol2inv(chol(Omegahat))
+    muhat <- Sigmahat%*%chat
+    cholhat <- chol(Sigmahat)
+    lambdas <- drop(muhat + crossprod(cholhat, rnorm(nregion + 1)))
+    alpha.region <- lambdas[1:nregion+1]
+    beta.prev <- lambdas[1]
+    ## draw alphabeta
+    alphabetasprop <- alphabetas + crossprod(cholsig, rnorm(nab, sd = rwsd))
+    muprop <- xzmat%*%alphabetasprop
+    lpdatprop <- sum(y*muprop - log(1 + exp(muprop)))
+    lppriorold <- - sum((betas - betamn)^2)/(2*betavar) -
+      sum((alpha.state - wmat*lambdas)^2)/(2*sig2.state) -
+      sum(alpha.ageedu^2)/(2*sig2.ageedu) -
+      sum(alpha.poll^2)/(2*sig2.poll)
+    lppriorprop <- - sum((alphabetasprop[1:nbeta] - betamn)^2)/(2*betavar) -
+      sum((alphabetas[nbeta + 1:nstate] - wmat*lambdas)^2)/(2*sig2.state) -
+      sum(alphabetas[nbeta + nstate + 1:nageedu]^2)/(2*sig2.ageedu) -
+      sum(alphabetas[nbeta + nstate + nageedu + 1:npoll]^2)/(2*sig2.poll)
+    la <- lpdatprop + lppriorprop - lpdatold - lppriorold
+    u <- runif(1)
+    if(la > log(u)){
+      accs[iter] <- 1
+      alphabetas <- alphabetasprop
+      betas <- alphabetas[1:nbeta]
+      alpha.state <- alphabetas[nbeta + 1:nstate]
+      alpha.ageedu <- alphabetas[nbeta + nstate + 1:nageedu]
+      alpha.poll <- alphabetas[nbeta + nstate + nageedu + 1:npoll]
+      muold <- muprop
+      lpdatold <- lpdatprop
+    }
+    draws[iter,] <- c(alphabetas, beta.prev, alpha.region,
+                      sig2.state, sig2.ageedu, sig2.region, sig2.poll)
+    if(tune){
+      logrwsd <- logrwsd + rwc*(exp(min(la, 0)) - rwtarget)/2
+      rwsd <- exp(logrwsd)
+    }
+  }
+  out <- list(draws = draws, accs = accs, logrwsd = logrwsd)
+  return(out)
+}
 
 gelmanindwithingibbs <- function(niter, init, mu, df, datlist){
   nstate <- datlist$nstate
