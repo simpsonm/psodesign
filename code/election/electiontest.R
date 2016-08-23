@@ -19,26 +19,68 @@ stanplus <- stan(file = "electionplus.stan", data = datlistplus, chains = 1, ite
 
 rwgibbstest <- gelmanrwgibbs(1000, rep(0, 80), datlistsmall)
 
-rwgibbstest <- gelmanrwgibbs(10000, rwgibbstest$draws[10000,], datlistsmall,
+rwgibbstest <- gelmanrwgibbs(10000, rwgibbstest$draws[1000,], datlistsmall,
                              logrwsds = rwgibbstest$logrwsds)
 
-str(rwgibbstest)
+rwgibbstest <- gelmanrwgibbs(20000, rwgibbstest$draws[10000,], datlistsmall,
+                             logrwsds = rwgibbstest$logrwsds)
 
+sighat <- cov(rwgibbstest$draws[-c(1:5000), 1:(4 + 51 + 16)])
 
+rwblockgibbstest <- gelmanblockrwgibbs(20000, rep(0, 80), datlistsmall, sighat)
+
+rwblockgibbstest <- gelmanblockrwgibbs(50000, rwblockgibbstest$draws[20000,], datlistsmall,
+                                       sighat, logrwsd = rwblockgibbstest$logrwsd,
+                                       rwtarget = 0.3)
+
+rwplusgibbstest <- gelmanplusrwgibbs(1000, rep(0, 89), datlistplus)
+
+rwplusgibbstest <- gelmanplusrwgibbs(10000, rwplusgibbstest$draws[1000,], datlistplus,
+                                     logrwsds = rwplusgibbstest$logrwsds)
 
 par(mfrow=c(3,3))
-for(i in 4 + 51 + 16 + 1:9){
-  plot(ts(rwgibbstest$draws[,i]))
+for(i in 1:9){
+  plot(ts(rwplusgibbstest$draws[,i]))
 }
+
+apply(rwplusgibbstest$acc, 2, mean)
+apply(rwplusgibbstest$accs, 2, mean)
+
+
+
+
+xzmat <- datlistsmall$xzmat
+alphabetas <- rwblockgibbstest$draws[,1:(4 + 51 + 16)]
+mus <- t(tcrossprod(xzmat, alphabetas))
+
+library(MCMCpack)
+library(coda)
+
+effsizestest <- effectiveSize(mcmc(mus))
+
+par(mfrow=c(5,4))
+for(i in which(effsizestest<10)){
+  plot(ts(mus[,i]))
+}
+
 
 par(mfrow=c(3,3))
 for(i in 1:9){
   plot(ts(rwgibbstest$draws[,i]))
 }
 
+par(mfrow=c(3,3))
+for(i in 1:9){
+  plot(ts(rwblockgibbstest$draws[,i]))
+}
+
+
+
 summary(stansmall, pars = c("betay"))$summary
 library(MCMCpack)
-summary(mcmc(rwgibbstest$draws[-c(1:5000),]))[[1]][1:5,]
+
+summary(mcmc(rwgibbstest$draws[-c(1:5000),]))[[1]][1:4,]
+summary(mcmc(rwblockgibbstest$draws[-c(1:10000),]))[[1]][1:4,]
 
 
 
