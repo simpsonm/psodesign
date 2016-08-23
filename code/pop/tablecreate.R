@@ -66,6 +66,9 @@ lnormfull
 
 
 library(xtable)
+print(xtable(poisiid), include.rownames=FALSE)
+print(xtable(poisfull), include.rownames=FALSE)
+print(xtable(lnormiid), include.rownames=FALSE)
 print(xtable(lnormfull), include.rownames=FALSE)
 
 
