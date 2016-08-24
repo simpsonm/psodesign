@@ -218,37 +218,263 @@ Finally, we consider the two extreme parameterizations of $\bm{\Sigma}(\bm{\thet
 Between the two possible parameterizations of $\bm{\Sigma}$ and the two choices for the data model we consider four possible classes of models. Both for implementing PSO algorithms to find the Laplace approximations and for running the IMH and IMHwG algorithms, we reparameterize the variance and covariance matrix parameters so that they have support on an unconstrained space. For $\sigma^2$ and $\phi^2$ we use the log transformation, and for $\bm{\Sigma}$ we use the Cholesky factorization of $\bm{\Sigma}^{-1}$ allowing the diagonal elements to be negative. See Appendix \ref{app:pop} for details about the posterior distributions, including this transformation and relevant full conditionals.
 
 \subsection{County population models PSO and MCMC results}
-We conduct a simulation study using \verb0R0 \citep{R2008} to compare various PSO algorithms at finding the posterior mode in each of the example models from Section \ref{sec:pop} Based on the results of Appendix \ref{app:psocompare}, we limit the study to 14 PSO algorithms: standard PSO, BBPSO-MC, BBPSOxp-MC, AT-BBPSO-MC and AT-BBPSOxp-MC, both with $df\in \{3,5\}$, $R^*\in \{0.3,0.5\}$, and $c=0.1$, DI-PSO with $\alpha = 0.2n_{iter}$ and $\beta=1$ where $n_{iter}$ is the number of iterations of the PSO algorithm, and AT-PSO with $R^*\in \{0.3,0.5\}$, and $c=0.1$. In addition, each algorithm was run using the global, ring-1, and ring-3 neighborhood topologies for a total of 42 algorithms, each for 10 replications of $n_{iter}=1,000$ iterations using 50 particles. See Appendix \ref{app:psodetail} for a detailed description the BBPSO variants we use along with the global and ring neighborhood topologies.
 
-[THE DETAILS HERE ARE CURRENTLY OUTDATED]
+We conduct a simulation study using \verb0R0 \citep{R2008} to compare various PSO algorithms at finding the posterior mode in each of the example models from Section \ref{sec:pop} Based on the results of Appendix \ref{app:psocompare}, we limit the study to 7 PSO algorithms: standard PSO, BBPSO-MC, BBPSOxp-MC, AT-BBPSO-MC and AT-BBPSOxp-MC, both with $df=5$, $R^*=0.5$, and $c=0.1$, DI-PSO with $\alpha = 0.2n_{iter}$ and $\beta=1$ where $n_{iter}=2,000$ is the number of iterations of the PSO algorithm, and AT-PSO with $R^*=0.5$, and $c=0.1$. In addition, each algorithm was run using the global, ring-1, and ring-3 neighborhood topologies for a total of 21 algorithms, each for 10 replications of $n_{iter}=1,000$ iterations using 50 particles. See Appendix \ref{app:psodetail} for a detailed description the BBPSO variants we use along with the global and ring neighborhood topologies. For the models with iid random effects, we set $r=30$, while for the models with fuly correlated random effects, we set $r = 7$ so that there are 28 unknown parameters in the random effect covariance matrix.
 
-Figure \ref{fig:popmaxboxplot} contains boxplots of the results of the simulations for the Poisson county population models of Section~\ref{sec:pop}. Models with iid random effects had 30 random effects while models with fully correlated random effects had 15. Each box plot was created using the 10, 25, 50, 75, and 90 percentiles of the maximum value of the log posterior found in all 20 replications after 1,000 iterations. Figure \ref{fig:popmaxboxplot2} is similar, except for the lognormal models. Across all models we see that the ring-3 topology and BFGS initialization both improve each of the algorithms, especially in combination. In  Appendix \ref{app:psocompare} the ring-3 neighborhood performed the best on our suite of test functions, and the same seems to be true here. The BFGS initialization is cheap, taking essentially no time to compute, yet seems to drastically improve the quality of every PSO algorithms. In  Appendix \ref{app:psocompare} we speculated that the AT-PSO algorithms would benefit significantly from some sort of stage one optimization, and our results confirm this for all of the algorithms. Another lesson from these boxplots is that the AT-PSO and AT-BBPSO algorithms tend to do the best, especially when $R^*=0.5$ in both cases. 
-\begin{figure}[!ht]
+[THE TABLES BELOW HAVE INCORRECT NUMBERS - WILL BE UPDATED SOON - BUT THEIR GENERAL STRUCTURE IS CORRECT. COMMENTARY ON THE TABLES WILL BE WRITTEN WHEN THE TABLES ARE UPDATED]
+
+\begin{table}[h]
 \centering
-%\includegraphics[width=0.4\textwidth]{code/pop/maxplot11.png}
-\includegraphics[width=0.4\textwidth]{code/pop/maxplot12.png}
-%\includegraphics[width=0.4\textwidth]{code/pop/maxplot13.png}
-\includegraphics[width=0.4\textwidth]{code/pop/maxplot14.png}
-\caption{Boxplots of the maximum value of the log posterior found for Poisson models by random effect type, neighborhood topology, optimization initialization, and algorithm. Each box plot was created using the 10, 25, 50, 75, and 90 percentiles of the maximum found from 20 replications of 1,000 iterations with 50 particles for each factor combination.}
-\label{fig:popmaxboxplot}
-\end{figure}
+\tiny{
+\begin{tabular}{llrr|rrr|rrr}
+\multicolumn{2}{l}{Poisson IID}& \multicolumn{2}{c}{Maximum} & \multicolumn{3}{c}{IMH acc rate}  &\multicolumn{3}{c}{IMHwG acc rate}\\
+  \hline 
+Algorithm & Nbhd & Mean & SD & 1200 & 1600 & 2000 & 1200 & 1600 & 2000 \\ 
+  \hline
+PSO & global & 0.00 & 0.00 & 0.88 & 0.88 & 0.88 & 0.91 & 0.91 & 0.91 \\ 
+  BBPSO-MC &  &  &  &  & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  BBPSOxp-MC &  &  &  & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  DI-PSO &  &  &  & 0.00 & 0.00 &  & 0.00 & 0.00 & 0.00 \\ 
+  AT-BBPSO-MC &  & -885.39 & 195.49 & 0.19 & 0.18 & 0.20 & 0.91 & 0.91 & 0.91 \\ 
+  AT-BBPSOxp-MC &  & -561.91 & 300.26 & 0.00 & 0.00 & 0.00 & 0.85 & 0.85 & 0.86 \\ 
+  AT-PSO &  &  &  & 0.01 & 0.84 & 0.88 & 0.46 & 0.86 & 0.91 \\ \hline
+  PSO & ring-3 &  &  & 0.00 & 0.01 & 0.88 & 0.00 & 0.01 & 0.91 \\ 
+  BBPSO-MC &  &  &  &  &  &  & 0.00 & 0.00 & 0.00 \\ 
+  BBPSOxp-MC &  &  &  & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  DI-PSO &  &  &  & 0.88 & 0.88 & 0.87 & 0.91 & 0.91 & 0.91 \\ 
+  AT-BBPSO-MC &  & -435.00 & 177.98 & 0.00 & 0.01 & 0.01 & 0.88 & 0.90 & 0.90 \\ 
+  AT-BBPSOxp-MC &  & -320.71 & 175.51 & 0.01 & 0.00 & 0.00 & 0.89 & 0.90 & 0.90 \\ 
+  AT-PSO &  & 0.00 & 0.00 & 0.88 & 0.88 & 0.87 & 0.92 & 0.91 & 0.91 \\ \hline
+  PSO & ring-1 &  &  & 0.00 & 0.00 & 0.01 & 0.00 & 0.00 & 0.00 \\ 
+  BBPSO-MC &  &  &  & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  BBPSOxp-MC &  &  &  &  &  &  & 0.00 & 0.00 & 0.00 \\ 
+  DI-PSO &  &  &  & 0.01 & 0.38 & 0.85 & 0.00 & 0.41 & 0.88 \\ 
+  AT-BBPSO-MC &  &  &  & 0.03 & 0.01 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  AT-BBPSOxp-MC &  &  &  & 0.01 & 0.01 & 0.01 & 0.89 & 0.90 & 0.90 \\ 
+  AT-PSO &  & -413.12 & 651.38 & 0.70 & 0.88 & 0.88 & 0.72 & 0.91 & 0.91 \\ 
+   \hline
+\end{tabular}
+}
+\label{tab:psopoisiid}
+\caption{PSO simulation results for the Poisson IID model. ``Mean'' is the mean maximum found after 10 repetitions, scaled so PSO with the global neighbhorhood has a mean of 0, and ``SD'' is their standard deviation. Omitted Means are less than $-1,000$. The IMH and IMHwG algorithms were constructed using the PSO algorithm's estimate of the posterior mode after $1,000$, $1,500$, and $2,000$ iterations, then their acceptance rates were computed after $10,000$ iterations. If the algorithm could not be constructed because e.g. the Hessian was not negative definite at the estimated mode, the acceptance rate was omitted.}
+\end{table}
 
-\begin{figure}[!ht]
+% latex table generated in R 3.3.1 by xtable 1.8-2 package
+% Wed Aug 24 15:10:06 2016
+\begin{table}[h]
 \centering
-%\includegraphics[width=0.4\textwidth]{code/pop/maxplot21.png}
-\includegraphics[width=0.4\textwidth]{code/pop/maxplot22.png}
-%\includegraphics[width=0.4\textwidth]{code/pop/maxplot23.png}
-\includegraphics[width=0.4\textwidth]{code/pop/maxplot24.png}
-\caption{Boxplots of the maximum value of the log posterior found for lognormal models by random effect type, number of random effects, neighborhood topology, optimization initialization, and algorithm. Each box plot was created using the 10, 25, 50, 75, and 90 percentiles of the maximum found from 20 replications of 1,000 iterations with 50 particles for each factor combination.}
-\label{fig:popmaxboxplot2}
-\end{figure}
+\tiny{
+\begin{tabular}{llrr|rrr|rrr}
+\multicolumn{2}{l}{Poisson full}& \multicolumn{2}{c}{Maximum} & \multicolumn{3}{c}{IMH acc rate}  &\multicolumn{3}{c}{IMHwG acc rate}\\
+  \hline 
+Algorithm & Nbhd & Mean & SD & 1200 & 1600 & 2000 & 1200 & 1600 & 2000 \\ 
+  \hline
+PSO & global & 0.00 & 70715.05 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  BBPSO-MC &  &  &  & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  BBPSOxp-MC &  & 81045.74 & 102530.37 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  DI-PSO &  &  &  & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  AT-BBPSO-MC &  & 223231.58 & 4260.48 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  AT-BBPSOxp-MC &  & 241751.90 & 7339.59 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  AT-PSO &  & 12359.42 & 49479.22 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ \hline
+  PSO & ring-3 &  &  & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  BBPSO-MC &  &  &  & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  BBPSOxp-MC &  & 58686.59 & 128958.03 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  DI-PSO &  &  &  & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  AT-BBPSO-MC &  & 277743.41 & 8776.64 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  AT-BBPSOxp-MC &  & 270016.09 & 18031.02 & 0.01 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  AT-PSO &  & 31853.46 & 55602.83 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ \hline
+  PSO & ring-1 &  &  & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  BBPSO-MC &  & 18400.26 & 186413.79 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  BBPSOxp-MC &  &  &  & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  DI-PSO &  &  &  & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  AT-BBPSO-MC &  & 284439.65 & 3293.96 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  AT-BBPSOxp-MC &  & 269867.76 & 11001.64 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  AT-PSO &  & 35676.55 & 51915.29 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+   \hline
+\end{tabular}
+}
+\label{tab:psopoisfull}
+\caption{PSO simulation results for the Poisson full model. ``Mean'' is the mean maximum found after 10 repetitions, scaled so PSO with the global neighbhorhood has a mean of 0, and ``SD'' is their standard deviation. Omitted Means are less than $-1,000$. The IMH and IMHwG algorithms were constructed using the PSO algorithm's estimate of the posterior mode after $1,000$, $1,500$, and $2,000$ iterations, then their acceptance rates were computed after $10,000$ iterations. If the algorithm could not be constructed because e.g. the Hessian was not negative definite at the estimated mode, the acceptance rate was omitted.}
+\end{table}
 
-Next we move to comparing various MCMC algorithms for both classes of models. The other MCMC algorithms we consider in this section are single move random walk Metropolis within Gibbs (RWwG), block random walk Metropolis within Gibbs (B-RWwG), Hamiltonian Monte Carlo as implemented by the Stan software \citep{carpenter2015stan} using the No U-turn Sampler \citep{homan2014no} and for the lognormal model for county populations, a two step Gibbs sampler (Gibbs). The last algorithm is only considered for the lognormal model because only in that case are all of the full conditionals tractable. We use standard settings to fit each of the models in Stan, though minimal tweaking was required in some cases. In all of the Gibbs algorithms, the blocks are the same as in the IMHwG algorithms detailed in the previous section. Both the RWwG and B-RWwG algorithms are tuned during the burn-in using an adaptive method. Appendix \ref{app:altmcmc} explains the details of the two random walk algorithms we use including how the adaptation was performed. 
+% latex table generated in R 3.3.1 by xtable 1.8-2 package
+% Wed Aug 24 15:10:06 2016
+\begin{table}[h]
+\centering
+\tiny{
+\begin{tabular}{llrr|rrr|rrr}
+\multicolumn{2}{l}{lognormal IID} & \multicolumn{2}{c}{Maximum} & \multicolumn{3}{c}{IMH acc rate}  &\multicolumn{3}{c}{IMHwG acc rate}\\
+  \hline 
+Algorithm & Nbhd & Mean & SD & 1200 & 1600 & 2000 & 1200 & 1600 & 2000 \\ 
+  \hline
+PSO & global & 0.00 & 0.00 & 0.68 & 0.69 & 0.68 & 0.89 & 0.89 & 0.89 \\ 
+  BBPSO-MC &  &  &  & 0.03 & 0.02 & 0.03 & 0.00 & 0.00 & 0.00 \\ 
+  BBPSOxp-MC &  &  &  & 0.03 & 0.03 & 0.03 & 0.00 & 0.00 & 0.00 \\ 
+  DI-PSO &  &  &  & 0.00 & 0.02 & 0.01 & 0.00 & 0.00 & 0.00 \\ 
+  AT-BBPSO-MC &  & -0.00 & 0.00 & 0.69 & 0.68 & 0.67 & 0.90 & 0.89 & 0.90 \\ 
+  AT-BBPSOxp-MC &  & 0.00 & 0.00 & 0.68 & 0.66 & 0.65 & 0.89 & 0.90 & 0.89 \\ 
+  AT-PSO &  & 0.00 & 0.00 & 0.67 & 0.68 & 0.66 & 0.89 & 0.89 & 0.90 \\ \hline
+  PSO & ring-3 & 0.00 & 0.00 & 0.66 & 0.67 & 0.67 & 0.90 & 0.89 & 0.89 \\ 
+  BBPSO-MC &  &  &  & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  BBPSOxp-MC &  &  &  & 0.03 & 0.03 & 0.03 & 0.00 & 0.00 & 0.00 \\ 
+  DI-PSO &  & 0.00 & 0.00 & 0.67 & 0.66 & 0.66 & 0.90 & 0.90 & 0.89 \\ 
+  AT-BBPSO-MC &  & -0.00 & 0.00 & 0.66 & 0.68 & 0.67 & 0.90 & 0.90 & 0.89 \\ 
+  AT-BBPSOxp-MC &  & 0.00 & 0.00 & 0.67 & 0.65 & 0.66 & 0.90 & 0.90 & 0.89 \\ 
+  AT-PSO &  & 0.00 & 0.00 & 0.67 & 0.69 & 0.67 & 0.89 & 0.90 & 0.89 \\ \hline
+  PSO & ring-1 & -0.00 & 0.00 & 0.67 & 0.67 & 0.67 & 0.89 & 0.89 & 0.90 \\ 
+  BBPSO-MC &  &  &  & 0.03 & 0.04 & 0.04 & 0.00 & 0.00 & 0.00 \\ 
+  BBPSOxp-MC &  &  &  & 0.03 & 0.04 & 0.03 & 0.00 & 0.00 & 0.00 \\ 
+  DI-PSO &  & 0.00 & 0.00 & 0.68 & 0.67 & 0.67 & 0.90 & 0.89 & 0.90 \\ 
+  AT-BBPSO-MC &  & -1.32 & 1.26 & 0.42 & 0.57 & 0.65 & 0.53 & 0.73 & 0.83 \\ 
+  AT-BBPSOxp-MC &  & -0.00 & 0.00 & 0.65 & 0.70 & 0.66 & 0.90 & 0.90 & 0.90 \\ 
+  AT-PSO &  & 0.00 & 0.00 & 0.67 & 0.65 & 0.67 & 0.90 & 0.89 & 0.89 \\ 
+   \hline
+\end{tabular}
+}
+\label{tab:psolnormiid}
+\caption{PSO simulation results for the lognormal IID model. ``Mean'' is the mean maximum found after 10 repetitions, scaled so PSO with the global neighbhorhood has a mean of 0, and ``SD'' is their standard deviation. Omitted Means are less than $-1,000$. The IMH and IMHwG algorithms were constructed using the PSO algorithm's estimate of the posterior mode after $1,000$, $1,500$, and $2,000$ iterations, then their acceptance rates were computed after $10,000$ iterations. If the algorithm could not be constructed because e.g. the Hessian was not negative definite at the estimated mode, the acceptance rate was omitted.}
+\end{table}
 
-We compare these algorithms in Table [TO BE CONSTRUCTED] %\ref{tab:neff}
- in terms of two measures: the minimum estimated effective sample size for all parameters in the model ($n_{\text{eff}}$, see \citet[Section~12.3.5]{robert2013monte}), and time in seconds per $n_{\text{eff}}$. The effective sample size is the size of an iid sample which yields the same standard error for estimating the mean of some function of the parameters in our MCMC simulations, so we take the minimum estimated $n_{\text{eff}}$ among all elements of the parameter vector and latent process. 
+% latex table generated in R 3.3.1 by xtable 1.8-2 package
+% Wed Aug 24 15:10:06 2016
+\begin{table}[h]
+\centering
+\tiny{
+\begin{tabular}{llrr|rrr|rrr}
+\multicolumn{2}{l}{lognormal full}& \multicolumn{2}{c}{Maximum} & \multicolumn{3}{c}{IMH acc rate}  &\multicolumn{3}{c}{IMHwG acc rate}\\
+  \hline 
+Algorithm & Nbhd & Mean & SD & 1200 & 1600 & 2000 & 1200 & 1600 & 2000 \\ 
+  \hline
+PSO & global & 0.00 & 70715.05 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  BBPSO-MC &  &  &  & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  BBPSOxp-MC &  & 81045.74 & 102530.37 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  DI-PSO &  &  &  & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  AT-BBPSO-MC &  & 223231.58 & 4260.48 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  AT-BBPSOxp-MC &  & 241751.90 & 7339.59 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ \hline
+  PSO & ring-3 & -31170.78 & 59922.34 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  BBPSO-MC &  & -79122.49 & 251196.22 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  BBPSOxp-MC &  & 58686.59 & 128958.03 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  DI-PSO &  &  &  & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  AT-BBPSO-MC &  & 277743.41 & 8776.64 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  AT-BBPSOxp-MC &  & 270016.09 & 18031.02 & 0.01 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ \hline
+  PSO & ring-1 &  &  & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  BBPSO-MC &  & 18400.26 & 186413.79 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  BBPSOxp-MC &  & -41962.78 & 179059.91 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  DI-PSO &  &  &  & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  AT-BBPSO-MC &  & 284439.65 & 3293.96 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  AT-BBPSOxp-MC &  & 269867.76 & 11001.64 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+   \hline
+\end{tabular}
+}
+\label{tab:psolnormfull}
+\caption{PSO simulation results for the lognormal full model. ``Mean'' is the mean maximum found after 10 repetitions, scaled so PSO with the global neighbhorhood has a mean of 0, and ``SD'' is their standard deviation. Omitted Means are less than $-1,000$. The IMH and IMHwG algorithms were constructed using the PSO algorithm's estimate of the posterior mode after $1,000$, $1,500$, and $2,000$ iterations, then their acceptance rates were computed after $10,000$ iterations. If the algorithm could not be constructed because e.g. the Hessian was not negative definite at the estimated mode, the acceptance rate was omitted.}
+\end{table}
 
-[SIMULATIONS TO BE CONDUCTED - SHOULD TAKE A COUPLE DAYS ONCE THEY'RE RUNNING. FOR THE IMH AND IMHwG ALGORITHMS, THESE WILL ONLY USE ONE PSO ALGORITHM]
+
+
+\begin{table}[ht]
+\centering
+\tiny{
+\begin{tabular}{lr|rrrrr}
+\multicolumn{7}{l}{Poisson}\\
+  \hline
+ranef &r & IMH & IMHwG & RWwG & B-RWwG & Stan \\ 
+  \hline
+IID & 10 & 23170 & 46177 & 8072 & 1168 & 34682 \\ 
+    &  20 & 16958 & 43005 & 5739 & 646 & 50000 \\ 
+    &  30 & 30237 & 39739 & 4440 & 404 & 50000 \\ \hline
+full&  5 & 32 & 47240 & 8089 & 2070 & 28662 \\ 
+    & 7 & 37 & 42459 & 7811 & 1743 & 35298 \\ 
+    & 9 & 9 & 717 & 8298 & 1417 & 30805 \\ 
+   \hline
+\end{tabular}
+\begin{tabular}{rrrrrr}
+\multicolumn{6}{l}{lognormal}\\
+  \hline
+ IMH & IMHwG & RWwG & B-RWwG & Gibbs & Stan \\ 
+  \hline
+ 2925 & 41538 & 10952 & 1227 & 45427 & 37850 \\ 
+ 5831 & 40193 & 10621 & 613 & 44477 & 50000 \\ 
+ 4789 & 39082 & 10594 & 399 & 43356 & 50000 \\ \hline
+ 38 & 43 & 772 & 203 & 4029 & 35463 \\ 
+ 44 & 26 & 586 & 114 & 3719 & 50000 \\ 
+ 17 & 7 & 469 & 81 & 3549 & 40035 \\ 
+   \hline
+\end{tabular}
+}
+\label{tab:mcmcpopneff}
+\caption{Minimum effective sample size ($n_{eff}$) among all parameters in the model for each of several MCMC algorithms for each of the county population models.}
+\end{table}
+
+
+% latex table generated in R 3.3.1 by xtable 1.8-2 package
+% Wed Aug 24 15:51:48 2016
+\begin{table}[ht]
+\centering
+\tiny{
+\begin{tabular}{lr|rrrrr}
+\multicolumn{7}{l}{Poisson}\\
+  \hline
+ranef & r & IMH & IMHwG & RWwG & B-RWwG & Stan \\ 
+  \hline
+IID &10 & 24 & 23 & 201 & 146 & 1911 \\ 
+    &20 & 27 & 26 & 506 & 215 & 1106 \\ 
+    &30 & 16 & 24 & 790 & 483 & 980 \\ \hline
+full&5 & 14433 & 21 & 131 & 170 & 2634 \\ 
+    &7 & 11188 & 20 & 145 & 167 & 1419 \\ 
+    &9 & 32197 & 876 & 126 & 153 & 1143 \\ 
+   \hline
+\end{tabular}
+\begin{tabular}{rrrrrr}
+\multicolumn{6}{l}{lognormal}\\
+  \hline
+ IMH & IMHwG & RWwG & B-RWwG & Gibbs & Stan \\ 
+  \hline
+ 248 & 34 & 92 & 122 & 101 & 200 \\ 
+ 110 & 35 & 249 & 265 & 75 & 153 \\ 
+ 130 & 35 & 280 & 292 & 63 & 107 \\ \hline
+ 11673 & 23647 & 941 & 1158 & 837 & 1248 \\ 
+ 11653 & 44999 & 1502 & 2072 & 932 & 1735 \\ 
+ 21851 & 123163 & 1728 & 2344 & 727 & 1630 \\ 
+   \hline
+\end{tabular}
+}
+\label{tab:mcmcpopnefftime}
+\caption{Time (seconds) to achive a minimum effective samples size of $10,000$ across all parameters in the model for each of several MCMC algorithms for each of the county population models.}
+\end{table}
+
+
+
+
+% [THE DETAILS HERE ARE CURRENTLY OUTDATED]
+
+% Figure \ref{fig:popmaxboxplot} contains boxplots of the results of the simulations for the Poisson county population models of Section~\ref{sec:pop}. Models with iid random effects had 30 random effects while models with fully correlated random effects had 15. Each box plot was created using the 10, 25, 50, 75, and 90 percentiles of the maximum value of the log posterior found in all 20 replications after 1,000 iterations. Figure \ref{fig:popmaxboxplot2} is similar, except for the lognormal models. Across all models we see that the ring-3 topology and BFGS initialization both improve each of the algorithms, especially in combination. In  Appendix \ref{app:psocompare} the ring-3 neighborhood performed the best on our suite of test functions, and the same seems to be true here. The BFGS initialization is cheap, taking essentially no time to compute, yet seems to drastically improve the quality of every PSO algorithms. In  Appendix \ref{app:psocompare} we speculated that the AT-PSO algorithms would benefit significantly from some sort of stage one optimization, and our results confirm this for all of the algorithms. Another lesson from these boxplots is that the AT-PSO and AT-BBPSO algorithms tend to do the best, especially when $R^*=0.5$ in both cases. 
+% \begin{figure}[!ht]
+% \centering
+% %\includegraphics[width=0.4\textwidth]{code/pop/maxplot11.png}
+% \includegraphics[width=0.4\textwidth]{code/pop/maxplot12.png}
+% %\includegraphics[width=0.4\textwidth]{code/pop/maxplot13.png}
+% \includegraphics[width=0.4\textwidth]{code/pop/maxplot14.png}
+% \caption{Boxplots of the maximum value of the log posterior found for Poisson models by random effect type, neighborhood topology, optimization initialization, and algorithm. Each box plot was created using the 10, 25, 50, 75, and 90 percentiles of the maximum found from 20 replications of 1,000 iterations with 50 particles for each factor combination.}
+% \label{fig:popmaxboxplot}
+% \end{figure}
+
+% \begin{figure}[!ht]
+% \centering
+% %\includegraphics[width=0.4\textwidth]{code/pop/maxplot21.png}
+% \includegraphics[width=0.4\textwidth]{code/pop/maxplot22.png}
+% %\includegraphics[width=0.4\textwidth]{code/pop/maxplot23.png}
+% \includegraphics[width=0.4\textwidth]{code/pop/maxplot24.png}
+% \caption{Boxplots of the maximum value of the log posterior found for lognormal models by random effect type, number of random effects, neighborhood topology, optimization initialization, and algorithm. Each box plot was created using the 10, 25, 50, 75, and 90 percentiles of the maximum found from 20 replications of 1,000 iterations with 50 particles for each factor combination.}
+% \label{fig:popmaxboxplot2}
+% \end{figure}
+
+% Next we move to comparing various MCMC algorithms for both classes of models. The other MCMC algorithms we consider in this section are single move random walk Metropolis within Gibbs (RWwG), block random walk Metropolis within Gibbs (B-RWwG), Hamiltonian Monte Carlo as implemented by the Stan software \citep{carpenter2015stan} using the No U-turn Sampler \citep{homan2014no} and for the lognormal model for county populations, a two step Gibbs sampler (Gibbs). The last algorithm is only considered for the lognormal model because only in that case are all of the full conditionals tractable. We use standard settings to fit each of the models in Stan, though minimal tweaking was required in some cases. In all of the Gibbs algorithms, the blocks are the same as in the IMHwG algorithms detailed in the previous section. Both the RWwG and B-RWwG algorithms are tuned during the burn-in using an adaptive method. Appendix \ref{app:altmcmc} explains the details of the two random walk algorithms we use including how the adaptation was performed. 
+
+% We compare these algorithms in Table [TO BE CONSTRUCTED] %\ref{tab:neff}
+%  in terms of two measures: the minimum estimated effective sample size for all parameters in the model ($n_{\text{eff}}$, see \citet[Section~12.3.5]{robert2013monte}), and time in seconds per $n_{\text{eff}}$. The effective sample size is the size of an iid sample which yields the same standard error for estimating the mean of some function of the parameters in our MCMC simulations, so we take the minimum estimated $n_{\text{eff}}$ among all elements of the parameter vector and latent process. 
+
+% [SIMULATIONS TO BE CONDUCTED - SHOULD TAKE A COUPLE DAYS ONCE THEY'RE RUNNING. FOR THE IMH AND IMHwG ALGORITHMS, THESE WILL ONLY USE ONE PSO ALGORITHM]
 
 
 % For the IMH and IMHwG algorithms, we ran the standard PSO algorithm using the ring-1 neighbhorhood with a swarm of 100 particles for 10,000 iterations in order to estimate the mode, then used $df=100$ in the $t$-proposal for both algorithms. Each algorithm was run until convergence, then a sample of 50,000 was collected. This allows us to compare each algorithm on a per iteration basis, but ignores the setup costs associated with each algorithm. The simulations were written entirely in \verb0R0 and run on a Dell laptop with an Intel Core i7-5600U CPU. Different languages and different CPUs will yield different timing results, but the relative comparisons should be similar.

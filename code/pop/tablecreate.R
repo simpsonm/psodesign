@@ -15,7 +15,7 @@ psosum <- ddply(sumlast, .(model, ranef, ndelta, algorithm, nbhd), summarise,
 
 psosum <- psosum[rev(1:nrow(psosum)),]
 
-algset <- c("PSO", "DI-PSO", "AT-PSO-0.5-0.1", "AT-BBPSOxp-MC-5-0.5-0.1",
+algset <- c("PSO", "DI-PSO", "BBPSO-MC", "BBPSOxp-MC", "AT-PSO-0.5-0.1", "AT-BBPSOxp-MC-5-0.5-0.1",
             "AT-BBPSO-MC-5-0.5-0.1")
 
 psosum <- subset(psosum, algorithm %in% algset)
@@ -25,42 +25,43 @@ psosum$algorithm <-
             c("AT-PSO-0.5-0.1", "AT-BBPSO-MC-5-0.5-0.1", "AT-BBPSOxp-MC-5-0.5-0.1"),
             c("AT-PSO", "AT-BBPSO-MC", "AT-BBPSOxp-MC"))
          
+algids <- c(1,4,3,2,7,6,5)
+cutoff <- -1000
 
-
-poisiid <- subset(psosum, model == "pois" & ranef == "iid" & ndelta == 10)[,c(4,5,6,8)]
+poisiid <- subset(psosum, model == "pois" & ranef == "iid" & ndelta == 30)[,c(4,5,6,8)]
 poisiid$mean <- round(poisiid$mean - poisiid$mean[3],2)
-poisiid$sd[poisiid$mean < -100000] <- NA
-poisiid$mean[poisiid$mean < -100000] <- NA
-poisiid <- rbind(subset(poisiid, nbhd == "global")[c(1,2,3,5,4),],
-                 subset(poisiid, nbhd == "ring-3")[c(1,2,3,5,4),],
-                 subset(poisiid, nbhd == "ring-1")[c(1,2,3,5,4),])
+poisiid$sd[poisiid$mean < cutoff] <- NA
+poisiid$mean[poisiid$mean < cutoff] <- NA
+poisiid <- rbind(subset(poisiid, nbhd == "global")[algids,],
+                 subset(poisiid, nbhd == "ring-3")[algids,],
+                 subset(poisiid, nbhd == "ring-1")[algids,])
 poisiid
 
-poisfull <- subset(psosum, model == "pois" & ranef == "full" & ndelta == 5)[,c(4,5,6,8)]
+poisfull <- subset(psosum, model == "pois" & ranef == "full" & ndelta == 15)[,c(4,5,6,8)]
 poisfull$mean <- round(poisfull$mean - poisfull$mean[1],2)
-poisfull$sd[poisfull$mean < -100000] <- NA
-poisfull$mean[poisfull$mean < -100000] <- NA
-poisfull <- rbind(subset(poisfull, nbhd == "global")[c(1,2,3,5,4),],
-                  subset(poisfull, nbhd == "ring-3")[c(1,2,3,5,4),],
-                  subset(poisfull, nbhd == "ring-1")[c(1,2,3,5,4),])
+poisfull$sd[poisfull$mean < cutoff] <- NA
+poisfull$mean[poisfull$mean < cutoff] <- NA
+poisfull <- rbind(subset(poisfull, nbhd == "global")[algids,],
+                  subset(poisfull, nbhd == "ring-3")[algids,],
+                  subset(poisfull, nbhd == "ring-1")[algids,])
 poisfull
 
-lnormiid <- subset(psosum, model == "lnorm" & ranef == "iid" & ndelta == 10)[,c(4,5,6,8)]
+lnormiid <- subset(psosum, model == "lnorm" & ranef == "iid" & ndelta == 30)[,c(4,5,6,8)]
 lnormiid$mean <- round(lnormiid$mean - lnormiid$mean[1],2)
-lnormiid$sd[lnormiid$mean < -100000] <- NA
-lnormiid$mean[lnormiid$mean < -100000] <- NA
-lnormiid <- rbind(subset(lnormiid, nbhd == "global")[c(1,2,3,5,4),],
-                  subset(lnormiid, nbhd == "ring-3")[c(1,2,3,5,4),],
-                  subset(lnormiid, nbhd == "ring-1")[c(1,2,3,5,4),])
+lnormiid$sd[lnormiid$mean < cutoff] <- NA
+lnormiid$mean[lnormiid$mean < cutoff] <- NA
+lnormiid <- rbind(subset(lnormiid, nbhd == "global")[algids,],
+                  subset(lnormiid, nbhd == "ring-3")[algids,],
+                  subset(lnormiid, nbhd == "ring-1")[algids,])
 lnormiid
 
-lnormfull <- subset(psosum, model == "lnorm" & ranef == "full" & ndelta == 5)[,c(4,5,6,8)]
+lnormfull <- subset(psosum, model == "lnorm" & ranef == "full" & ndelta == 15)[,c(4,5,6,8)]
 lnormfull$mean <- round(lnormfull$mean - lnormfull$mean[3],2)
-lnormfull$sd[lnormfull$mean < -100000] <- NA
-lnormfull$mean[lnormfull$mean < -100000] <- NA
-lnormfull <- rbind(subset(lnormfull, nbhd == "global")[c(1,2,3,5,4),],
-                   subset(lnormfull, nbhd == "ring-3")[c(1,2,3,5,4),],
-                   subset(lnormfull, nbhd == "ring-1")[c(1,2,3,5,4),])
+lnormfull$sd[lnormfull$mean < cutoff] <- NA
+lnormfull$mean[lnormfull$mean < cutoff] <- NA
+lnormfull <- rbind(subset(lnormfull, nbhd == "global")[algids,],
+                   subset(lnormfull, nbhd == "ring-3")[algids,],
+                   subset(lnormfull, nbhd == "ring-1")[algids,])
 lnormfull
 
 
@@ -74,7 +75,7 @@ psomcmcsum$pso <-
 
 
 poisiidmcmc <- subset(psomcmcsum, model == "pois" & ranef == "iid" &
-                      ndelta == 10)[,c(6,7,8,5,9)]
+                      ndelta == 30)[,c(6,7,8,5,9)]
 tempmelt <- melt(poisiidmcmc, id.vars = c("pso", "nbhd", "mcmc", "niter"))
 poisiidmcmccast <- dcast(tempmelt, pso + nbhd ~ mcmc + niter)
 poisiidmerge <- merge(poisiid, poisiidmcmccast, by.x = c("algorithm", "nbhd"),
@@ -82,7 +83,7 @@ poisiidmerge <- merge(poisiid, poisiidmcmccast, by.x = c("algorithm", "nbhd"),
 poisiidmerge$nbhd[poisiidmerge$algorithm != "PSO"] <- NA
 
 lnormiidmcmc <- subset(psomcmcsum, model == "lnorm" & ranef == "iid" &
-                       ndelta == 10)[,c(6,7,8,5,9)]
+                       ndelta == 30)[,c(6,7,8,5,9)]
 tempmelt <- melt(lnormiidmcmc, id.vars = c("pso", "nbhd", "mcmc", "niter"))
 lnormiidmcmccast <- dcast(tempmelt, pso + nbhd ~ mcmc + niter)
 lnormiidmerge <- merge(lnormiid, lnormiidmcmccast, by.x = c("algorithm", "nbhd"),
@@ -90,7 +91,7 @@ lnormiidmerge <- merge(lnormiid, lnormiidmcmccast, by.x = c("algorithm", "nbhd")
 lnormiidmerge$nbhd[lnormiidmerge$algorithm != "PSO"] <- NA
 
 poisfullmcmc <- subset(psomcmcsum, model == "pois" & ranef == "full" &
-                       ndelta == 5)[,c(6,7,8,5,9)]
+                       ndelta == 15)[,c(6,7,8,5,9)]
 tempmelt <- melt(poisfullmcmc, id.vars = c("pso", "nbhd", "mcmc", "niter"))
 poisfullmcmccast <- dcast(tempmelt, pso + nbhd ~ mcmc + niter)
 poisfullmerge <- merge(poisfull, poisfullmcmccast, by.x = c("algorithm", "nbhd"),
@@ -98,7 +99,7 @@ poisfullmerge <- merge(poisfull, poisfullmcmccast, by.x = c("algorithm", "nbhd")
 poisfullmerge$nbhd[poisfullmerge$algorithm != "PSO"] <- NA
 
 lnormfullmcmc <- subset(psomcmcsum, model == "lnorm" & ranef == "full" &
-                        ndelta == 5)[,c(6,7,8,5,9)]
+                        ndelta == 15)[,c(6,7,8,5,9)]
 tempmelt <- melt(lnormfullmcmc, id.vars = c("pso", "nbhd", "mcmc", "niter"))
 lnormfullmcmccast <- dcast(tempmelt, pso + nbhd ~ mcmc + niter)
 lnormfullmerge <- merge(lnormfull, lnormfullmcmccast, by.x = c("algorithm", "nbhd"),
@@ -110,6 +111,75 @@ print(xtable(poisiidmerge), include.rownames=FALSE)
 print(xtable(poisfullmerge), include.rownames=FALSE)
 print(xtable(lnormiidmerge), include.rownames=FALSE)
 print(xtable(lnormfullmerge), include.rownames=FALSE)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+load("mcmcout.RData")
+rownames(mcmcout) <- NULL
+head(mcmcout)
+mcmcout$nefftime <- mcmcout$itertime/mcmcout$neff*10000
+mcmcout$alg <- mapvalues(mcmcout$alg, c("IMHwGibbs", "blockRWwG"), c("IMHwG", "B-RWwG"))
+mcmcout$alg <- factor(mcmcout$alg, levels(mcmcout$alg)[c(6,5,4,3,2,1)])
+mcmcout$model <- mapvalues(mcmcout$model, c("lnorm", "pois"), c("lognormal", "Poisson"))
+
+mcmcoutmelt <- melt(mcmcout, id.vars = c("model", "ranef", "ndelta", "alg"))
+
+poisiidneff <- dcast(mcmcoutmelt, ndelta ~ alg,
+                     subset = .(model == "Poisson" & ranef == "iid" & variable == "neff"))
+poisiidnefftime <- dcast(mcmcoutmelt, ndelta ~ alg,
+                         subset = .(model == "Poisson" & ranef == "iid" & variable == "nefftime"))
+poisfullneff <- dcast(mcmcoutmelt, ndelta ~ alg,
+                      subset = .(model == "Poisson" & ranef == "full" & variable == "neff"))
+poisfullnefftime <- dcast(mcmcoutmelt, ndelta ~ alg,
+                          subset = .(model == "Poisson" & ranef == "full" & variable == "nefftime"))
+lnormiidneff <- dcast(mcmcoutmelt, ndelta ~ alg,
+                      subset = .(model == "lognormal" & ranef == "iid" & variable == "neff"))
+lnormiidnefftime <- dcast(mcmcoutmelt, ndelta ~ alg,
+                          subset = .(model == "lognormal" & ranef == "iid" & variable == "nefftime"))
+lnormfullneff <- dcast(mcmcoutmelt, ndelta ~ alg,
+                       subset = .(model == "lognormal" & ranef == "full" & variable == "neff"))
+lnormfullnefftime <- dcast(mcmcoutmelt, ndelta ~ alg,
+                           subset = .(model == "lognormal" & ranef == "full" & variable == "nefftime"))
+
+print(xtable(rbind(poisiidneff, poisfullneff), digits = 0), include.rownames = FALSE)
+
+print(xtable(rbind(lnormiidneff, lnormfullneff), digits = 0), include.rownames = FALSE)
+
+print(xtable(rbind(lnormiidnefftime, lnormfullnefftime), digits = c(0,0,0,rep(0,5))),
+      include.rownames = FALSE)
+
+print(xtable(rbind(poisiidnefftime, poisfullnefftime), digits = c(0,0,rep(0,5))),
+      include.rownames = FALSE)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
