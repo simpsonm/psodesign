@@ -5,16 +5,16 @@ load("popdat/popdat.RData")
 
 nbeta <- 1
 nrep <- 10
-ndeltasiid <- c(10, 30)
-ndeltasfull <- c(5, 15)
-niter <- 1000
+ndeltasiid <- c(30)
+ndeltasfull <- c(10)
+niter <- 2000
 nswarm <- 50
 inertia <- 0.7298
 cognitive <- 1.496
 social <- 1.496
 nbhdnames <- c("ring-1", "ring-3", "global")
-rates <- c(0.3, 0.5)
-dfs <- c(3, 5)
+rates <- c(0.5)
+dfs <- c(5)
 ccc <- c(0.1)
 alpha <- .2*niter
 beta <- 1
