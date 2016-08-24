@@ -6,8 +6,8 @@ library(matrixcalc)
 load("popdat/popdat.RData")
 
 nbeta <- 1
-ndeltasiid <- c(10, 30)
-ndeltasfull <- c(5, 10)
+ndeltasiid <- c(10, 20, 30)
+ndeltasfull <- c(5, 7, 9)
 ranefs <- c("iid", "full")
 models <- c("pois", "lnorm")
 ccc <- 0.1
