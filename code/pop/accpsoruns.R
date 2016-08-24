@@ -61,7 +61,7 @@ psoid <- 1
     ndeltaiid <- ndeltasiid[idelta]
     nell <- ndeltafull*(ndeltafull + 1)/2
     for(ranef in ranefs){
-      datlist <- switch(ranef, iid = datlistiid, full = datlistfull)
+      datlist <- switch(ranef, iid = datlistiid[[idelta]], full = datlistfull[[idelta]])
       ndelta <- switch(ranef, iid = ndeltaiid, full = ndeltafull)
       for(model in models){
         lpost <- switch(paste(model, ranef, sep=""),
@@ -175,10 +175,8 @@ psoid <- 1
   }
 }
 
-
-
 accout <- NULL
-niters <- c(400, 800, 1200, 1600, 2000)
+niters <- c(1000, 1500, 2000)
 mcmciter <- 10000
 df <- 100
 for(id in 1:max(accpsoout$psoid)){
@@ -191,8 +189,9 @@ for(id in 1:max(accpsoout$psoid)){
   nbhd <- psooutid$nbhd[1]
   alg <- psooutid$algorithm[1]
   ndelta <- psooutid$ndelta[1]
+  idelta <- ifelse(ndelta %in% c(5, 10), 1, 2)
   nell <- ndelta*(ndelta + 1)/2
-  datlist <- switch(as.character(ranef), iid = datlistiid, full = datlistfull)
+  datlist <- switch(ranef, iid = datlistiid[[idelta]], full = datlistfull[[idelta]])
   lpost <- switch(paste(model, ranef, sep=""),
                   poisiid = poislpostiid,
                   lnormiid = lnormlpostiid,

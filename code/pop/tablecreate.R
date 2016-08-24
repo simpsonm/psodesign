@@ -15,7 +15,7 @@ psosum <- ddply(sumlast, .(model, ranef, ndelta, algorithm, nbhd), summarise,
 
 psosum <- psosum[rev(1:nrow(psosum)),]
 
-algset <- c("PSO", "DI-PSO", "BBPSO-MC", "BBPSOxp-MC", "AT-PSO-0.5-0.1", "AT-BBPSOxp-MC-5-0.5-0.1",
+algset <- c("PSO", "DI-PSO", "AT-PSO-0.5-0.1", "AT-BBPSOxp-MC-5-0.5-0.1",
             "AT-BBPSO-MC-5-0.5-0.1")
 
 psosum <- subset(psosum, algorithm %in% algset)
@@ -27,55 +27,102 @@ psosum$algorithm <-
          
 
 
-poisiid <- subset(psosum, model == "pois" & ranef == "iid" & ndelta == 30)[,c(4,5,6,8)]
+poisiid <- subset(psosum, model == "pois" & ranef == "iid" & ndelta == 10)[,c(4,5,6,8)]
 poisiid$mean <- round(poisiid$mean - poisiid$mean[3],2)
 poisiid$sd[poisiid$mean < -100000] <- NA
 poisiid$mean[poisiid$mean < -100000] <- NA
-poisiid <- rbind(subset(poisiid, nbhd == "global")[c(1,4,3,2,5,7,6),],
-                 subset(poisiid, nbhd == "ring-3")[c(1,4,3,2,5,7,6),],
-                 subset(poisiid, nbhd == "ring-1")[c(1,4,3,2,5,7,6),])
+poisiid <- rbind(subset(poisiid, nbhd == "global")[c(1,2,3,5,4),],
+                 subset(poisiid, nbhd == "ring-3")[c(1,2,3,5,4),],
+                 subset(poisiid, nbhd == "ring-1")[c(1,2,3,5,4),])
 poisiid
 
-poisfull <- subset(psosum, model == "pois" & ranef == "full" & ndelta == 15)[,c(4,5,6,8)]
+poisfull <- subset(psosum, model == "pois" & ranef == "full" & ndelta == 5)[,c(4,5,6,8)]
 poisfull$mean <- round(poisfull$mean - poisfull$mean[1],2)
 poisfull$sd[poisfull$mean < -100000] <- NA
 poisfull$mean[poisfull$mean < -100000] <- NA
-poisfull <- rbind(subset(poisfull, nbhd == "global")[c(1,4,3,2,5,7,6),],
-                  subset(poisfull, nbhd == "ring-3")[c(1,4,3,2,5,7,6),],
-                  subset(poisfull, nbhd == "ring-1")[c(1,4,3,2,5,7,6),])
+poisfull <- rbind(subset(poisfull, nbhd == "global")[c(1,2,3,5,4),],
+                  subset(poisfull, nbhd == "ring-3")[c(1,2,3,5,4),],
+                  subset(poisfull, nbhd == "ring-1")[c(1,2,3,5,4),])
 poisfull
 
-lnormiid <- subset(psosum, model == "lnorm" & ranef == "iid" & ndelta == 30)[,c(4,5,6,8)]
+lnormiid <- subset(psosum, model == "lnorm" & ranef == "iid" & ndelta == 10)[,c(4,5,6,8)]
 lnormiid$mean <- round(lnormiid$mean - lnormiid$mean[1],2)
 lnormiid$sd[lnormiid$mean < -100000] <- NA
 lnormiid$mean[lnormiid$mean < -100000] <- NA
-lnormiid <- rbind(subset(lnormiid, nbhd == "global")[c(1,4,3,2,5,7,6),],
-                  subset(lnormiid, nbhd == "ring-3")[c(1,4,3,2,5,7,6),],
-                  subset(lnormiid, nbhd == "ring-1")[c(1,4,3,2,5,7,6),])
+lnormiid <- rbind(subset(lnormiid, nbhd == "global")[c(1,2,3,5,4),],
+                  subset(lnormiid, nbhd == "ring-3")[c(1,2,3,5,4),],
+                  subset(lnormiid, nbhd == "ring-1")[c(1,2,3,5,4),])
 lnormiid
 
-lnormfull <- subset(psosum, model == "lnorm" & ranef == "full" & ndelta == 15)[,c(4,5,6,8)]
+lnormfull <- subset(psosum, model == "lnorm" & ranef == "full" & ndelta == 5)[,c(4,5,6,8)]
 lnormfull$mean <- round(lnormfull$mean - lnormfull$mean[3],2)
 lnormfull$sd[lnormfull$mean < -100000] <- NA
 lnormfull$mean[lnormfull$mean < -100000] <- NA
-lnormfull <- rbind(subset(lnormfull, nbhd == "global")[c(1,4,3,2,5,7,6),],
-                   subset(lnormfull, nbhd == "ring-3")[c(1,4,3,2,5,7,6),],
-                   subset(lnormfull, nbhd == "ring-1")[c(1,4,3,2,5,7,6),])
+lnormfull <- rbind(subset(lnormfull, nbhd == "global")[c(1,2,3,5,4),],
+                   subset(lnormfull, nbhd == "ring-3")[c(1,2,3,5,4),],
+                   subset(lnormfull, nbhd == "ring-1")[c(1,2,3,5,4),])
 lnormfull
 
 
+accout <- read.csv("accout.csv")
+
+psomcmcsum <- subset(accout, pso %in% algset & niter > 400)
+psomcmcsum$pso <-
+  mapvalues(psomcmcsum$pso,
+            c("AT-PSO-0.5-0.1", "AT-BBPSO-MC-5-0.5-0.1", "AT-BBPSOxp-MC-5-0.5-0.1"),
+            c("AT-PSO", "AT-BBPSO-MC", "AT-BBPSOxp-MC"))
+
+
+poisiidmcmc <- subset(psomcmcsum, model == "pois" & ranef == "iid" &
+                      ndelta == 10)[,c(6,7,8,5,9)]
+tempmelt <- melt(poisiidmcmc, id.vars = c("pso", "nbhd", "mcmc", "niter"))
+poisiidmcmccast <- dcast(tempmelt, pso + nbhd ~ mcmc + niter)
+poisiidmerge <- merge(poisiid, poisiidmcmccast, by.x = c("algorithm", "nbhd"),
+                      by.y = c("pso", "nbhd"), sort = FALSE)
+poisiidmerge$nbhd[poisiidmerge$algorithm != "PSO"] <- NA
+
+lnormiidmcmc <- subset(psomcmcsum, model == "lnorm" & ranef == "iid" &
+                       ndelta == 10)[,c(6,7,8,5,9)]
+tempmelt <- melt(lnormiidmcmc, id.vars = c("pso", "nbhd", "mcmc", "niter"))
+lnormiidmcmccast <- dcast(tempmelt, pso + nbhd ~ mcmc + niter)
+lnormiidmerge <- merge(lnormiid, lnormiidmcmccast, by.x = c("algorithm", "nbhd"),
+                       by.y = c("pso", "nbhd"), sort = FALSE)
+lnormiidmerge$nbhd[lnormiidmerge$algorithm != "PSO"] <- NA
+
+poisfullmcmc <- subset(psomcmcsum, model == "pois" & ranef == "full" &
+                       ndelta == 5)[,c(6,7,8,5,9)]
+tempmelt <- melt(poisfullmcmc, id.vars = c("pso", "nbhd", "mcmc", "niter"))
+poisfullmcmccast <- dcast(tempmelt, pso + nbhd ~ mcmc + niter)
+poisfullmerge <- merge(poisfull, poisfullmcmccast, by.x = c("algorithm", "nbhd"),
+                      by.y = c("pso", "nbhd"), sort = FALSE)
+poisfullmerge$nbhd[poisfullmerge$algorithm != "PSO"] <- NA
+
+lnormfullmcmc <- subset(psomcmcsum, model == "lnorm" & ranef == "full" &
+                        ndelta == 5)[,c(6,7,8,5,9)]
+tempmelt <- melt(lnormfullmcmc, id.vars = c("pso", "nbhd", "mcmc", "niter"))
+lnormfullmcmccast <- dcast(tempmelt, pso + nbhd ~ mcmc + niter)
+lnormfullmerge <- merge(lnormfull, lnormfullmcmccast, by.x = c("algorithm", "nbhd"),
+                      by.y = c("pso", "nbhd"), sort = FALSE)
+lnormfullmerge$nbhd[lnormfullmerge$algorithm != "PSO"] <- NA
 
 library(xtable)
-print(xtable(poisiid), include.rownames=FALSE)
-print(xtable(poisfull), include.rownames=FALSE)
-print(xtable(lnormiid), include.rownames=FALSE)
-print(xtable(lnormfull), include.rownames=FALSE)
+print(xtable(poisiidmerge), include.rownames=FALSE)
+print(xtable(poisfullmerge), include.rownames=FALSE)
+print(xtable(lnormiidmerge), include.rownames=FALSE)
+print(xtable(lnormfullmerge), include.rownames=FALSE)
 
 
 
 
 
 
+accpsoout <- read.csv("accpsoout.csv")
+
+
+
+bbpsotest <- subset(accpsoout, model == "pois" & ranef == "full" & ndelta == 15 & nbhd == "ring-3" & algorithm %in% c("BBPSOxp-MC", "BBPSO-MC") & iteration == 400)
+
+str(bbpsotest)
 
 which.min(poisiid$mean)
 
