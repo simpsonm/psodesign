@@ -66,7 +66,7 @@ lnormfull
 
 accout <- read.csv("accout.csv")
 
-psomcmcsum <- subset(accout, pso %in% algset & niter > 400)
+psomcmcsum <- subset(accout, pso %in% algset & niter > 800)
 psomcmcsum$pso <-
   mapvalues(psomcmcsum$pso,
             c("AT-PSO-0.5-0.1", "AT-BBPSO-MC-5-0.5-0.1", "AT-BBPSOxp-MC-5-0.5-0.1"),

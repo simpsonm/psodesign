@@ -6,7 +6,7 @@ load("popdat/popdat.RData")
 nbeta <- 1
 nrep <- 10
 ndeltasiid <- c(30)
-ndeltasfull <- c(10)
+ndeltasfull <- c(7)
 niter <- 2000
 nswarm <- 50
 inertia <- 0.7298
