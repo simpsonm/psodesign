@@ -16,16 +16,125 @@ smalltest <- optim(rep(0, 80), gelmanlpost, datlist = datlistsmall,
 smalltest <- optim(smalltest$par, gelmanlpost, datlist = datlistsmall,
                    control=list(fnscale=-1, reltol = .Machine$double.eps, maxit = 100000))
 
+plustest <- optim(rep(0, 89), gelmanpluslpost, datlist = datlistplus,
+              control=list(fnscale=-1, reltol = .Machine$double.eps, maxit = 10000))
+
+plustest <- optim(plustest$par, gelmanpluslpost, datlist = datlistplus,
+              control=list(fnscale=-1, reltol = .Machine$double.eps, maxit = 1000000))
+
 
 
 musmall <- smalltest$par
 lpbestsmall <- smalltest$value
 
-imhsmall <- indmetrop(10000, gelmanlpost, gelmanlposthess, musmall, musmall, 100, lpbestsmall,
-                      datlist = datlistsmall, tune = FALSE)
+muplus <- plustest$par
+lpbestplus <- plustest$value
+
+niter <- 10000
+nswarm <- 100
+inertia <- 0.7298
+cognitive <- 1.496
+social <- 1.496
+nbhd <- list()
+nbhd[[1]] <- sapply(1:nswarm, function(x){return( (x + -1:1 - 1)%%nswarm + 1)}) ## ring-1
+nbhd[[2]] <- sapply(1:nswarm, function(x){return( (x + -3:3 - 1)%%nswarm + 1)}) ## ring-3
+nbhd[[3]] <- matrix(1:nswarm, ncol=nswarm, nrow=nswarm) ## global
+
+smallinit <- matrix(runif(80*nswarm, -10, 10), ncol = nswarm) + musmall
+smallinit[,1] <- musmall
+
+plusinit <- matrix(runif(89*nswarm, -10, 10), ncol = nswarm) + muplus
+plusinit[,1] <- muplus
+
+atsmall <- pso(niter, nswarm, inertia, cognitive, social, smallinit, nbhd[[2]], gelmanlpost,
+               datlist = datlistsmall, tune = TRUE, rate = 0.5)
+
+atplus <- pso(niter, nswarm, inertia, cognitive, social, plusinit, nbhd[[2]], gelmanpluslpost,
+              datlist = datlistplus, tune = TRUE, rate = 0.5)
+
+atbbxpsmall <- bbpso(niter, nswarm, 1, 0.5, smallinit, nbhd[[2]], gelmanlpost, 5, TRUE, 0.5,
+                     datlist = datlistsmall)
+
+atbbxpplus <- bbpso(niter, nswarm, 1, 0.5, plusinit, nbhd[[2]], gelmanlpost, 5, TRUE, 0.5,
+                     datlist = datlistplus)
+
+atbbsmall <- bbpso(niter, nswarm, 1, 0.5, smallinit, nbhd[[2]], gelmanlpost, 5, TRUE, 0,
+                     datlist = datlistsmall)
+
+atbbplus <- bbpso(niter, nswarm, 1, 0.5, plusinit, nbhd[[2]], gelmanlpost, 5, TRUE, 0,
+                     datlist = datlistplus)
+
+
+
+c(atsmall$max, atbbxpsmall$max, atbbsmall$max) - max(c(atsmall$max, atbbxpsmall$max, atbbsmall$max))
+c(atplus$max, atbbxpplus$max, atbbplus$max) - max(c(atplus$max, atbbxpplus$max, atbbplus$max))
+
+
+
+musmall <- atsmall$argmax
+lpbestsmall <- atsmall$max
+
+muplus <- atplus$argmax
+lpbestplus <- atplus$max
+
+plustest <- optim(muplus, gelmanpluslpost, datlist = datlistplus,
+              control=list(fnscale=-1, reltol = .Machine$double.eps, maxit = 100000))
+
+bfgstest <- optim(rep(0,89), gelmanpluslpost, datlist = datlistplus,
+                  control=list(fnscale=-1, reltol = .Machine$double.eps, maxit = 10000),
+                  method = "BFGS")
+
+lpbestplus <- bfgstest$value
+muplus <- bfgstest$par
+
+muplus <- plustest$par
+lpbestplus <- plustest$value
+
+plusinit <- matrix(runif(89*nswarm, -10, 10), ncol = nswarm) + muplus
+plusinit[,1] <- muplus
+
+atplus <- pso(niter, nswarm, inertia, cognitive, social, plusinit, nbhd[[2]], gelmanpluslpost,
+              datlist = datlistplus, tune = TRUE, rate = 0.5)
+
+muplus <- atplus$argmax
+lpbestplus <- atplus$max
+
+imhsmall <- indmetrop(10000, gelmanlpost, gelmanlposthess, musmall, musmall,
+                      100, lpbestsmall, datlist = datlistsmall, tune = FALSE)
 
 mean(imhsmall$acc)
 
+imhplus <- indmetrop(10000, gelmanpluslpost, gelmanpluslposthess, muplus, muplus,
+                     100, lpbestplus, datlist = datlistplus, tune = FALSE)
+
+imhwgpluspso <- gelmanplusindwithingibbs(100000, muplus, muplus, 100, datlistplus)
+
+imhwgplusbfgs <- gelmanplusindwithingibbs(100000, bfgstest$par, bfgstest$par, 100, datlistplus)
+
+mean(imhwgpluspso$acc)
+
+mean(imhwgplusbfgs$acc)
+
+par(mfrow=c(4,2))
+for(i in 1:4){
+  plot(ts(imhwgpluspso$draws[,i]))
+  plot(ts(imhwgplusbfgs$draws[,i]), col = "red")
+}
+
+mean(imhplus$acc)
+
+mean(imhwgplus$acc)
+
+
+source("electionfun.R")
+
+newhess <- gelmanpluslposthess(muplus, datlistplus)
+
+oldhess <- gelmanpluslposthessOLD(muplus, datlistplus)
+
+all.equal(oldhess, newhess)
+
+which(abs(oldhess - newhess) == max(abs(oldhess - newhess)), arr.ind=TRUE)
 
 imhwgsmall <- gelmanindwithingibbs(10000, musmall, musmall, 100, datlistsmall)
 
@@ -33,11 +142,6 @@ mean(imhwgsmall$acc)
 
 
 
-plustest <- optim(rep(0, 89), gelmanpluslpost, datlist = datlistplus,
-              control=list(fnscale=-1, reltol = .Machine$double.eps, maxit = 10000))
-
-plustest <- optim(plustest$par, gelmanpluslpost, datlist = datlistplus,
-              control=list(fnscale=-1, reltol = .Machine$double.eps, maxit = 1000000))
 
 muplus <- plustest$par
 lpbestplus <- plustest$value
