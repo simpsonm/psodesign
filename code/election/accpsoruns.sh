@@ -4,7 +4,7 @@
 #SBATCH -J accpsorunselection
 #SBATCH -o accpsoruns.o
 #SBATCH -e accpsoruns.e
-#SBATCH --mem 5000
+#SBATCH --mem 10000
 #SBATCH -t 5-00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=themattsimpson@gmail.com
