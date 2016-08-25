@@ -37,7 +37,7 @@ poisiid <- rbind(subset(poisiid, nbhd == "global")[algids,],
                  subset(poisiid, nbhd == "ring-1")[algids,])
 poisiid
 
-poisfull <- subset(psosum, model == "pois" & ranef == "full" & ndelta == 15)[,c(4,5,6,8)]
+poisfull <- subset(psosum, model == "pois" & ranef == "full" & ndelta == 7)[,c(4,5,6,8)]
 poisfull$mean <- round(poisfull$mean - poisfull$mean[1],2)
 poisfull$sd[poisfull$mean < cutoff] <- NA
 poisfull$mean[poisfull$mean < cutoff] <- NA
@@ -55,7 +55,7 @@ lnormiid <- rbind(subset(lnormiid, nbhd == "global")[algids,],
                   subset(lnormiid, nbhd == "ring-1")[algids,])
 lnormiid
 
-lnormfull <- subset(psosum, model == "lnorm" & ranef == "full" & ndelta == 15)[,c(4,5,6,8)]
+lnormfull <- subset(psosum, model == "lnorm" & ranef == "full" & ndelta == 7)[,c(4,5,6,8)]
 lnormfull$mean <- round(lnormfull$mean - lnormfull$mean[3],2)
 lnormfull$sd[lnormfull$mean < cutoff] <- NA
 lnormfull$mean[lnormfull$mean < cutoff] <- NA
@@ -91,7 +91,7 @@ lnormiidmerge <- merge(lnormiid, lnormiidmcmccast, by.x = c("algorithm", "nbhd")
 lnormiidmerge$nbhd[lnormiidmerge$algorithm != "PSO"] <- NA
 
 poisfullmcmc <- subset(psomcmcsum, model == "pois" & ranef == "full" &
-                       ndelta == 15)[,c(6,7,8,5,9)]
+                       ndelta == 7)[,c(6,7,8,5,9)]
 tempmelt <- melt(poisfullmcmc, id.vars = c("pso", "nbhd", "mcmc", "niter"))
 poisfullmcmccast <- dcast(tempmelt, pso + nbhd ~ mcmc + niter)
 poisfullmerge <- merge(poisfull, poisfullmcmccast, by.x = c("algorithm", "nbhd"),
@@ -99,7 +99,7 @@ poisfullmerge <- merge(poisfull, poisfullmcmccast, by.x = c("algorithm", "nbhd")
 poisfullmerge$nbhd[poisfullmerge$algorithm != "PSO"] <- NA
 
 lnormfullmcmc <- subset(psomcmcsum, model == "lnorm" & ranef == "full" &
-                        ndelta == 15)[,c(6,7,8,5,9)]
+                        ndelta == 7)[,c(6,7,8,5,9)]
 tempmelt <- melt(lnormfullmcmc, id.vars = c("pso", "nbhd", "mcmc", "niter"))
 lnormfullmcmccast <- dcast(tempmelt, pso + nbhd ~ mcmc + niter)
 lnormfullmerge <- merge(lnormfull, lnormfullmcmccast, by.x = c("algorithm", "nbhd"),
