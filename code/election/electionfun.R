@@ -201,7 +201,7 @@ gelmanlposthess <- function(par, datlist){
   return(out)
 }
 
-gelmanpluslposthess <- function(par, datlist){
+gelmanpluslposthessOLD <- function(par, datlist){
   betamn <- datlist$betamn
   betavar <- datlist$betavar
   sig2a <- datlist$sig2a
@@ -346,5 +346,129 @@ gelmanpluslposthess <- function(par, datlist){
       nbeta + nstate + nageedu + npoll + 1 + nregion + 4] <- 1/sig2.region*alpha.region
   out[nbeta + nstate + nageedu + npoll + 1 + nregion + 4,
       nbeta + nstate + nageedu + npoll + 1 + 1:nregion  ] <- 1/sig2.region*alpha.region
+  return(out)
+}
+
+gelmanpluslposthess <- function(par, datlist){
+  betamn <- datlist$betamn
+  betavar <- datlist$betavar
+  sig2a <- datlist$sig2a
+  sig2b <- datlist$sig2b
+  y <- datlist$y
+  xzmat <- datlist$xzmat
+  wmat <- datlist$wmat
+  prev <- datlist$prev
+  statemat <- datlist$statemat
+  ageedumat <- datlist$ageedumat
+  pollmat <- datlist$pollmat
+  regionmat <- datlist$regionmat
+  xmat <- datlist$xmat
+  nstate <- datlist$nstate
+  nage <- datlist$nage
+  nedu <- datlist$nedu
+  nageedu <- nage*nedu
+  nregion <- datlist$nregion
+  nbeta <- datlist$nbeta
+  npoll <- datlist$npoll
+  beta.y <- par[1:nbeta]
+  alpha.state <-  par[nbeta + 1:nstate]
+  alpha.ageedu <- par[nbeta + nstate + 1:nageedu]
+  alpha.poll <-   par[nbeta + nstate + nageedu + 1:npoll]
+  eta <- c(beta.y, alpha.state, alpha.ageedu, alpha.poll)
+  beta.prev <-    par[nbeta + nstate + nageedu + npoll + 1]
+  alpha.region <- par[nbeta + nstate + nageedu + npoll + 1 + 1:nregion]
+  delta <- c(beta.prev, alpha.region)
+  lsig2.state <-  par[nbeta + nstate + nageedu + npoll + 1 + nregion + 1]
+  lsig2.ageedu <- par[nbeta + nstate + nageedu + npoll + 1 + nregion + 2]
+  lsig2.poll <-   par[nbeta + nstate + nageedu + npoll + 1 + nregion + 3]
+  lsig2.region <- par[nbeta + nstate + nageedu + npoll + 1 + nregion + 4]
+  sig2.state <- exp(lsig2.state)
+  sig2.ageedu <- exp(lsig2.ageedu)
+  sig2.poll <- exp(lsig2.poll)
+  sig2.region <- exp(lsig2.region)
+  sig2s <- c(sig2.state, sig2.ageedu, sig2.poll, sig2.region)
+  lsig2s <- c(lsig2.state, lsig2.ageedu, lsig2.poll, lsig2.region)
+  mu.y <- xzmat%*%eta
+  mu.state <- wmat%*%delta
+  dpdmu.y <- c(exp(mu.y)/(1 + exp(mu.y))^2)
+  out <- matrix(0, nbeta + nstate + nageedu + npoll + 1 + nregion + 4,
+                nbeta + nstate + nageedu + npoll + 1 + nregion + 4)
+  ## data model hessian
+  out[1:(nbeta + nstate + nageedu + npoll),1:(nbeta + nstate + nageedu + npoll)] <-
+    - crossprod(xzmat, dpdmu.y*xzmat)
+  ## hierarchical model hessian
+  ## # alpha.state alpha.state
+  out[nbeta + 1:nstate, nbeta + 1:nstate] <- out[nbeta + 1:nstate, nbeta + 1:nstate] -
+    diag(1/sig2.state, nstate)
+  ## # delta delta (delta = c(beta.prev, alpha.region))
+  out[nbeta + nstate + nageedu + npoll + 1:(1 + nregion),
+      nbeta + nstate + nageedu + npoll + 1:(1 + nregion)] <- -1/sig2.state*crossprod(wmat)
+  ## # lsig2.state lsig2.state
+  out[nbeta + nstate + nageedu + npoll + 1 + nregion + 1,
+      nbeta + nstate + nageedu + npoll + 1 + nregion + 1] <-
+    -1/sig2.state*(sig2b + 0.5*crossprod(alpha.state - mu.state))
+  ## # alpha.state lsig2.state
+  out[nbeta + 1:nstate, nbeta + nstate + nageedu + npoll + 1 + nregion + 1] <-
+    1/sig2.state*c(alpha.state - wmat%*%delta)
+  out[nbeta + nstate + nageedu + npoll + 1 + nregion + 1, nbeta + 1:nstate] <-
+    1/sig2.state*c(alpha.state - wmat%*%delta)
+  ## #alpha.state delta (delta = c(beta.prev, alpha.region))
+  out[nbeta + 1:nstate, nbeta + nstate + nageedu + npoll + 1:(1 + nregion)] <-
+    wmat/sig2.state
+  out[nbeta + nstate + nageedu + npoll + 1:(1 + nregion), nbeta + 1:nstate] <-
+    t(wmat)/sig2.state
+  ## # delta lsig2.state (delta = c(beta.prev, alpha.region))
+  out[nbeta + nstate + nageedu + npoll + 1 + nregion + 1,
+      nbeta + nstate + nageedu + npoll + 1:(1 + nregion)] <-
+    c(crossprod(alpha.state - wmat%*%delta, wmat))/sig2.state
+  out[nbeta + nstate + nageedu + npoll + 1:(1 + nregion),
+      nbeta + nstate + nageedu + npoll + 1 + nregion + 1] <-
+    c(crossprod(alpha.state - wmat%*%delta, wmat))/sig2.state
+  ## priors hessian
+  ## # beta beta
+  out[1:nbeta, 1:nbeta] <- out[1:nbeta, 1:nbeta] - diag(1/betavar, nbeta)
+  ## alpha.ageedu alpha.ageedu
+  out[nbeta + nstate + 1:nageedu, nbeta + nstate + 1:nageedu] <-
+    out[nbeta + nstate + 1:nageedu, nbeta + nstate + 1:nageedu] - diag(1/sig2.ageedu, nageedu)
+  ## alpha.poll alpha.poll
+  out[nbeta + nstate + nageedu + 1:npoll, nbeta + nstate + nageedu + 1:npoll] <-
+    out[nbeta + nstate + nageedu + 1:npoll, nbeta + nstate + nageedu + 1:npoll] -
+    diag(1/sig2.poll, npoll)
+  ## beta.prev
+  out[nbeta + nstate + nageedu + npoll + 1, nbeta + nstate + nageedu + npoll + 1] <-
+    out[nbeta + nstate + nageedu + npoll + 1, nbeta + nstate + nageedu + npoll + 1] - 1/betavar
+  ## alpha.region
+  out[nbeta + nstate + nageedu + npoll + 1 + 1:nregion,
+      nbeta + nstate + nageedu + npoll + 1 + 1:nregion] <-
+    out[nbeta + nstate + nageedu + npoll + 1 + 1:nregion,
+        nbeta + nstate + nageedu + npoll + 1 + 1:nregion] - diag(1/sig2.region, nregion)
+  ## tau.ageedu tau.ageedu
+  out[nbeta + nstate + nageedu + npoll + 1 + nregion + 2,
+      nbeta + nstate + nageedu + npoll + 1 + nregion + 2] <-
+    - (sig2b + crossprod(alpha.ageedu)/2)/sig2.ageedu
+  ## tau.poll tau.poll
+  out[nbeta + nstate + nageedu + npoll + 1 + nregion + 3,
+      nbeta + nstate + nageedu + npoll + 1 + nregion + 3] <-
+    - (sig2b + crossprod(alpha.poll)/2)/sig2.poll
+  ## tau.region tau.region
+  out[nbeta + nstate + nageedu + npoll + 1 + nregion + 4,
+      nbeta + nstate + nageedu + npoll + 1 + nregion + 4] <-
+    - (sig2b + crossprod(alpha.region)/2)/sig2.region
+
+  ## alpha.poll tau.poll
+  out[nbeta + nstate + 1:nageedu, nbeta + nstate + nageedu + npoll + 1 + nregion + 3] <-
+    alpha.poll/sig2.poll
+  out[nbeta + nstate + nageedu + npoll + 1 + nregion + 3, nbeta + nstate + 1:nageedu] <-
+    alpha.poll/sig2.poll
+  ## alpha.ageedu tau.age
+  out[nbeta + nstate + 1:nageedu, nbeta + nstate + nageedu + npoll + 1 + nregion + 2] <-
+    alpha.ageedu/sig2.ageedu
+  out[nbeta + nstate + nageedu + npoll + 1 + nregion + 2, nbeta + nstate + 1:nageedu] <-
+    alpha.ageedu/sig2.ageedu
+  ## alpha.region tau.region
+  out[nbeta + nstate + nageedu + npoll + 1 + 1:nregion,
+      nbeta + nstate + nageedu + npoll + 1 + nregion + 4] <- alpha.region/sig2.region
+  out[nbeta + nstate + nageedu + npoll + 1 + nregion + 4,
+      nbeta + nstate + nageedu + npoll + 1 + 1:nregion  ] <- alpha.region/sig2.region
   return(out)
 }

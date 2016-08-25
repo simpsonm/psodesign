@@ -4,7 +4,7 @@ source("mcmcfun.R")
 load("datlistsmall.RData")
 load("datlistplus.RData")
 
-niter <- 100000
+niter <- 10000
 nswarm <- 100
 inertia <- 0.7298
 cognitive <- 1.496
@@ -31,8 +31,13 @@ for(model in models){
                     small = datlistsmall,
                     poll = datlistplus)
   npar <- 80 + 9*(model == "poll")
+  bfgsout <- optim(rep(0,npar), lpost, datlist = datlist,
+                   control=list(fnscale=-1, reltol = .Machine$double.eps, maxit = 10000),
+                   method = "BFGS")
+  mufbgs <- bfgsout$par
   for(m in 1:3){
-    init <- matrix(runif(npar*nswarm, -100, 100), ncol = nswarm)
+    init <- matrix(runif(npar*nswarm, -1, 1), ncol = nswarm) + bfgsout$par
+    init[,1] <- bfgs$par
     cat(model)
     cat(" ")
     cat("nbhd = ")
@@ -129,8 +134,8 @@ for(model in models){
 
 
 accout <- NULL
-niters <- c(2000, 4000, 8000, 10000)
-mcmciter <- 10000
+niters <- c(0, 5000, 10000)
+mcmciter <- 100000
 df <- 100
 for(id in 1:max(accpollpsoout$psoid)){
   cat("\n PSOID = ")

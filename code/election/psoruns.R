@@ -31,9 +31,14 @@ for(model in models){
                     small = datlistsmall,
                     poll = datlistplus)
   npar <- 80 + 9*(model == "poll")
+  bfgsout <- optim(rep(0,npar), lpost, datlist = datlist,
+                   control=list(fnscale=-1, reltol = .Machine$double.eps, maxit = 10000),
+                   method = "BFGS")
+  mufbgs <- bfgsout$par
   for(m in 1:2){
     for(rep in 1:nrep){
-      init <- matrix(runif(npar*nswarm, -100, 100), ncol = nswarm)
+      init <- matrix(runif(npar*nswarm, -1, 1), ncol = nswarm) + bfgsout$par
+      init[,1] <- bfgs$par
       cat(model)
       cat(" ")
       cat("nbhd = ")
