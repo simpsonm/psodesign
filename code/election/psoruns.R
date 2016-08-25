@@ -38,7 +38,7 @@ for(model in models){
   for(m in 1:2){
     for(rep in 1:nrep){
       init <- matrix(runif(npar*nswarm, -1, 1), ncol = nswarm) + bfgsout$par
-      init[,1] <- bfgs$par
+      init[,1] <- bfgsout$par
       cat(model)
       cat(" ")
       cat("nbhd = ")

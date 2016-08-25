@@ -37,7 +37,7 @@ for(model in models){
   mufbgs <- bfgsout$par
   for(m in 1:3){
     init <- matrix(runif(npar*nswarm, -1, 1), ncol = nswarm) + bfgsout$par
-    init[,1] <- bfgs$par
+    init[,1] <- bfgsout$par
     cat(model)
     cat(" ")
     cat("nbhd = ")
