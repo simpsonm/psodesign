@@ -15,21 +15,16 @@ psosum <- ddply(sumlast, .(model, ranef, ndelta, algorithm, nbhd), summarise,
 
 psosum <- psosum[rev(1:nrow(psosum)),]
 
-algset <- c("PSO", "DI-PSO", "BBPSO-MC", "BBPSOxp-MC", "AT-PSO-0.5-0.1", "AT-BBPSOxp-MC-5-0.5-0.1",
-            "AT-BBPSO-MC-5-0.5-0.1")
-
-psosum <- subset(psosum, algorithm %in% algset)
-
 psosum$algorithm <-
   mapvalues(psosum$algorithm,
             c("AT-PSO-0.5-0.1", "AT-BBPSO-MC-5-0.5-0.1", "AT-BBPSOxp-MC-5-0.5-0.1"),
             c("AT-PSO", "AT-BBPSO-MC", "AT-BBPSOxp-MC"))
          
 algids <- c(1,4,3,2,7,6,5)
-cutoff <- -1000
+cutoff <- -10000
 
 poisiid <- subset(psosum, model == "pois" & ranef == "iid" & ndelta == 30)[,c(4,5,6,8)]
-poisiid$mean <- round(poisiid$mean - poisiid$mean[3],2)
+poisiid$mean <- round(poisiid$mean - max(subset(poisiid, algorithm == "PSO")$mean), 2)
 poisiid$sd[poisiid$mean < cutoff] <- NA
 poisiid$mean[poisiid$mean < cutoff] <- NA
 poisiid <- rbind(subset(poisiid, nbhd == "global")[algids,],
@@ -38,7 +33,7 @@ poisiid <- rbind(subset(poisiid, nbhd == "global")[algids,],
 poisiid
 
 poisfull <- subset(psosum, model == "pois" & ranef == "full" & ndelta == 7)[,c(4,5,6,8)]
-poisfull$mean <- round(poisfull$mean - poisfull$mean[1],2)
+poisfull$mean <- round(poisfull$mean - max(subset(poisfull, algorithm == "PSO")$mean), 2)
 poisfull$sd[poisfull$mean < cutoff] <- NA
 poisfull$mean[poisfull$mean < cutoff] <- NA
 poisfull <- rbind(subset(poisfull, nbhd == "global")[algids,],
@@ -47,7 +42,7 @@ poisfull <- rbind(subset(poisfull, nbhd == "global")[algids,],
 poisfull
 
 lnormiid <- subset(psosum, model == "lnorm" & ranef == "iid" & ndelta == 30)[,c(4,5,6,8)]
-lnormiid$mean <- round(lnormiid$mean - lnormiid$mean[1],2)
+lnormiid$mean <- round(lnormiid$mean - max(subset(lnormiid, algorithm == "PSO")$mean), 2)
 lnormiid$sd[lnormiid$mean < cutoff] <- NA
 lnormiid$mean[lnormiid$mean < cutoff] <- NA
 lnormiid <- rbind(subset(lnormiid, nbhd == "global")[algids,],
@@ -56,7 +51,7 @@ lnormiid <- rbind(subset(lnormiid, nbhd == "global")[algids,],
 lnormiid
 
 lnormfull <- subset(psosum, model == "lnorm" & ranef == "full" & ndelta == 7)[,c(4,5,6,8)]
-lnormfull$mean <- round(lnormfull$mean - lnormfull$mean[3],2)
+lnormfull$mean <- round(lnormfull$mean - max(subset(lnormfull, algorithm == "PSO")$mean), 2)
 lnormfull$sd[lnormfull$mean < cutoff] <- NA
 lnormfull$mean[lnormfull$mean < cutoff] <- NA
 lnormfull <- rbind(subset(lnormfull, nbhd == "global")[algids,],
@@ -65,9 +60,8 @@ lnormfull <- rbind(subset(lnormfull, nbhd == "global")[algids,],
 lnormfull
 
 
-accout <- read.csv("accout.csv")
+psomcmcsum <- read.csv("accout.csv")
 
-psomcmcsum <- subset(accout, pso %in% algset & niter > 800)
 psomcmcsum$pso <-
   mapvalues(psomcmcsum$pso,
             c("AT-PSO-0.5-0.1", "AT-BBPSO-MC-5-0.5-0.1", "AT-BBPSOxp-MC-5-0.5-0.1"),
