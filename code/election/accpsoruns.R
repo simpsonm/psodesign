@@ -22,116 +22,116 @@ nbhd[[2]] <- sapply(1:nswarm, function(x){return( (x + -3:3 - 1)%%nswarm + 1)}) 
 nbhd[[3]] <- matrix(1:nswarm, ncol=nswarm, nrow=nswarm) ## global
 models <- c("small", "poll")
 
-psoid <- 1
-for(model in models){
-  lpost <- switch(model,
-                  small = gelmanlpost,
-                  poll = gelmanpluslpost)
-  datlist <- switch(model,
-                    small = datlistsmall,
-                    poll = datlistplus)
-  npar <- 80 + 9*(model == "poll")
-  bfgsout <- optim(rep(0,npar), lpost, datlist = datlist,
-                   control=list(fnscale=-1, reltol = .Machine$double.eps, maxit = 10000),
-                   method = "BFGS")
-  mufbgs <- bfgsout$par
-  for(m in 1:3){
-    init <- matrix(runif(npar*nswarm, -1, 1), ncol = nswarm) + bfgsout$par
-    init[,1] <- bfgsout$par
-    cat(model)
-    cat(" ")
-    cat("nbhd = ")
-    cat(nbhdnames[m])
-    cat("\n")
-    print("PSO")
-    psotemp <- pso(niter, nswarm, inertia, cognitive, social, init, nbhd[[m]],
-                   lpost, datlist = datlist)
-    psotempout <- data.frame(model = model,
-                             algorithm = "PSO",
-                             nbhd = nbhdnames[m],
-                             iteration = rep(0:niter, each = npar),
-                             maxes = rep(psotemp$maxes, each = npar),
-                             pars = c(psotemp$argmaxes), psoid = psoid)
-    psoid <- psoid + 1    
-    accpollpsoout <- rbind(accpollpsoout, psotempout)
-    print("BBPSO-MC")
-    temp <- bbpso(niter, nswarm, 0, 1, init, nbhd[[m]], lpost, Inf, FALSE,
-                  0, datlist = datlist)
-    psotempout <- data.frame(model = model,
-                             algorithm = "BBPSO-MC",
-                             nbhd = nbhdnames[m],
-                             iteration = rep(0:niter, each = npar),
-                             maxes = rep(psotemp$maxes, each = npar),
-                             pars = c(psotemp$argmaxes), psoid = psoid)
-    psoid <- psoid + 1    
-    accpollpsoout <- rbind(accpollpsoout, psotempout)
-    print("BBPSOxp-MC")
-    temp <- bbpso(niter, nswarm, 0, 1, init, nbhd[[m]], lpost, Inf, FALSE,
-                  .5, datlist = datlist)
-    psotempout <- data.frame(model = model,
-                             algorithm = "BBPSOxp-MC",
-                             nbhd = nbhdnames[m],
-                             iteration = rep(0:niter, each = npar),
-                             maxes = rep(psotemp$maxes, each = npar),
-                             pars = c(psotemp$argmaxes), psoid = psoid)
-    psoid <- psoid + 1    
-    accpollpsoout <- rbind(accpollpsoout, psotempout)
-    print("DI-PSO")
-    psotemp <- pso(niter, nswarm, inertia, social, cognitive, init, nbhd[[m]],
-                   lpost, datlist = datlist, tune = TRUE, style = "deterministic",
-                   alpha = alpha, beta = beta)
-    psotempout <- data.frame(model = model,
-                             algorithm = "DI-PSO",
-                             nbhd = nbhdnames[m],
-                             iteration = rep(0:niter, each = npar),
-                             maxes = rep(psotemp$maxes, each = npar),
-                             pars = c(psotemp$argmaxes), psoid = psoid)
-    psoid <- psoid + 1
-    accpollpsoout <- rbind(accpollpsoout, psotempout)
-    print("AT-PSO & AT-BBPSO-MC & AT-BBPSOxp-MC")
-    for(rate in rates){
-      psotemp <- pso(niter, nswarm, 0.9, cognitive, social, init, nbhd[[m]],
-                     lpost, datlist = datlist, tune = TRUE, style = "adaptive",
-                     rate = rate, ccc = ccc)
-      psotempout <- data.frame(model = model,
-                               algorithm = paste("AT-PSO", rate, ccc, sep="-"),
-                               nbhd = nbhdnames[m],
-                               iteration = rep(0:niter, each = npar),
-                               maxes = rep(psotemp$maxes, each = npar),
-                               pars = c(psotemp$argmaxes), psoid = psoid)
-      psoid <- psoid + 1      
-      accpollpsoout <- rbind(accpollpsoout, psotempout)
-      for(df in dfs){
-        print(paste(c(rate, df)))
-        psotemp <- bbpso(niter, nswarm, 1, rate, init, nbhd[[m]], lpost, df,
-                         TRUE, 0, datlist = datlist, ccc = ccc)
-        psotempout <- data.frame(model = model,
-                                 algorithm =
-                                   paste("AT-BBPSO-MC", df, rate, ccc, sep="-"),
-                                 nbhd = nbhdnames[m],
-                                 iteration = rep(0:niter, each = npar),
-                                 maxes = rep(psotemp$maxes, each = npar),
-                                 pars = c(psotemp$argmaxes), psoid = psoid)
-        psoid <- psoid + 1        
-        accpollpsoout <- rbind(accpollpsoout, psotempout)
-        psotemp <- bbpso(niter, nswarm, 1, rate, init, nbhd[[m]], lpost, df,
-                         TRUE, 0.5, datlist = datlist, ccc = ccc)
-        psotempout <- data.frame(model = model,
-                                 algorithm =
-                                   paste("AT-BBPSOxp-MC", df, rate, ccc, sep="-"),
-                                 nbhd = nbhdnames[m],
-                                 iteration = rep(0:niter, each = npar),
-                                 maxes = rep(psotemp$maxes, each = npar),
-                                 pars = c(psotemp$argmaxes), psoid = psoid)
-        psoid <- psoid + 1        
-        accpollpsoout <- rbind(accpollpsoout, psotempout)
-      }
-    }
-    write.csv(accpollpsoout, file = "accpollpsoout.csv", row.names=FALSE)
-  }
-}
+## psoid <- 1
+## for(model in models){
+##   lpost <- switch(model,
+##                   small = gelmanlpost,
+##                   poll = gelmanpluslpost)
+##   datlist <- switch(model,
+##                     small = datlistsmall,
+##                     poll = datlistplus)
+##   npar <- 80 + 9*(model == "poll")
+##   bfgsout <- optim(rep(0,npar), lpost, datlist = datlist,
+##                    control=list(fnscale=-1, reltol = .Machine$double.eps, maxit = 10000),
+##                    method = "BFGS")
+##   mufbgs <- bfgsout$par
+##   for(m in 1:3){
+##     init <- matrix(runif(npar*nswarm, -1, 1), ncol = nswarm) + bfgsout$par
+##     init[,1] <- bfgsout$par
+##     cat(model)
+##     cat(" ")
+##     cat("nbhd = ")
+##     cat(nbhdnames[m])
+##     cat("\n")
+##     print("PSO")
+##     psotemp <- pso(niter, nswarm, inertia, cognitive, social, init, nbhd[[m]],
+##                    lpost, datlist = datlist)
+##     psotempout <- data.frame(model = model,
+##                              algorithm = "PSO",
+##                              nbhd = nbhdnames[m],
+##                              iteration = rep(0:niter, each = npar),
+##                              maxes = rep(psotemp$maxes, each = npar),
+##                              pars = c(psotemp$argmaxes), psoid = psoid)
+##     psoid <- psoid + 1    
+##     accpollpsoout <- rbind(accpollpsoout, psotempout)
+##     print("BBPSO-MC")
+##     temp <- bbpso(niter, nswarm, 0, 1, init, nbhd[[m]], lpost, Inf, FALSE,
+##                   0, datlist = datlist)
+##     psotempout <- data.frame(model = model,
+##                              algorithm = "BBPSO-MC",
+##                              nbhd = nbhdnames[m],
+##                              iteration = rep(0:niter, each = npar),
+##                              maxes = rep(psotemp$maxes, each = npar),
+##                              pars = c(psotemp$argmaxes), psoid = psoid)
+##     psoid <- psoid + 1    
+##     accpollpsoout <- rbind(accpollpsoout, psotempout)
+##     print("BBPSOxp-MC")
+##     temp <- bbpso(niter, nswarm, 0, 1, init, nbhd[[m]], lpost, Inf, FALSE,
+##                   .5, datlist = datlist)
+##     psotempout <- data.frame(model = model,
+##                              algorithm = "BBPSOxp-MC",
+##                              nbhd = nbhdnames[m],
+##                              iteration = rep(0:niter, each = npar),
+##                              maxes = rep(psotemp$maxes, each = npar),
+##                              pars = c(psotemp$argmaxes), psoid = psoid)
+##     psoid <- psoid + 1    
+##     accpollpsoout <- rbind(accpollpsoout, psotempout)
+##     print("DI-PSO")
+##     psotemp <- pso(niter, nswarm, inertia, social, cognitive, init, nbhd[[m]],
+##                    lpost, datlist = datlist, tune = TRUE, style = "deterministic",
+##                    alpha = alpha, beta = beta)
+##     psotempout <- data.frame(model = model,
+##                              algorithm = "DI-PSO",
+##                              nbhd = nbhdnames[m],
+##                              iteration = rep(0:niter, each = npar),
+##                              maxes = rep(psotemp$maxes, each = npar),
+##                              pars = c(psotemp$argmaxes), psoid = psoid)
+##     psoid <- psoid + 1
+##     accpollpsoout <- rbind(accpollpsoout, psotempout)
+##     print("AT-PSO & AT-BBPSO-MC & AT-BBPSOxp-MC")
+##     for(rate in rates){
+##       psotemp <- pso(niter, nswarm, 0.9, cognitive, social, init, nbhd[[m]],
+##                      lpost, datlist = datlist, tune = TRUE, style = "adaptive",
+##                      rate = rate, ccc = ccc)
+##       psotempout <- data.frame(model = model,
+##                                algorithm = paste("AT-PSO", rate, ccc, sep="-"),
+##                                nbhd = nbhdnames[m],
+##                                iteration = rep(0:niter, each = npar),
+##                                maxes = rep(psotemp$maxes, each = npar),
+##                                pars = c(psotemp$argmaxes), psoid = psoid)
+##       psoid <- psoid + 1      
+##       accpollpsoout <- rbind(accpollpsoout, psotempout)
+##       for(df in dfs){
+##         print(paste(c(rate, df)))
+##         psotemp <- bbpso(niter, nswarm, 1, rate, init, nbhd[[m]], lpost, df,
+##                          TRUE, 0, datlist = datlist, ccc = ccc)
+##         psotempout <- data.frame(model = model,
+##                                  algorithm =
+##                                    paste("AT-BBPSO-MC", df, rate, ccc, sep="-"),
+##                                  nbhd = nbhdnames[m],
+##                                  iteration = rep(0:niter, each = npar),
+##                                  maxes = rep(psotemp$maxes, each = npar),
+##                                  pars = c(psotemp$argmaxes), psoid = psoid)
+##         psoid <- psoid + 1        
+##         accpollpsoout <- rbind(accpollpsoout, psotempout)
+##         psotemp <- bbpso(niter, nswarm, 1, rate, init, nbhd[[m]], lpost, df,
+##                          TRUE, 0.5, datlist = datlist, ccc = ccc)
+##         psotempout <- data.frame(model = model,
+##                                  algorithm =
+##                                    paste("AT-BBPSOxp-MC", df, rate, ccc, sep="-"),
+##                                  nbhd = nbhdnames[m],
+##                                  iteration = rep(0:niter, each = npar),
+##                                  maxes = rep(psotemp$maxes, each = npar),
+##                                  pars = c(psotemp$argmaxes), psoid = psoid)
+##         psoid <- psoid + 1        
+##         accpollpsoout <- rbind(accpollpsoout, psotempout)
+##       }
+##     }
+##     write.csv(accpollpsoout, file = "accpollpsoout.csv", row.names=FALSE)
+##   }
+## }
 
-
+accpollpsoout <- read.csv("accpollpsoout.csv")
 
 accout <- NULL
 niters <- c(0, 5000, 10000)
@@ -145,6 +145,13 @@ for(id in 1:max(accpollpsoout$psoid)){
   model <- psooutid$model[1]
   nbhd <- psooutid$nbhd[1]
   alg <- psooutid$algorithm[1]
+  cat(", ")
+  cat(as.character(model))
+  cat(", ")
+  cat(as.character(nbhd))
+  cat(", ")
+  cat(as.character(alg))
+  cat("\n")
   lpost <- switch(as.character(model),
                   small = gelmanlpost,
                   poll = gelmanpluslpost)
@@ -160,7 +167,7 @@ for(id in 1:max(accpollpsoout$psoid)){
                                  poll = gelmanplusindwithingibbs)
   for(niter in niters){
     cat(niter)
-    cat(" ")
+    cat("\n")
     mu <- subset(psooutid, iteration == niter)$pars
     lpbest <- subset(psooutid, iteration == niter)$maxes[1]
     try({
