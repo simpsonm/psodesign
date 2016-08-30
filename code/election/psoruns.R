@@ -35,7 +35,7 @@ for(model in models){
                    control=list(fnscale=-1, reltol = .Machine$double.eps, maxit = 10000),
                    method = "BFGS")
   mufbgs <- bfgsout$par
-  for(m in 1:2){
+  for(m in 1:3){
     for(rep in 1:nrep){
       init <- matrix(runif(npar*nswarm, -1, 1), ncol = nswarm) + bfgsout$par
       init[,1] <- bfgsout$par
