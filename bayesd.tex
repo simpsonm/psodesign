@@ -1,0 +1,33 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath, bm, bbm}
+\title{A Note on Bayesian D-optimality}
+\author{Matt Simpson}
+\begin{document}
+\maketitle
+\section{Introduction}
+This is a quick note outlining the class of problems we need to look for in order to use PSO for finding Bayesian D-optimal designs, or nearly optimial designs. Strictly speaking, D-optimality is more narrow than necessary. 
+\section{General Framework}
+Suppose we wish to design an experiment with $n$ experimental units in order to determine the effect of some covariates on some response $y_i$, $i=1,2,\dots,n$. Let $\bm{y}=\bm{y}_{1:n}=(y_1,y_2,\dots,y_n)'$. The covariates are split into two types --- fixed covariates and adjustable covariates. Fixed covariates are immutable features of the experimental units, while adjustable covariates are features which are chosen by the experimenter. For example, any treatment applied to the experimental unity is an adjustable covariate. Let $\bm{X}^f$ denote the $n\times p$ matrix of fixed covariates, $\bm{X}^a$ denote the $n\times q$ matrix of adjustable covariates, and $\bm{X}=[\bm{X}^f, \bm{X}^a]$ the full $n\times(p+q)$ matrix of covariates. Finally let $\bm{\theta}$ denote a vector of model parameters. Then the generic model is
+\begin{align*}
+\bm{y}|\bm{X},\bm{\theta} &\sim [\bm{y}|\bm{X},\bm{\theta}], &&& \bm{\theta}|\bm{X}&\sim [\bm{\theta}]
+\end{align*}
+where $[.|.]$ denotes the probability density or mass function of the enclosed random variables. Often $\bm{\theta}=(\bm{\beta},\phi)$, $\bm{y}|\bm{X},\bm{\theta}\sim [\bm{y}|\bm{\mu},\phi]$ with $g(\bm{\mu}) = \bm{X}\bm{\beta}$ and $g(.)$ is a known link function.
+
+The design problem is to choose $\bm{X}^a \in \mathcal{X}$ in order to maximize some design criterion. The space $\mathcal{X}$ contains all constraints on the elements of $\bm{X}^a$, for example if $x_{i2} = x_{i1}^2$ in a quadratic regression model. What is being chosen here is not which covariates to include, but rather the values of the covariates. For example in a simple linear regression model with $\bm{X}^f = (1,1,\dots,1)'$ correpsonding to the intercept and $\bm{X}^a=(x_1,x_2,\dots,x_n)$ corresponding to the slope, the design problem is to choose the values of $x_1, x_2, \dots, x_n$ for a fixed $n$, typically where $x_i$ lives in a constrained space.
+
+A standard Bayesian design criterion is the expected shannon information gain:
+\begin{align*}
+\mathrm{E}_{\bm{y},\bm{\theta}}\left\{\log \frac{[\bm{\theta}|\bm{y},\bm{X}]}{[\bm{\theta}]}\right\}    = \iint \log \frac{[\bm{\theta}|\bm{y},\bm{X}]}{[\bm{\theta}]} [\bm{y}|\bm{X},\bm{\theta}][\bm{\theta}] d\bm{\theta} d\bm{y}.
+\end{align*}
+Maximizing this in $\bm{X}^a$ is equivalent to maximizing
+\begin{align*}
+U(\bm{X}^a) = \iint \log \frac{[\bm{y}|\bm{X},\bm{\theta}]}{[\bm{y}|\bm{X}]} [\bm{y}|\bm{X},\bm{\theta}][\bm{\theta}] d\bm{\theta} d\bm{y}.
+\end{align*}
+When $\bm{\theta}\sim N(\bm{\theta}_0, \sigma^2\bm{S}_0)$ and $\bm{y}|\bm{X},\bm{\theta} \sim N(\bm{X}\bm{\theta}, \sigma^2\bm{I}_n)$ where $\bm{I}_n$ is the $n\times n$ identity matrix and $\sigma^2$ is known, then maximizing $U(\bm{X}^a)$ is equivalent to maximizing the Bayesian D-optimality criterion:
+\begin{align*}
+D(\bm{X}^{a}) = |\bm{X}'\bm{X} + \bm{S}_0^{-1}|.
+\end{align*}
+However in general, maximizing $U$ and $D$ are not equivalent, and when they are not, typically $U(\bm{X}^a)$ must be approximated via monte carlo simulation as well as an approximation for the model's marginal likelihood, $[\bm{y}|\bm{X}]$.
+
+Whether the model is $U$ or $D$, finding the optimal design is a difficult optimization problem, and near-optimal designs are often desireable. As such, this is a perfect problem for heuristic optimization algorithms such as particle swarm optimization. The problem for us, then, is to find an example that fits into this framework and ideally uses federal data.
+\end{document}
