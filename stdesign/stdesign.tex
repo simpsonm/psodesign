@@ -1,0 +1,134 @@
+\documentclass[12pt]{article}
+\setlength{\oddsidemargin}{-0.125in}
+\setlength{\topmargin}{-0.5in} \setlength{\textwidth}{6.5in}
+\setlength{\textheight}{9in}
+
+\setlength{\textheight}{9in} \setlength{\textwidth}{6.5in}
+\setlength{\topmargin}{-40pt} \setlength{\oddsidemargin}{0pt}
+\setlength{\evensidemargin}{0pt}
+
+\setlength{\textheight}{8.5in} \setlength{\textwidth}{6.5in}
+\setlength{\topmargin}{-36pt} \setlength{\oddsidemargin}{0pt}
+\setlength{\evensidemargin}{0pt} \tolerance=500
+\renewcommand{\baselinestretch}{1.5}
+
+\usepackage{amssymb, amsmath, latexsym, array, morefloats, epsfig, rotating, graphicx}
+\usepackage{subfigure, url, mathtools, enumerate, wasysym, threeparttable, lscape}
+\usepackage{natbib,color}
+\usepackage{bm, bbm,epstopdf}
+\usepackage{xr, zref, hyperref}
+
+\newenvironment{proof}[1][Proof]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{definition}[1][Definition]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{example}[1][Example]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{remark}[1][Remark]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+
+\newcommand{\qed}{\nobreak \ifvmode \relax \else
+      \ifdim\lastskip<1.5em \hskip-\lastskip
+      \hskip1.5em plus0em minus0.5em \fi \nobreak
+      \vrule height0.75em width0.5em depth0.25em\fi}
+
+%- Makes the section title start with Appendix in the appendix environment
+ \newcommand{\Appendix}
+ {%\appendix
+ \def\thesection{\Alph{section}}
+ \def\thesubsection{\Alph{section}.\arabic{subsection}}
+ \def\theequation{\Alph{section}.\arabic{equation}}
+ \def\thealg{\Alph{section}.\arabic{alg}}
+ %\def\thesubsection{A.\arabic{subsection}}
+ }
+
+\DeclareMathOperator{\vect}{vec}
+\DeclareMathOperator{\vech}{vech}
+\DeclareMathOperator{\diag}{diag}
+
+\newtheorem{alg}{Algorithm}
+
+% if variable blind is undefined, assume it is 0
+\makeatletter
+\@ifundefined{blind}{\def\blind{0}}{}
+\makeatother
+
+% if not blinded, reference unblinded appendix
+% \if0\blind
+% {
+%   \externaldocument{stdesignapp}
+% }\fi
+
+% % if blinded, reference blinded appendix
+% \if1\blind
+% {
+%   \externaldocument{stdesignapp}
+% }\fi
+
+
+\begin{document}
+\thispagestyle{empty} \baselineskip=28pt
+
+\begin{center}
+{\LARGE{\bf Particle Swarm Optimization for Spatio-Temporal Design}}
+\end{center}
+
+\baselineskip=12pt
+%%
+\vskip 2mm
+% if not blinded, give the authors
+\if0\blind
+{
+  \begin{center}
+    Matthew Simpson\footnote{(\baselineskip=10pt to whom correspondence should be addressed)
+      Department of Statistics, University of Missouri,
+      146 Middlebush Hall, Columbia, MO 65211-6100, themattsimpson@gmail.com}
+    % Matthew Simpson,\footnote{(\baselineskip=10pt to whom correspondence should be addressed)
+    % Department of Statistics, University of Missouri,
+    % 146 Middlebush Hall, Columbia, MO 65211-6100, themattsimpson@gmail.com}
+    % Christopher K. Wikle,\footnote{\label{note:aff}\baselineskip=10pt
+    % Department of Statistics, University of Missouri,
+    % 146 Middlebush Hall, Columbia, MO 65211-6100}
+    % and Scott H. Holan\textsuperscript{\ref{note:aff}}
+  \end{center}
+} \fi
+
+\vskip 2mm
+\begin{center}
+{\large{\bf Abstract}}
+\end{center}
+\baselineskip=12pt 
+
+\baselineskip=12pt
+\par\vfill\noindent
+{\bf KEY WORDS:} 
+
+\par\medskip\noindent
+
+
+\clearpage\pagebreak\newpage \pagenumbering{arabic}
+\baselineskip=24pt
+
+\section{Introduction}
+
+\section{Model}
+Let $Y(\bm{s},t)$ denote the true (latent) log ozone (in log PPM) at location $\bm{s}\in \mathcal{D}$ at time point $t\in \mathcal{T}$. Then we assume the following process model
+\begin{align*}
+Y(\bm{s},t) = \mu(\bm{s};t) + \psi(\bm{s}) + \tau(t) + \kappa(\bm{s};t) + \delta(\bm{s},t)
+\end{align*}
+where $\mu(.;.)$ is a deterministic mean term, $\psi(.)$ is a spatial random effect, $\tau(t)$ is a temporal random effect, $\kappa(.;.)$ is a spatio-temporal interaction random effect, and $\delta(.;.)$ is a white noise fine scale variation term. To complete the model, we need to specify the mean structure, and covariance structures for $\psi(.)$, $\tau(.)$, and $\kappa(.,.)$. Let $\gamma(\bm{s};t) = \psi(\bm{s}) + \tau(t) + \kappa(\bm{s};t)$. We are unlikely to have access to many relevant covariates, so a nonstationary covariance structure for $\gamma(.;.)$ seems appropriate. Similarly, we expect spatio-temporal interaction so a nonseparable covariance structure seems appropriate, and additional an assymetric structure seems appropriate because, e.g., the wind tends to blow in certain directions. This makes the modeling problem somewhat challenging, but we can simplify it by taking advantage of the fact that we do not need to model the dynamics in continuous time. We need continuous space in order to apply PSO to the design problem, but since measurements are typically made daily, we can work in the discrete time setting. 
+
+In discrete time, the process model can be conceived of as a time series of geostatistical spatial processes. Then the model can be written as
+\begin{align*}
+Y_t(\bm{s}) = \mu_t(\bm{s}) + \mathcal{M}_t(\bm{s}) + \psi(\bm{s}) + \delta_t(\bm{s})
+\end{align*}
+where $\mathcal{M}_t(\bm{s}) = \int_{\mathcal{D}}m(\bm{s};\bm{u})[Y_{t-1}(\bm{u}) - \mu_{t-1}(\bm{s})]d\bm{u}$, $\mu_t(\bm{s})$ is a deterministic mean term, $\psi(.)$ is a spatially correlated process, and $\delta_t(.)$ is white noise. Spatio-temporal interaction, i.e. how locations in period $t-1$ impact a location in period $t$, is controlled by $\mathcal{M}_t$ through a first order autoregressive structure. The weight function $m(\bm{s};\bm{u})$ controls this interaction and must be specified. Similarly, a spatial covariance structure for the $\psi(.)$s must be specified.
+
+Supposing both of pieces of the model are specified, let $\bm{d}^{(t)}_i\in \mathcal{D}$ for $i=1,2,\dots,I_t$ denote the locations of the $I_t$ monitoring stations in period $t$. Then the data model is
+\begin{align*}
+Z_t(\bm{d}_i^{(t)}) = Y_t(\bm{d}_i^{(t)}) + \varepsilon_t(\bm{d}_i^{(t)}) \mbox{ for } i=1,2,\dots,I_t
+\end{align*}
+where $\varepsilon_t(.)$ is white noise. The adaptive design problem is to choose the locations of the $I_{t+1}$ monitors in period $t$ in order to optimize the amount of information we have the latent ozone values in period $t+1$. In order to operationalize ``amount of information'' into a design criterion we may take an entropy based approach, or we may simply try to minimize
+\clearpage\pagebreak\newpage\thispagestyle{empty}
+%\bibliographystyle{jasa}
+\end{document}
