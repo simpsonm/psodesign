@@ -1,0 +1,139 @@
+\documentclass[12pt]{article}
+\setlength{\oddsidemargin}{-0.125in}
+\setlength{\topmargin}{-0.5in} \setlength{\textwidth}{6.5in}
+\setlength{\textheight}{9in}
+
+\setlength{\textheight}{9in} \setlength{\textwidth}{6.5in}
+\setlength{\topmargin}{-40pt} \setlength{\oddsidemargin}{0pt}
+\setlength{\evensidemargin}{0pt}
+
+\setlength{\textheight}{8.5in} \setlength{\textwidth}{6.5in}
+\setlength{\topmargin}{-36pt} \setlength{\oddsidemargin}{0pt}
+\setlength{\evensidemargin}{0pt} \tolerance=500
+\renewcommand{\baselinestretch}{1.5}
+
+\usepackage{amssymb, amsmath, latexsym, array, morefloats, epsfig, rotating, graphicx}
+\usepackage{subfigure, url, mathtools, enumerate, wasysym, threeparttable, lscape}
+\usepackage{natbib,color}
+\usepackage{bm, bbm,epstopdf}
+\usepackage{xr, zref, hyperref}
+
+\newenvironment{proof}[1][Proof]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{definition}[1][Definition]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{example}[1][Example]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{remark}[1][Remark]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+
+\newcommand{\qed}{\nobreak \ifvmode \relax \else
+      \ifdim\lastskip<1.5em \hskip-\lastskip
+      \hskip1.5em plus0em minus0.5em \fi \nobreak
+      \vrule height0.75em width0.5em depth0.25em\fi}
+
+%- Makes the section title start with Appendix in the appendix environment
+ \newcommand{\Appendix}
+ {%\appendix
+ \def\thesection{\Alph{section}}
+ \def\thesubsection{\Alph{section}.\arabic{subsection}}
+ \def\theequation{\Alph{section}.\arabic{equation}}
+ \def\thealg{\Alph{section}.\arabic{alg}}
+ %\def\thesubsection{A.\arabic{subsection}}
+ }
+
+\DeclareMathOperator{\vect}{vec}
+\DeclareMathOperator{\vech}{vech}
+\DeclareMathOperator{\diag}{diag}
+
+\newtheorem{alg}{Algorithm}
+
+% if variable blind is undefined, assume it is 0
+\makeatletter
+\@ifundefined{blind}{\def\blind{0}}{}
+\makeatother
+
+% if not blinded, reference unblinded appendix
+% \if0\blind
+% {
+%   \externaldocument{stdesignapp}
+% }\fi
+
+% % if blinded, reference blinded appendix
+% \if1\blind
+% {
+%   \externaldocument{stdesignapp}
+% }\fi
+
+
+\begin{document}
+\thispagestyle{empty} \baselineskip=28pt
+
+\begin{center}
+{\LARGE{\bf Particle Swarm Optimization for Spatial Design}}
+\end{center}
+
+\baselineskip=12pt
+%%
+\vskip 2mm
+% if not blinded, give the authors
+\if0\blind
+{
+  \begin{center}
+    Matthew Simpson\footnote{(\baselineskip=10pt to whom correspondence should be addressed)
+      Department of Statistics, University of Missouri,
+      146 Middlebush Hall, Columbia, MO 65211-6100, themattsimpson@gmail.com}
+    % Matthew Simpson,\footnote{(\baselineskip=10pt to whom correspondence should be addressed)
+    % Department of Statistics, University of Missouri,
+    % 146 Middlebush Hall, Columbia, MO 65211-6100, themattsimpson@gmail.com}
+    % Christopher K. Wikle,\footnote{\label{note:aff}\baselineskip=10pt
+    % Department of Statistics, University of Missouri,
+    % 146 Middlebush Hall, Columbia, MO 65211-6100}
+    % and Scott H. Holan\textsuperscript{\ref{note:aff}}
+  \end{center}
+} \fi
+
+\vskip 2mm
+\begin{center}
+{\large{\bf Abstract}}
+\end{center}
+\baselineskip=12pt 
+
+\baselineskip=12pt
+\par\vfill\noindent
+{\bf KEY WORDS:} 
+
+\par\medskip\noindent
+
+
+\clearpage\pagebreak\newpage \pagenumbering{arabic}
+\baselineskip=24pt
+
+\section{Introduction}
+
+\section{Model}
+Suppose we are interested in the latent spatial field of some response variable $Y(\bm{s})$, $\bm{s}\in \mathcal{D}\subseteq \Re^2$. Specifically, we are interested in predicting $Y(\bm{s})$ at a set of locations $\bm{s}_1, \bm{s}_2, \dots, \bm{s}_M\in\mathcal{D}$. We have the ability to sample $N$ locations anywhere in $\mathcal{D}$, and we wish to place them in order to optimize some design criterion. Let $\bm{d}_1, \bm{d}_2, \dots, \bm{d}_N\in\mathcal{D}$ denote the locations of the $N$ monitors. We will assume the universal kriging setup with only location as a predictor. In otherwords, we assume the $Y(\bm{s})$ is a geostatistical process with mean function $\mu(\bm{s})$ and covariance function $C_Y(\bm{s}, \bm{t})$ for $\bm{s},\bm{t}\in\mathcal{D}$. Further, we assume that $\mu(\bm{s}) = \bm{x}'(\bm{s})\bm{\beta}$ where if $\bm{s}=(u,v)$, then $\bm{x}'(\bm{s}) = (1, u, v)$. Finally, we observe $Z(\bm{d}_i)$ for $i=1,2,\dots,N$ where $Z(\bm{d}) = Y(\bm{d}) + \varepsilon(\bm{d})$ and $\varepsilon(\bm{d})$ is mean zero white noise with variance $\sigma^2_{\varepsilon}$. 
+
+Let $\bm{Z} = (Z(\bm{d}_1), Z(\bm{d}_2), \dots, Z(\bm{d}_N) )'$, $\bm{X} = (\bm{x}(\bm{d}_1), \bm{x}(\bm{d}_2), \dots, \bm{x}(\bm{d}_N))'$, $\bm{C}_Z = \mathrm{cov}(\bm{Z})$ where $\mathrm{cov}(Z(\bm{d}_i), Z(\bm{d}_j)) = C_Y(\bm{d}_i,\bm{d}_j) + \sigma^2_\varepsilon 1(\bm{d}_i = \bm{d}_j)$, and $\bm{c}_Y(\bm{s}_0) = \mathrm{cov}(Y(\bm{s}_0), \bm{Z})$ where $\mathrm{cov}(Y(\bm{s}_0), Z(\bm{d}_i)) = C_Y(\bm{s}_0, \bm{d}_i)$. Then the generalized least squares estimator of $\bm{\beta}$ is $\widehat{\bm{\beta}}_{gls} = (\bm{X}'\bm{C}_Z^{-1}\bm{X})^{-1}\bm{X}'\bm{C}_Z^{-1}\bm{Z}$, the universal kriging predictor of $Y(\bm{s}_0)$ is $\widehat{Y}(\bm{s}_0) = \bm{x}(\bm{s}_0)'\widehat{\bm{\beta}}_{gls} + \bm{c}_Y(\bm{s}_0)'\bm{C}_Z^{-1}(\bm{Z} - \bm{X}\widehat{\bm{\beta}}_{gls})$, and its mean square prediction error is 
+\begin{align*}
+\sigma^2_{\widehat{Y}}&(\bm{d};\bm{s}_0) = \bm{c}_Y(\bm{s}_0)'\bm{C}_Z(\bm{d})^{-1}\bm{c}(\bm{s}_0) + \\
+&\left[\bm{x}(\bm{s}_0) - \bm{X}(\bm{d})\bm{C}_Z(\bm{d})^{-1}\bm{c}_Y(\bm{s}_0)\right]'\left[\bm{X}(\bm{d})'\bm{C}_Z(\bm{d})^{-1}\bm{X}(\bm{d})\right]^{-1}\left[\bm{x}(\bm{s}_0) - \bm{X}(\bm{d})\bm{C}_Z(\bm{d})^{-1}\bm{c}_Y(\bm{s}_0)\right]
+\end{align*}
+where $\bm{d}=(\bm{d}_1, \bm{d}_2, \dots, \bm{d}_N)'$ and $\bm{d}_i=(u_i, v_i)'$ for $i=1,2,\dots,N$. Then the design criterion is
+\begin{align*}
+U(\bm{d}) &= \frac{1}{M}\sum_{j=1}^M\sigma^2_{\widehat{Y}}(\bm{d};\bm{s}_j)
+\end{align*}
+where $\{\bm{s}_j\}$ are the $M$ locations we wish to predict and our goal is to minimize $U$ in $\bm{d}$. Alternatively if we wish to learn about the entire spatial domain, we can minimize
+\begin{align*}
+U_C(\bm{d}) = \frac{1}{|\mathcal{D}|}\int_{\mathcal{D}}\sigma^2_{\widehat{Y}}&(\bm{d};\bm{s})d\bm{s},
+\end{align*}
+though this integral is unlikely to be available in closed form and so in practice we would approximate with a criterion with the form of $U(\bm{d})$. We could also modify $U(\bm{d})$ by attaching weights to the spatial locations if some locations are more important than others.
+
+We can consider two versions of this optimizatio problem: when $M>N$, i.e. we want to predict at more locations than we can observe, or the opposite case when $M<N$. When $M<N$, it is sensible to restrict ourself to designs where the first $M$ observed locations are exactly the $M$ locations at which we want to predict [CAN WE PROVE THIS?]. When $M>N$, it is no longer necessarily the case that putting a design location at a prediction location is a good idea.
+
+[SHOULD WE CONSIDER OTHER OBJECTIVE FUNCTIONS? SOMETHING DEPENDING ON ENTROPY?]
+
+Also note that $U(\bm{d})$ depends on the covariance function, $C_Y(\bm{s},\bm{t})$, which may depend on unknown parameters. In that case, we can put a prior on those unknown parameters and instead minimize $E_{\bm{\theta}}[U(\bm{d};\bm{\theta})] = \int_{\Theta}U(\bm{d};\bm{\theta})[\bm{\theta}]d\bm{\theta}$ where $[\bm{\theta}]$ is the prior on $\bm{\theta}$. [CONNECTION TO FACT THAT KRIGING CAN BE DERIVED FROM A BAYESIAN HIERARCHICAL LINEAR MODEL]
+\clearpage\pagebreak\newpage\thispagestyle{empty}
+%\bibliographystyle{jasa}
+\end{document}
