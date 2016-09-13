@@ -133,6 +133,7 @@ for(idelta in 1:length(ndeltasiid)){
                                        nbhd = nbhdnames[m], rep = rep,
                                        iteration = 0:niter,
                                        maxes = psotemp$maxes)
+              psoout <- rbind(psoout, psotempout)
               for(df in dfs){
                 print(paste(c(rate, df)))
                 psoout <- rbind(psoout, psotempout)
