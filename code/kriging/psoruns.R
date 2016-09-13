@@ -1,6 +1,6 @@
 source("../psofun.R")
 
-nrep <- 10
+nrep <- 1
 niter <- 1000
 nswarm <- 50
 inertia <- 0.7298
