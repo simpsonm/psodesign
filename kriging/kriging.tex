@@ -116,8 +116,8 @@ Suppose we are interested in the latent spatial field of some response variable 
 
 Let $\bm{Z} = (Z(\bm{d}_1), Z(\bm{d}_2), \dots, Z(\bm{d}_N) )'$, $\bm{X} = (\bm{x}(\bm{d}_1), \bm{x}(\bm{d}_2), \dots, \bm{x}(\bm{d}_N))'$, $\bm{C}_Z = \mathrm{cov}(\bm{Z})$ where $\mathrm{cov}(Z(\bm{d}_i), Z(\bm{d}_j)) = C_Y(\bm{d}_i,\bm{d}_j) + \sigma^2_\varepsilon 1(\bm{d}_i = \bm{d}_j)$, and $\bm{c}_Y(\bm{s}_0) = \mathrm{cov}(Y(\bm{s}_0), \bm{Z})$ where $\mathrm{cov}(Y(\bm{s}_0), Z(\bm{d}_i)) = C_Y(\bm{s}_0, \bm{d}_i)$. Then the generalized least squares estimator of $\bm{\beta}$ is $\widehat{\bm{\beta}}_{gls} = (\bm{X}'\bm{C}_Z^{-1}\bm{X})^{-1}\bm{X}'\bm{C}_Z^{-1}\bm{Z}$, the universal kriging predictor of $Y(\bm{s}_0)$ is $\widehat{Y}(\bm{s}_0) = \bm{x}(\bm{s}_0)'\widehat{\bm{\beta}}_{gls} + \bm{c}_Y(\bm{s}_0)'\bm{C}_Z^{-1}(\bm{Z} - \bm{X}\widehat{\bm{\beta}}_{gls})$, and its mean square prediction error is 
 \begin{align*}
-\sigma^2_{\widehat{Y}}&(\bm{d};\bm{s}_0) = \bm{c}_Y(\bm{s}_0)'\bm{C}_Z(\bm{d})^{-1}\bm{c}(\bm{s}_0) + \\
-&\left[\bm{x}(\bm{s}_0) - \bm{X}(\bm{d})\bm{C}_Z(\bm{d})^{-1}\bm{c}_Y(\bm{s}_0)\right]'\left[\bm{X}(\bm{d})'\bm{C}_Z(\bm{d})^{-1}\bm{X}(\bm{d})\right]^{-1}\left[\bm{x}(\bm{s}_0) - \bm{X}(\bm{d})\bm{C}_Z(\bm{d})^{-1}\bm{c}_Y(\bm{s}_0)\right]
+\sigma^2_{\widehat{Y}}&(\bm{d};\bm{s}_0) = \bm{C}_Y(\bm{s}_0, \bm{s}_0) - \bm{c}_Y(\bm{s}_0)'\bm{C}_Z(\bm{d})^{-1}\bm{c}_Y(\bm{s}_0)  + \\
+&\left[\bm{x}(\bm{s}_0) - \bm{X}(\bm{d})'\bm{C}_Z(\bm{d})^{-1}\bm{c}_Y(\bm{s}_0)\right]'\left[\bm{X}(\bm{d})'\bm{C}_Z(\bm{d})^{-1}\bm{X}(\bm{d})\right]^{-1}\left[\bm{x}(\bm{s}_0) - \bm{X}(\bm{d})'\bm{C}_Z(\bm{d})^{-1}\bm{c}_Y(\bm{s}_0)\right]
 \end{align*}
 where $\bm{d}=(\bm{d}_1, \bm{d}_2, \dots, \bm{d}_N)'$ and $\bm{d}_i=(u_i, v_i)'$ for $i=1,2,\dots,N$. Then the design criterion is
 \begin{align*}
