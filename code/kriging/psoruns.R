@@ -83,13 +83,18 @@ negmspe <- function(x, datlist){
     Xn <- cbind(1, d)
     XprimeCinv <- crossprod(Xn, Czinv)
     precmat <- crossprod(Xn, Czinv)%*%Xn
-    covmat <- chol2inv(chol(precmat))
-    sigyhats <- rep(0, M)
-    for(i in 1:M){
-      delta <- Xm[i,] - XprimeCinv%*%Cy[i,]
-      sigyhats[i] <- crossprod(delta, covmat)%*%delta - crossprod(Cy[i,], Czinv)%*%Cy[i,]
+    covmat <- NULL
+    try(covmat <- chol2inv(chol(precmat)))
+    if(is.null(covmat)){
+      out <- Inf
+    } else {
+      sigyhats <- rep(0, M)
+      for(i in 1:M){
+        delta <- Xm[i,] - XprimeCinv%*%Cy[i,]
+        sigyhats[i] <- crossprod(delta, covmat)%*%delta - crossprod(Cy[i,], Czinv)%*%Cy[i,]
+      }
+      out <- mean(sigyhats)
     }
-    out <- mean(sigyhats)
   }
   ##  }
   return(-out)
