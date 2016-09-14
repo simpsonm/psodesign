@@ -56,26 +56,30 @@ negmspe <- function(x, datlist){
   covfun <- datlist$covfun
   d <- matrix(x, ncol = 2)
   Xm <- cbind(1, PredS)
-#  if(min(d) < 0 | max(d) > 1){
+  ##  if(min(d) < 0 | max(d) > 1){
+  out <- Inf
+  ##  } else {
+  Cz <- matrix(0, N, N)
+  for(i in 1:N){
+    for(j in 1:i){
+      Cz[i,j] <- covfun(d[i,], d[j,], theta)
+      if(j < i){
+        Cz[j,i] <- Cz[i,j]
+      }
+    }
+  }
+  ## create Cy
+  Cy <- matrix(0, M, N)
+  for(i in 1:M){
+    for(j in 1:N){
+      Cy[i,j] <- covfun(s[i,], d[j,], theta)
+    }
+  }
+  Czinv <- NULL
+  try(Czinv <- chol2inv(chol(Cz)))
+  if(is.null(Czinv)){
     out <- Inf
-#  } else {
-    Cz <- matrix(0, N, N)
-    for(i in 1:N){
-      for(j in 1:i){
-        Cz[i,j] <- covfun(d[i,], d[j,], theta)
-        if(j < i){
-          Cz[j,i] <- Cz[i,j]
-        }
-      }
-    }
-    ## create Cy
-    Cy <- matrix(0, M, N)
-    for(i in 1:M){
-      for(j in 1:N){
-        Cy[i,j] <- covfun(s[i,], d[j,], theta)
-      }
-    }
-    Czinv <- chol2inv(chol(Cz))
+  } else {
     Xn <- cbind(1, d)
     XprimeCinv <- crossprod(Xn, Czinv)
     precmat <- crossprod(Xn, Czinv)%*%Xn
@@ -86,7 +90,8 @@ negmspe <- function(x, datlist){
       sigyhats[i] <- crossprod(delta, covmat)%*%delta - crossprod(Cy[i,], Czinv)%*%Cy[i,]
     }
     out <- mean(sigyhats)
-#  }
+  }
+  ##  }
   return(-out)
 }
 

@@ -1,64 +1,88 @@
-theta1 <- .5
-sig0 <- 1
-sig1 <- 2
-theta <- c(theta1, sig0, sig1)
+library(ggplot2)
+library(gridExtra)
 
+source("../psofun.R")
+
+nrep <- 1
+niter <- 1000
+nswarm <- 50
+inertia <- 0.7298
+cognitive <- 1.496
+social <- 1.496
+nbhdnames <- c("ring-1", "ring-3", "global")
+rates <- c(0.5)
+dfs <- c(5)
+ccc <- c(0.1)
+alpha <- .2*niter
+beta <- 1
+psoout <- NULL
+nbhd <- list()
+nbhd[[1]] <- sapply(1:nswarm, function(x){return( (x + -1:1 - 1)%%nswarm + 1)}) ## ring-1
+nbhd[[2]] <- sapply(1:nswarm, function(x){return( (x + -3:3 - 1)%%nswarm + 1)}) ## ring-3
+nbhd[[3]] <- matrix(1:nswarm, ncol=nswarm, nrow=nswarm) ## global
+
+theta1 <- 1
+theta2 <- 1
+sig0 <- 0.1
+sig1 <- 0.9
+theta <- c(theta1, theta2, sig0, sig1)
+
+## powered exponential covariance function
 expcov <- function(s1, s2, theta){
-  sig0 <- theta[1]
-  sig1 <- theta[2]
-  theta1 <- theta[3]
+  theta1 <- theta[1]
+  theta2 <- theta[2]
+  sig0 <- theta[3]
+  sig1 <- theta[4]
   h <- s1 - s2
   euc <- sqrt(sum(h^2))
-  out <- sig0*(euc == 0) + sig1*exp(-euc/theta1)
+  out <- sig0*(euc == 0) + sig1*exp(-(euc/theta1)^theta2)
   return(out)
 }
 
-## num of design points
-N <- 20
+## Number of design points
+N <- 10
 
-## num of points interested in
-M <- 7*7
+## Number of points we're interested in
+M <- 10^2
 
-## X matrix for points we are interested in
-grid <- seq(0, 1, length.out = sqrt(M)+2)
-grid <- grid[-c(1, sqrt(M)+2)]
-u <- rep(grid, sqrt(M))
-v <- rep(grid, each = sqrt(M))
-s <- cbind(u,v)
-Xm <- cbind(1, u, v)
+## Points where we predict - a regular grid
+grid <- seq(0, 1, length.out = sqrt(M))
+PredS <- cbind(u = rep(grid, sqrt(M)), v = rep(grid, each = sqrt(M)))
 
-## pick some random design points
-d <- cbind(runif(N), runif(N))
-Xn <- cbind(1, d)
-
-mspe <- function(x, datlist){
+## negative MSPE, ignoring the C_Y(s,s) term
+negmspe <- function(x, datlist){
   ## create Cz
   N <- datlist$N
-  s <- datlist$s
+  s <- datlist$PredS
   M <- datlist$M
   theta <- datlist$theta
   covfun <- datlist$covfun
   d <- matrix(x, ncol = 2)
-  if(min(d) < 0 | max(d) > 1){
+  Xm <- cbind(1, PredS)
+  ##  if(min(d) < 0 | max(d) > 1){
+  out <- Inf
+  ##  } else {
+  Cz <- matrix(0, N, N)
+  for(i in 1:N){
+    for(j in 1:i){
+      Cz[i,j] <- covfun(d[i,], d[j,], theta)
+      if(j < i){
+        Cz[j,i] <- Cz[i,j]
+      }
+    }
+  }
+  ## create Cy
+  Cy <- matrix(0, M, N)
+  for(i in 1:M){
+    for(j in 1:N){
+      Cy[i,j] <- covfun(s[i,], d[j,], theta)
+    }
+  }
+  Czinv <- NULL
+  try(Czinv <- chol2inv(chol(Cz)))
+  if(is.null(Czinv)){
     out <- Inf
   } else {
-    Cz <- matrix(0, N, N)
-    for(i in 1:N){
-      for(j in 1:i){
-        Cz[i,j] <- covfun(d[i,], d[j,], theta)
-        if(j < i){
-          Cz[j,i] <- Cz[i,j]
-        }
-      }
-    }
-    ## create Cy
-    Cy <- matrix(0, M, N)
-    for(i in 1:M){
-      for(j in 1:N){
-        Cy[i,j] <- covfun(s[i,], d[j,], theta)
-      }
-    }
-    Czinv <- chol2inv(chol(Cz))
     Xn <- cbind(1, d)
     XprimeCinv <- crossprod(Xn, Czinv)
     precmat <- crossprod(Xn, Czinv)%*%Xn
@@ -70,52 +94,36 @@ mspe <- function(x, datlist){
     }
     out <- mean(sigyhats)
   }
+  ##  }
   return(-out)
 }
 
-source("../code/psofun.R")
+datlist <- list(N=N, PredS=PredS, M=M, theta=theta, covfun=expcov)
 
+npar <- N*2
+inits <- list()
+inits[[1]] <- matrix(runif(npar*nswarm, 0, 1), ncol = nswarm)
+idxs <- replicate(nswarm, sample(1:M, N))
+inits[[2]] <- rbind(matrix(PredS[idxs,1], ncol = nswarm), matrix(PredS[idxs,2], ncol = nswarm))
 
+psoout1 <- pso(niter, nswarm, inertia, cognitive, social, inits[[1]], nbhd[[1]], negmspe,
+               datlist = datlist)
 
+psoout2 <- pso(niter, nswarm, inertia, cognitive, social, inits[[2]], nbhd[[1]], negmspe,
+               datlist = datlist)
 
-niter <- 5000
-nswarm <- 20
-inertia <- 0.7298
-cognitive <- 1.496
-social <- 1.496
-nbhd <- sapply(1:nswarm, function(x){return( (x + -3:3 - 1)%%nswarm + 1)}) ## ring-3
-init <- matrix(runif(nswarm*N*2, 0, 1), ncol = nswarm)
-datlist <- list(N=N, s=s, M=M, theta=theta, covfun=expcov)
-
-psotest <- pso(niter, nswarm, inertia, cognitive, social, init, nbhd, mspe, datlist = datlist)
-
-psotest2 <- pso(niter, nswarm, 1, cognitive, social, init, nbhd, mspe, datlist = datlist,
-               tune = TRUE)
-
-psotest3 <- bbpso(niter, nswarm, 1, 0.3, init, nbhd, mspe, 1, TRUE, 0.5, datlist = datlist)
-
-plot(ts(expcov(c(0,0), c(0,0), theta) - psotest$maxes))
-lines(ts(expcov(c(0,0), c(0,0), theta) - psotest2$maxes), col = "red")
-lines(ts(expcov(c(0,0), c(0,0), theta) - psotest3$maxes), col = "blue")
-
+outdf <- data.frame(maxes=c(psoout1$maxes, psoout2$maxes), iter = rep(0:niter, 2), init = rep(c("A", "B"), each = niter + 1))
 
 library(ggplot2)
+qplot(iter, maxes, color = init, data = outdf, geom="line")
 
-plot1 <- qplot(u, v, data = data.frame(s), size = I(1), xlim=c(0,1), ylim=c(0,1)) +
-  geom_point(aes(x=u, y=v), data = data.frame(u = psotest$argmax[1:N],
-                                              v = psotest$argmax[1:N + N]),
-             color = I("red"), size = I(2))
+p1 <- qplot(u, v, data = data.frame(PredS), size = I(1)) +
+  geom_point(aes(u, v), data = data.frame(u = psoout1$argmax[1:N], v = psoout1$argmax[1:N + N]),
+             color = I("red"), size = I(3))
 
-plot2 <- qplot(u, v, data = data.frame(s), size = I(1), xlim=c(0,1), ylim=c(0,1)) +
-  geom_point(aes(x=u, y=v), data = data.frame(u = psotest2$argmax[1:N],
-                                              v = psotest2$argmax[1:N + N]),
-             color = I("blue"), size = I(2))
+p2 <- qplot(u, v, data = data.frame(PredS), size = I(1)) +
+  geom_point(aes(u, v), data = data.frame(u = psoout2$argmax[1:N], v = psoout2$argmax[1:N + N]),
+            color = I("blue"), size = I(3))
 
-plot3 <- qplot(u, v, data = data.frame(s), size = I(1), xlim=c(0,1), ylim=c(0,1)) +
-  geom_point(aes(x=u, y=v), data = data.frame(u = psotest3$argmax[1:N],
-                                              v = psotest3$argmax[1:N + N]),
-             color = I("green"), size = I(2))
 
-library(gridExtra)
-
-grid.arrange(plot1, plot2, plot3, ncol = 2)
+grid.arrange(p1, p2, ncol = 2)
