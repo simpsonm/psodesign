@@ -1,4 +1,4 @@
-\documentclass[12pt]{article}
+ \documentclass[12pt]{article}
 \setlength{\oddsidemargin}{-0.125in}
 \setlength{\topmargin}{-0.5in} \setlength{\textwidth}{6.5in}
 \setlength{\textheight}{9in}
@@ -110,14 +110,14 @@
 \baselineskip=24pt
 
 \section{The Problem}
-Suppose we are interested in the latent spatial field of some response variable $Y(\bm{s})$, $\bm{s}\in \mathcal{D}\subseteq \Re^2$. Specifically, we are interested in predicting $Y(\bm{s})$ at a set of target locations $\bm{s}_1, \bm{s}_2, \dots, \bm{s}_M\in\mathcal{D}$. We have the ability to sample $N$ locations anywhere in $\mathcal{D}$, and we wish to place them in order to optimize some design criterion. Let $\bm{d}_1, \bm{d}_2, \dots, \bm{d}_N\in\mathcal{D}$ denote the $N$ sampled locations. Suppose that $Y(\bm{s})$ is a geostatistical process with mean function $\mu(\bm{s})=\bm{x}(\bm{s})'\bm{\beta}$ for some known covariate $\bm{x}(\bm{s})$ and covariance function $C(\bm{s}, \bm{t})$ for $\bm{s},\bm{t}\in\mathcal{D}$. Once the design points are selected, we observe $Z(\bm{d}_i)$ for $i=1,2,\dots,N$ where $Z(\bm{d}) = Y(\bm{d}) + \varepsilon(\bm{d})$ and $\varepsilon(\bm{d})$ is mean zero white noise with variance $\sigma^2_{\varepsilon}$, representing measurement error. An intuitive criterion to minimize is average mean square prediction error (MSPE) from kriging across each of the target locations. 
+Suppose we are interested in the latent spatial field of some response variable $Y(\bm{s})$, $\bm{s}\in \mathcal{D}\subseteq \Re^2$. Specifically, we are interested in predicting $Y(\bm{s})$ at a set of target locations $\bm{s}_1, \bm{s}_2, \dots, \bm{s}_M\in\mathcal{D}$. We have the ability to sample $N$ locations anywhere in $\mathcal{D}$, and we wish to place them in order to optimize some design criterion. Let $\bm{d}_1, \bm{d}_2, \dots, \bm{d}_N\in\mathcal{D}$ denote the $N$ sampled locations. Suppose that $Y(\bm{s})$ is a geostatistical process with mean function $\mu(\bm{s})=\bm{x}(\bm{s})'\bm{\beta}$ for some known covariate $\bm{x}(\bm{s})$ and covariance function $C(\bm{s}, \bm{t})$ for $\bm{s},\bm{t}\in\mathcal{D}$. Once the design points are selected, we observe $Z(\bm{d}_i)$ for $i=1,2,\dots,N$ where $Z(\bm{d}) = Y(\bm{d}) + \varepsilon(\bm{d})$ and $\varepsilon(\bm{d})$ is mean zero white noise with variance $\sigma^2_{\varepsilon}$, representing measurement error. An intuitive criterion to minimize is the average mean square prediction error (MSPE) from kriging across each of the target locations, each the errrors are weighted appropriately. It turns out that this is intimately related to a more principled design criterion, the expected entropy gain on the predictive distribution: $\mathrm{E}\left\{\log[Y(\bm{s}_0)|\bm{Z}] - \log[Y(\bm{s}_0)]\right\}$. This is equivalent to the mutual information between $Y(\bm{s}_0)$ and $\bm{Z}$, which can be expressed as $M[Y(\bm{s}_0),\bm{Z}] = H[Y(\bm{s}_0)] + H[\bm{Z}] - H[Y(\bm{s}_0), \bm{Z}]$ where $H(.)$ is the entropy of the density function of the eclosed random variable.
 
 \subsection{Simple Kriging}
-In simple kriging, $C(.,.)$, $\bm{\beta}$, and $\sigma^2_{\varepsilon}$ are all treated as known. Let $\bm{Z} = (Z(\bm{d}_1), Z(\bm{d}_2), \dots, Z(\bm{d}_N) )'$, $\bm{X} = (\bm{x}(\bm{d}_1), \bm{x}(\bm{d}_2), \dots, \bm{x}(\bm{d}_N))'$, $\bm{C}_Z = \mathrm{cov}(\bm{Z})$ where $\mathrm{cov}(Z(\bm{d}_i), Z(\bm{d}_j)) = C(\bm{d}_i,\bm{d}_j) + \sigma^2_\varepsilon 1(\bm{d}_i = \bm{d}_j)$, and $\bm{c}_Y(\bm{s}_0) = \mathrm{cov}(Y(\bm{s}_0), \bm{Z})$ where $\mathrm{cov}(Y(\bm{s}_0), Z(\bm{d}_i)) = C(\bm{s}_0, \bm{d}_i)$. Then the simple kriging predictor of $Y(\bm{s}_0)$ is the linear predictor $\bm{Y}^*(\bm{s}_0) = \bm{\lambda}'\bm{Z} + k$ that MSPE conditional on sampled locations, $\bm{d}_1, \bm{d}_2, \dots, \bm{d}_N$. Specifically it minimizes $\mathrm{E}[Y(\bm{s}_0) - Y^*(\bm{s}_0)]^2$ over $\bm{\lambda}$ and $k$ such that $\bm{\lambda}'\bm{1}=1$ where $\bm{1}$ is a column vector of ones. The simple kriging predictor is easily derived as 
+In simple kriging, $C(.,.)$, $\bm{\beta}$, and $\sigma^2_{\varepsilon}$ are all treated as known. Let $\bm{Z} = [Z(\bm{d}_1), Z(\bm{d}_2), \dots, Z(\bm{d}_N) ]'$, $\bm{X} = [\bm{x}(\bm{d}_1), \bm{x}(\bm{d}_2), \dots, \bm{x}(\bm{d}_N)]'$, $\bm{C}_Z = \mathrm{cov}(\bm{Z})$ where $\mathrm{cov}[Z(\bm{d}_i), Z(\bm{d}_j)] = C(\bm{d}_i,\bm{d}_j) + \sigma^2_\varepsilon 1(\bm{d}_i = \bm{d}_j)$, and $\bm{c}_Y(\bm{s}_0) = \mathrm{cov}[Y(\bm{s}_0), \bm{Z}]$ where $\mathrm{cov}[Y(\bm{s}_0), Z(\bm{d}_i)] = C(\bm{s}_0, \bm{d}_i)$. Then the simple kriging predictor of $Y(\bm{s}_0)$ is the linear predictor $\bm{Y}^*(\bm{s}_0) = \bm{\lambda}'\bm{Z} + k$ that MSPE conditional on sampled locations, $\bm{d}_1, \bm{d}_2, \dots, \bm{d}_N$. Specifically it minimizes $\mathrm{E}[Y(\bm{s}_0) - \widehat{Y}_{sk}(\bm{s}_0)]^2$ over $\bm{\lambda}$ and $k$ such that $\bm{\lambda}'\bm{1}=1$ where $\bm{1}$ is a column vector of ones. The simple kriging predictor is easily derived as 
 \begin{align*}
-Y^*(\bm{s}_0) &= \bm{x}(\bm{s}_0)'\bm{\beta} + \bm{c}_Y(\bm{s}_0)'\bm{C}_Z^{-1}(\bm{Z} - \bm{X}\bm{\beta})\\
+\widehat{Y}_{sk}(\bm{s}_0) &= \bm{x}(\bm{s}_0)'\bm{\beta} + \bm{c}_Y(\bm{s}_0)'\bm{C}_Z^{-1}(\bm{Z} - \bm{X}\bm{\beta})\\
 \intertext{ with MSPE }
-S_{sk}^{2}(\bm{s}_0) &= C(\bm{s}_0,\bm{s}_0) - \bm{c}_Y(\bm{s}_0)'\bm{C}_Z^{-1}\bm{c}_Y(\bm{s}_0).
+\sigma_{sk}^{2}(\bm{s}_0) &= C(\bm{s}_0,\bm{s}_0) - \bm{c}_Y(\bm{s}_0)'\bm{C}_Z^{-1}\bm{c}_Y(\bm{s}_0).
 \end{align*}
 The simple kriging MSPE a function of the design points, $\bm{D}=(\bm{d}_1,\bm{d}_2,\dots,\bm{d}_N)$, through $\bm{c}_Y(\bm{s}_0)$ and $\bm{C}_Z^{-1}$. 
 
@@ -132,14 +132,26 @@ Y(\bm{s}_0)|\bm{Y},\bm{Z} &\sim N\left[\bm{x}(\bm{s}_0)'\bm{\beta} + \bm{c}_Y(\b
 \mathrm{var}[Y(\bm{s}_0)|\bm{Z}]&=\mathrm{E}\left\{\mathrm{var}[Y(\bm{s}_0)|\bm{Y},\bm{Z}]|\bm{Z}\right\} + \mathrm{var}\left\{\mathrm{E}[Y(\bm{s}_0)|\bm{Y},\bm{Z}]|\bm{Z}\right\}\\
 &= C(\bm{s}_0, \bm{s}_0) - \bm{c}_Y(\bm{s}_0)'\bm{C}_Z^{-1}\bm{c}_Y(\bm{s}_0).
 \end{align*}
-Then the design criterion we minimize is average simple kriging variance, $\overline{S}^2_{sk} = \sum_{i=1}^NS_{sk}^2(\bm{s}_i)/N$. Note that in order to $\overline{S}^2_{sk}$, we need to know $\bm{x}(\bm{s})$ a priori for each location $\bm{s}\in\mathcal{D}$. Often for this to be feasible, $\bm{x}(\bm{s})$ must be some know function of $\bm{s}$ and not a covariate that must be measured at location $\bm{s}$. For example if $\bm{s}=(u,v)$, then $\bm{x}(\bm{s}) = (1, u, v)'$ requires no additional measurement.
+Then a design criterion we could minimize is average simple kriging MSPE across all target locations, $\sum_{i=1}^N\sigma_{sk}^2(\bm{s}_i)/N$. This is a bit naieve, however, because it does not take into account the covariance structure across the locations. 
 
-Naively, it appears strange to minimize a {\it posterior} predictive variance prior to seeing the data. However, in the simple kriging setup, it turns out that $\mathrm{var}[Y(\bm{s}_0)|\bm{Z}]$ does not depend on $\bm{Z}$. More generally, a Bayesian would minimize the {\it expected} posterior predictive variance, $\mathrm{E}\left\{\mathrm{var}[Y(\bm{s}_0)|\bm{Z}]\right\}$. 
+Let $\bm{Y}^*=[Y(\bm{s}_1,Y(\bm{s}_2,\dots,Y(\bm{s}_M)]'$ denote the true vector of response variables at the target locations, $\{\bm{s}_k\in\mathcal{D}:i=1,\dots,M\}$. The covariance between the prediction errors at $\bm{s}_i$ and $\bm{s}_j$ can be derived as $\mathrm{cov}[Y(\bm{s}_i),Y(\bm{s}_j)|\bm{Z}] = C(\bm{s}_i,\bm{s}_j) - \bm{c}_Y(\bm{s}_i)'\bm{C}_Z^{-1}\bm{c}_Y(\bm{s}_j)$. Let $\bm{C}_{Y*} = \mathrm{cov}(\bm{Y}^*)$ where $\mathrm{cov}[Y(\bm{s}_i),Y(\bm{s}_j)] = C(\bm{s}_i,\bm{s}_j)$ and $\bm{C}_{YY^*}=\mathrm{cov}(\bm{Y},\bm{Y}^*)$ where the $i,j$th element is given by $\mathrm{cov}[Y(\bm{d}_i),Y(\bm{s}_j)] = C(\bm{d}_i,\bm{s}_j)$ for $i=1,2,\dots,N$ and $j=1,2,\dots,M$. Then the simple kriging error covariance matrix is given by $\bm{\Sigma}_{sk} = \bm{C}_{Y^*} - \bm{C}_{YY^*}'\bm{C}_Z^{-1}\bm{C}_{YY^*}$.
+
+Then an intuitive design criterion to minimize is $\log|\bm{\Sigma}_{sk}|$, which is in some sense the total amount of variation in the distribution of the errors from predicting $\bm{Y}^*$. If we return to the Bayesian setting and instead maximize the expected entropy gain, we have $M(\bm{Y}^*,\bm{Z}) = H(\bm{Y}^*) + H(\bm{Z}) - H(\bm{Y}^*,\bm{Z})$. To derive these quantities, note that the joint distribution of $(\bm{Y}^*,\bm{Z})$ is Gaussian with mean $(\bm{X}^*\bm{\beta}, \bm{X}\bm{\beta}$ and covariance matrix
+\begin{align*}
+\mathrm{cov}[(\bm{Y}^*,\bm{Z})] = \begin{bmatrix} \bm{C}_{Y^*} & \bm{C}_{YY^*}' \\ \bm{C}_{YY^*} & \bm{C}_Z \end{bmatrix}
+\end{align*} 
+where $\bm{X}^* = [\bm{x}(\bm{s}_1), \bm{x}(\bm{s}_2), \dots, \bm{x}(\bm{s}_M)]'$. The entropy of the $p$-variate normal distribution is $\log[(2\pi e)^p|\bm{\Sigma}|]/2$ where $\bm{\Sigma}$ is the covariance matrix. This yields
+\begin{align*}
+2M(\bm{Y}^*,\bm{Z}) &= \log|\bm{C}_{Y^*}| + \log|\bm{C}_{Z}| - \log\left|\begin{bmatrix} \bm{C}_{Y^*} & \bm{C}_{YY^*}' \\ \bm{C}_{YY^*} & \bm{C}_Z \end{bmatrix}\right|\\
+&= \log|\bm{C}_{Y^*}| - \log|\bm{C}_{Y^*} - \bm{C}_{YY^*}'\bm{C}_Z^{-1}\bm{C}_{YY^*}|.
+\end{align*}
+So maximizing the expected entropy gain is equivalent to minimizing $\log|\bm{C}_{Y^*} - \bm{C}_{YY^*}'\bm{C}_Z^{-1}\bm{C}_{YY^*}|$ since $\bm{C}_{Y^*}$ does not depend on the sampled points, and further the intuitive criterion coincides with the entropy criterion.
+
 \subsection{Universal Kriging}
 A major limitation of simple kriging is that typically $\bm{\beta}$, $\sigma^2_{\varepsilon}$, and $C(.,.)$ are unknown. Universal kriging attempts to remedy this by allowing $\bm{\beta}$ to be unknown. The universal kriging predictor is
 \begin{align*}
-\widehat{Y}(\bm{s}_0) &= \bm{x}(\bm{s}_0)'\widehat{\bm{\beta}}_{gls} + \bm{c}_Y(\bm{s}_0)'\bm{C}_Z^{-1}(\bm{Z} - \bm{X}\widehat{\bm{\beta}}_{gls})\\
-\intertext{where $\widehat{\bm{\beta}}_{gls} = (\bm{X}'\bm{C}_Z^{-1}\bm{X})^{-1}\bm{X}'\bm{C}_Z^{-1}\bm{Z}$ is the generalized least squares estimate of $\bm{\beta}$, and the MSPE of $\widehat{Y}(\bm{s}_0)$ is}
+\widehat{Y}_{uk}(\bm{s}_0) &= \bm{x}(\bm{s}_0)'\widehat{\bm{\beta}}_{gls} + \bm{c}_Y(\bm{s}_0)'\bm{C}_Z^{-1}(\bm{Z} - \bm{X}\widehat{\bm{\beta}}_{gls})\\
+\intertext{where $\widehat{\bm{\beta}}_{gls} = (\bm{X}'\bm{C}_Z^{-1}\bm{X})^{-1}\bm{X}'\bm{C}_Z^{-1}\bm{Z}$ is the generalized least squares estimate of $\bm{\beta}$, and the MSPE of $\widehat{Y}_{uk}(\bm{s}_0)$ is}
 \overline{S}_{uk}^2(\bm{s}_0) &= C(\bm{s}_0, \bm{s}_0) - \bm{c}_Y(\bm{s}_0)'\bm{C}_Z^{-1}\bm{c}_Y(\bm{s}_0)  \\
 & + [\bm{x}(\bm{s}_0)  - \bm{X}'\bm{C}_Z^{-1}\bm{c}_Y(\bm{s}_0)]'[\bm{X}'\bm{C}_Z^{-1}\bm{X}][\bm{x}(\bm{s}_0)  - \bm{X}'\bm{C}_Z^{-1}\bm{c}_Y(\bm{s}_0)].
 \end{align*}
