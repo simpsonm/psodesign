@@ -1,3 +1,7 @@
+# auto folder for auctex parsing
+*/auto/*
+*auto/*
+
 # files from running on the server
 *.Rout
 *.e
