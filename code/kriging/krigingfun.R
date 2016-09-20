@@ -157,6 +157,8 @@ expentropgain <- function(d, datlist){
   ## construct the Y and Z sims from the error sims - depend on the design!
   ## note: don't have to redo the Y part every time though, bc fixed pred locations
   ## (can fix in future update; make sure this works first)
+  out <- NULL
+  try({
   for(i in 1:nsim){
     theta <- thetasims[i,]
     sig2z <- sig2zsims[i]
@@ -190,7 +192,10 @@ expentropgain <- function(d, datlist){
     logZdens[i] <- log(mean(Zconddens))
     logYZdens[i] <- log(mean(YZconddens))
   }
-  out <-  mean(logYZdens) - mean(logZdens)
+  out <-  mean(logYZdens) - mean(logZdens)})
+  if(is.null(out)){
+    out <- -Inf
+  }
   return(out)
 }
 

@@ -64,12 +64,11 @@ inits[[2]] <- logit(rbind(matrix(cands[idxs,1], ncol = nswarm), matrix(cands[idx
 inits[[2]][,1] <- logit(c(spacefill$design))
 
 
+system.time(psoout1 <- pso(niter, nswarm, inertia, cognitive, social, inits[[1]], nbhd[[1]], expentropgain,
+               datlist = datlist))
 
-psoout1 <- pso(niter, nswarm, inertia, cognitive, social, inits[[1]], nbhd[[1]], expentropgain,
-               datlist = datlist)
-
-psoout2 <- pso(niter, nswarm, inertia, cognitive, social, inits[[2]], nbhd[[1]], expentropgain,
-               datlist = datlist)
+system.time(psoout2 <- pso(niter, nswarm, inertia, cognitive, social, inits[[2]], nbhd[[1]], expentropgain,
+               datlist = datlist))
 
 outdf <- data.frame(maxes=c(psoout1$maxes, psoout2$maxes), iter = rep(0:niter, 2), init = rep(c("A", "B"), each = niter + 1))
 
