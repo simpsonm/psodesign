@@ -1,5 +1,33 @@
 logit <- function(x) return(log(x/(1-x)))
 
+krigneglike <- function(pars, Z, X, loc, N, nbeta, covfun, log = TRUE){
+  beta <- pars[1:nbeta]
+  phi <- (pars[-c(1:nbeta)])
+  sig2z <- phi[1]
+  theta <- phi[-1]
+  mu <- X%*%beta
+  delta <- Z - mu
+  Cz <- Czfun(loc, N, theta, sig2z, covfun)
+  R <- chol(Cz)
+  Rinv <- backsolve(R, diag(N))
+  out <- drop(tcrossprod(crossprod(delta, Rinv)) + 2*sum(log(diag(R))))
+  return(out)
+}
+
+krigneglikeun <- function(pars, Z, X, loc, N, nbeta, covfun, log = TRUE){
+  beta <- pars[1:nbeta]
+  phi <- exp(pars[-c(1:nbeta)])
+  sig2z <- phi[1]
+  theta <- phi[-1]
+  mu <- X%*%beta
+  delta <- Z - mu
+  Cz <- Czfun(loc, N, theta, sig2z, covfun)
+  R <- chol(Cz)
+  Rinv <- backsolve(R, diag(N))
+  out <- drop(tcrossprod(crossprod(delta, Rinv)) + 2*sum(log(diag(R))))
+  return(out)
+}
+
 ## powered exponential covariance function
 powexpcov <- function(s1, s2, theta){
   theta1 <- theta[1]
