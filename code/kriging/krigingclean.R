@@ -9,8 +9,8 @@ for(i in 1:31){
   houston8[,1 + i] <- as.numeric(houston8[,1 + i])
 }
 houston8$nvalid <- apply(!is.na(as.matrix(houston8[,2:32])), 1, sum)
-houston8$avg <- apply(log(as.matrix((houston8[,2:32]))), 1, mean, na.rm=TRUE)
-houston8$sd <- apply(log(as.matrix((houston8[,2:32]))), 1, sd, na.rm=TRUE)
+houston8$avg <- apply((as.matrix((houston8[,2:32]))), 1, mean, na.rm=TRUE)
+houston8$sd <- apply((as.matrix((houston8[,2:32]))), 1, sd, na.rm=TRUE)
 houston8$se <- houston8$sd/sqrt(houston8$nvalid)
 
 houstongis <- read.table("houstongis.csv", TRUE, "\t")
