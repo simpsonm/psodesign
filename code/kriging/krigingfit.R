@@ -3,23 +3,37 @@ library(dplyr)
 library(ggplot2)
 library(rgdal)
 library(ggmap)
-library(gridExtra)
 source("krigingfun.R")
+library(shapefiles)
+library(maptools)
+source("poly_coords_function.R")
 
 houston <- read.csv("houstonout.csv")
 
-## convert coordinates to a projection suited for this area of texas
-x <- houston$Longitude
-y <- houston$Latitude
-d <- data.frame(lon=x, lat=y)
-coordinates(d) <- c("lon", "lat")
-proj4string(d) <- CRS("+init=epsg:4326") # WGS 84, i.e. world
-CRS.new <- CRS("+init=epsg:2256") # Texas 
-d2 <- spTransform(d, CRS.new)
+## county level shapefile
+coshape <- readOGR(dsn="shape", layer="05000")
+names(coshape)[1] <- "ID"
+cogeom <- poly_coords(coshape)
+housgeom <- filter(cogeom, NAME =="Harris")
 
-## rescale so betas & phi are easier to fit
-houston$u <- d2@coords[,1]/1000000  
-houston$v <- d2@coords[,2]/1000000  
+## shapefile is in a different projection; convert to lon + lat
+d <- data.frame( x = housgeom$PolyCoordsY, y = housgeom$PolyCoordsX)
+coordinates(d) <- c("x", "y")
+proj4string(d) <- proj4string(coshape)
+CRS.new <- CRS("+init=epsg:4326") # WGS 84, i.e. world
+d2 <- spTransform(d, CRS.new)
+housgeom$longitude <- d2@coords[,1]
+housgeom$latitude <- d2@coords[,2]
+
+## plot of houston area, Harris county, and current monitoring sites
+basemap <- get_map(location = "houston", zoom = 9, maptype = 'terrain')
+p <- ggmap(basemap) + geom_point(aes(Longitude, Latitude), data = houston, size = I(3), alpha=0.6)
+p + geom_polygon(aes(longitude,latitude, group = Poly_Name), data = housgeom, fill = NA,
+                 colour = "black")
+
+## convert longitude & lattitude to approximate kilometers
+houston$u <- houston$Longitude*pi/180*6371
+houston$v <- houston$Latitude*pi/180*6371
 
 houstongeo <- list(coords = as.matrix(select(houston, u, v)),
                    data = houston$avg)
@@ -52,70 +66,42 @@ ml.n3 <- likfit(houstongeo, ini = c(10,5), fix.nugget = FALSE, nugget = 10, tren
 ml.n4 <- likfit(houstongeo, ini = c(10,0.05), fix.nugget = FALSE, nugget = 10, trend = trendtype)
 ml.n5 <- likfit(houstongeo, ini = c(.1,5), fix.nugget = FALSE, nugget = 10, trend = trendtype)
 
-## basically, nugget is zero and estiamtes consistent across starting values
+## basically, nugget is zero 
 
 ml <- likfit(houstongeo, ini = c(1,0.5), fix.nugget = TRUE, trend = trendtype)
 ml.n <- likfit(houstongeo, ini = c(1,0.5), fix.nugget = FALSE, nugget = 1, trend = trendtype)
 
-cbind(ml.n$beta +  qnorm(0.025) * sqrt(diag(as.matrix(ml.n$beta.var))),
-      ml.n$beta +  qnorm(0.975) * sqrt(diag(as.matrix(ml.n$beta.var))))
-
 cbind(ml$beta +  qnorm(0.025) * sqrt(diag(as.matrix(ml$beta.var))),
       ml$beta +  qnorm(0.975) * sqrt(diag(as.matrix(ml$beta.var))))
 
-## confidence intervals are basically the same - linear in X, though not Y
+cbind(ml$beta +  qnorm(0.005) * sqrt(diag(as.matrix(ml$beta.var))),
+      ml$beta +  qnorm(0.995) * sqrt(diag(as.matrix(ml$beta.var))))
 
-############################################################
-## now try 2nd order polynomial
-trendtype <- "2nd"
+cbind(ml$beta +  qnorm(0.1) * sqrt(diag(as.matrix(ml$beta.var))),
+      ml$beta +  qnorm(0.9) * sqrt(diag(as.matrix(ml$beta.var))))
 
-## Fitting models with nugget fixed to zero
-ml1 <- likfit(houstongeo, ini = c(1,0.5), fix.nugget = TRUE, trend = trendtype)
-ml2 <- likfit(houstongeo, ini = c(.1,00.5), fix.nugget = TRUE, trend = trendtype)
-ml3 <- likfit(houstongeo, ini = c(10,5), fix.nugget = TRUE, trend = trendtype)
-ml4 <- likfit(houstongeo, ini = c(10,0.5), fix.nugget = TRUE, trend = trendtype)
-	 
-## Fitting models estimated nugget
-ml.n1 <- likfit(houstongeo, ini = c(1,0.5), fix.nugget = FALSE, nugget = 1, trend = trendtype)
-ml.n2 <- likfit(houstongeo, ini = c(.1,0.05), fix.nugget = FALSE, nugget = 1, trend = trendtype)
-ml.n3 <- likfit(houstongeo, ini = c(10,5), fix.nugget = FALSE, nugget = 1, trend = trendtype)
-ml.n4 <- likfit(houstongeo, ini = c(10,0.05), fix.nugget = FALSE, nugget = 1, trend = trendtype)
-ml.n5 <- likfit(houstongeo, ini = c(.1,5), fix.nugget = FALSE, nugget = 1, trend = trendtype)
+## confidence intervals suggest linear in y axis is reasonable even at 99% level
+## but x axis is not a significant predictor even at 80% level
 
-ml.n1 <- likfit(houstongeo, ini = c(1,0.5), fix.nugget = FALSE, nugget = .1, trend = trendtype)
-ml.n2 <- likfit(houstongeo, ini = c(.1,0.05), fix.nugget = FALSE, nugget = .1, trend = trendtype)
-ml.n3 <- likfit(houstongeo, ini = c(10,5), fix.nugget = FALSE, nugget = .1, trend = trendtype)
-ml.n4 <- likfit(houstongeo, ini = c(10,0.05), fix.nugget = FALSE, nugget = .1, trend = trendtype)
-ml.n5 <- likfit(houstongeo, ini = c(.1,5), fix.nugget = FALSE, nugget = .1, trend = trendtype)
-
-ml.n1 <- likfit(houstongeo, ini = c(1,0.5), fix.nugget = FALSE, nugget = 10, trend = trendtype)
-ml.n2 <- likfit(houstongeo, ini = c(.1,0.05), fix.nugget = FALSE, nugget = 10, trend = trendtype)
-ml.n3 <- likfit(houstongeo, ini = c(10,5), fix.nugget = FALSE, nugget = 10, trend = trendtype)
-ml.n4 <- likfit(houstongeo, ini = c(10,0.05), fix.nugget = FALSE, nugget = 10, trend = trendtype)
-ml.n5 <- likfit(houstongeo, ini = c(.1,5), fix.nugget = FALSE, nugget = 10, trend = trendtype)
+## not shown: 2nd order polynomial clearly seems to be an overfit
 
 
-## now higly sensitive to starting values, but nugget=0 is still MLE
 
-ml <- likfit(houstongeo, ini = c(1,0.5), fix.nugget = TRUE, trend = trendtype)
-ml.n <- likfit(houstongeo, ini = c(10,0.05), fix.nugget = FALSE, nugget = 0, trend = trendtype)
 
-cbind(ml.n$beta +  qnorm(0.025) * sqrt(diag(as.matrix(ml.n$beta.var))),
-      ml.n$beta +  qnorm(0.975) * sqrt(diag(as.matrix(ml.n$beta.var))))
+##### now estimate the variogram nonparametrically using two methods
 
-cbind(ml$beta +  qnorm(0.025) * sqrt(diag(as.matrix(ml$beta.var))),
-      ml$beta +  qnorm(0.975) * sqrt(diag(as.matrix(ml$beta.var))))
 
-## confidence intervals now think nothing is significant - so stay linear
+## for use in objective function - for checking whether candidate points are in the poly
+harrispoly <- cbind(housgeom$longitude, housgeom$latitude)*pi/180*6371
+currloc <- cbind(houston$u, houston$v)
 
-## now estimate the variogram nonparametrically using two methods
 trendtype <- "1st"
-cloud1 <- variog(houstongeo, option = "cloud", max.dist = 1, trend=trendtype)
+cloud1 <- variog(houstongeo, option = "cloud", trend=trendtype)
 cloud2 <- variog(houstongeo, option = "cloud", estimator.type = "modulus",
-                 max.dist = 1, trend=trendtype)
-bin1 <- variog(houstongeo, uvec = seq(0, 1, l = 11), trend=trendtype)
-bin2 <- variog(houstongeo, uvec = seq(0, 1, l = 11),
-               estimator.type = "modulus", trend=trendtype)
+                 trend=trendtype)
+bin1 <- variog(houstongeo, trend=trendtype)
+bin2 <- variog(houstongeo, estimator.type = "modulus", trend=trendtype)
+
 par(mfrow = c(2, 2))
 plot(cloud1, main = "classical estimator")
 plot(cloud2, main = "modulus estimator")
@@ -124,41 +110,117 @@ plot(bin2, main = "modulus estimator")
 
 ## obtain ML estimates
 ml <- likfit(houstongeo, ini = c(1,0.5), fix.nugget = TRUE, trend = trendtype)
-ml.n <- likfit(houstongeo, ini = c(10,0.05), fix.nugget = FALSE, nugget = 0, trend = trendtype)
+ml.n <- likfit(houstongeo, ini = c(1,0.5), fix.nugget = FALSE, nugget = 0, trend = trendtype)
 
 # Now, plotting fitted models against empirical variogram
 par(mfrow = c(2,1))
-plot(bin1, main = "classical variogram", ylim=c(0,30))
-lines(ml, max.dist = 1)
-lines(ml.n, lty = 2, max.dist = 1)
-legend(0.2, 15, legend=c("ML","ML.N"),lty=c(1,2),lwd=c(1,1), cex=0.7)
-plot(bin2, main = "modulus variogram", ylim=c(0,30))
-lines(ml, max.dist = 1)
-lines(ml.n, lty = 2, max.dist = 1)
-legend(0.2, 15, legend=c("ML","ML.N"),lty=c(1,2),lwd=c(1,1), cex=0.7)
+plot(bin1, main = "classical variogram")
+lines(ml)
+lines(ml.n, lty = 2)
+legend(40, 15, legend=c("ML","ML.N"),lty=c(1,2),lwd=c(1,1), cex=0.7)
+plot(bin2, main = "modulus variogram")
+lines(ml)
+lines(ml.n, lty = 2)
+legend(40, 15, legend=c("ML","ML.N"),lty=c(1,2),lwd=c(1,1), cex=0.7)
 
-## looks reasonable on the classical variogram, though a little off on the modulus one
+betahat <- ml$beta
+tau2hat <- ml$tausq
+sig2hat <- ml$sigmasq
+phihat <- ml$phi
+varbetahat <- ml$beta.var
+thetahat <- c(phihat, 0, sig2hat)
+
+basemap <- get_map(location = "houston", zoom = 9, maptype = 'terrain')
+p <- ggmap(basemap) + geom_point(aes(Longitude, Latitude), data = houston, size = I(3), alpha=0.6)
+
+N.sim <- 1000
+datlist <- list()
+datlist$poly <- Polygon(harrispoly)
+datlist$theta <- thetahat
+datlist$sig2z <- 0
+datlist$covfun <- expcov
+datlist$ss <- currloc
+datlist$tt <- spsample(datlist$poly, 1000, "random")@coords
+datlist$invCz.s <- chol2inv(chol(Czfun(currloc, nrow(currloc), thetahat, 0, expcov)))
+datlist$Cyy.s.t <- Cyyfun(currloc, datlist$tt, nrow(currloc), nrow(datlist$tt), thetahat, expcov)
+datlist$Cy.t <- drop(Cyyfun(dd, dd, 1, 1, thetahat, expcov))
+save(datlist, file = "datlist.Rdata")
+
+p + geom_polygon(aes(longitude,latitude, group = Poly_Name), data = housgeom, fill = NA,
+                 colour = "black") +
+  geom_point(aes(u, v), data = data.frame(u = datlist$tt[,1]/(pi/180*6371),
+                                          v = datlist$tt[,2]/(pi/180*6371)),
+             colour = "blue", alpha = 0.6, shape="+", size = I(3)) +
+  geom_point(aes(u, v), data = data.frame(u = dd[,1]/(pi/180*6371),
+                                          v = dd[,2]/(pi/180*6371)),
+             colour = "red", shape="X", size = I(5))
+
+
+niter <- 100
+nswarm <- 50
+inertia <- 0.7298
+cognitive <- 1.496
+social <- 1.496
+nbhdnames <- c("ring-1", "ring-3", "global")
+rates <- c(0.5)
+dfs <- c(5)
+ccc <- c(0.1)
+alpha <- .2*niter
+beta <- 1
+nbhd <- list()
+nbhd[[1]] <- sapply(1:nswarm, function(x){return( (x + -1:1 - 1)%%nswarm + 1)}) ## ring-1
+nbhd[[2]] <- sapply(1:nswarm, function(x){return( (x + -3:3 - 1)%%nswarm + 1)}) ## ring-3
+nbhd[[3]] <- matrix(1:nswarm, ncol=nswarm, nrow=nswarm) ## global
+
+npar <- 2
+inits <- list()
+inits[[1]] <- t(spsample(datlist$poly, nswarm, "random")@coords)
+idxs <- sample(1:nrow(datlist$tt), 50)
+inits[[2]] <- t(datlist$tt[idxs,])
 
 
 
-basemap1 <- get_map(location = c(lon = -95.27566, lat = 29.75722), zoom = 9, maptype = 'terrain')
-p1 <- ggmap(basemap1) + geom_point(aes(Longitude, Latitude), data = houston,
-                                  size = I(3), alpha=0.4)
+source("../psofun.R")
+
+system.time(meanpso <- pso(niter, nswarm, inertia, cognitive, social, inits[[1]], nbhd[[1]],
+                           negsig2sk.mean, datlist = datlist))
+
+system.time(minpso <- pso(niter, nswarm, inertia, cognitive, social, inits[[1]], nbhd[[1]],
+                          negsig2sk.min, datlist = datlist))
 
 
-basemap2 <- get_map(location = c(lon = -95.5, lat = 29.7), zoom = 9, maptype = 'terrain')
-p2 <- ggmap(basemap2) + geom_point(aes(Longitude, Latitude), data = houston,
-                                  size = I(3), alpha=0.4)
+system.time(meanpso2 <- pso(niter, nswarm, inertia, cognitive, social, inits[[2]], nbhd[[1]],
+                           negsig2sk.mean, datlist = datlist))
 
-grid.arrange(p1, p2, ncol = 2)
-
-xs <- c(-95.75, -95.75, -95, -95)
-ys <- c(29.5, 30, 30, 29.5)
-dat <- data.frame(xs = xs, ys = ys)
-p2 + geom_polygon(aes(xs, ys), data = dat, fill = NA, colour = "black")
+system.time(minpso2 <- pso(niter, nswarm, inertia, cognitive, social, inits[[2]], nbhd[[1]],
+                          negsig2sk.min, datlist = datlist))
 
 
-## todo: convet bounds to transformed coordinates
-## program up objective functions for a new site
-## let PSO rip!
+
+
+par(mfrow=c(2,1))
+plot(ts(meanpso$maxes))
+lines(ts(meanpso2$maxes), col = "red")
+plot(ts(minpso$maxes))
+lines(ts(minpso2$maxes), col = "red")
+
+
+p + geom_polygon(aes(longitude,latitude, group = Poly_Name), data = housgeom, fill = NA,
+                       colour = "black") +
+  geom_point(aes(u, v), data = data.frame(u = datlist$tt[,1]/(pi/180*6371),
+                                          v = datlist$tt[,2]/(pi/180*6371)),
+             colour = "blue", alpha = 0.6, shape="+", size = I(3)) +
+  geom_point(aes(u, v), data = data.frame(u = meanpso$argmax[1]/(pi/180*6371),
+                                          v = meanpso$argmax[2]/(pi/180*6371)),
+             colour = "red", shape="X", size = I(5)) +
+  geom_point(aes(u, v), data = data.frame(u = minpso$argmax[1]/(pi/180*6371),
+                                          v = minpso$argmax[2]/(pi/180*6371)),
+             colour = "blue", shape="X", size = I(5)) +
+  geom_point(aes(u, v), data = data.frame(u = meanpso2$argmax[1]/(pi/180*6371),
+                                          v = meanpso2$argmax[2]/(pi/180*6371)),
+             colour = "red", shape="O", size = I(5)) +
+  geom_point(aes(u, v), data = data.frame(u = minpso2$argmax[1]/(pi/180*6371),
+                                          v = minpso2$argmax[2]/(pi/180*6371)),
+             colour = "blue", shape="O", size = I(5))
+
 

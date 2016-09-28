@@ -1,3 +1,81 @@
+## mean negative simple kriging variance at a set of target points
+## (i.e. assuming only latent process is unknown)
+negsig2sk.mean <- function(dd, datlist){
+  ## dd = variable design points
+  ss <- datlist$ss ## fixed points in the design
+  tt <- datlist$tt ## target points
+  covfun <- datlist$covfun
+  theta <- datlist$theta
+  sig2z <- datlist$sig2z
+  poly <- datlist$poly
+  invCz.s <- datlist$invCz.s
+  Cyy.s.t <- datlist$Cyy.s.t
+  Cy.t <- datlist$Cy.t
+  N.s <- nrow(ss)
+  N.t <- nrow(tt)
+  dd <- matrix(dd, nrow = 1)
+  N.d <- nrow(dd)
+  ## check that all design points are in the target county
+  check <- point.in.polygon(dd[,1], dd[,2], poly@coords[,1], poly@coords[,2])
+  if(sum(check) == N.d){
+    ## first, finish creating Cz and Czinv
+    Cz.d.s <- Cyyfun(dd, ss, N.d, N.s, theta, covfun)
+    Cz.d <- Czfun(dd, N.d, theta, sig2z, covfun)
+    DD <- chol2inv(chol(Cz.d - Cz.d.s%*%tcrossprod(invCz.s, Cz.d.s)))
+    AinvB <- tcrossprod(invCz.s, Cz.d.s)
+    AA <- invCz.s + AinvB%*%tcrossprod(DD,AinvB)
+    BB <- -AinvB%*%DD
+    invCz <- rbind(cbind(AA, BB), cbind(t(BB), DD))
+    ## next, finish creating Cyy
+    Cyy.d.t <- Cyyfun(dd, tt, N.d, N.t, theta, covfun)
+    Cyy <- rbind(Cyy.s.t, Cyy.d.t)
+    outs <- apply(Cyy, 2, function(x, invCz) crossprod(x, invCz)%*%x, invCz = invCz)
+    out <- mean(outs) - Cy.t
+  } else {
+    out <- -Inf
+  }
+  return(out)
+}
+
+## min negative simple kriging variance at a set of target points
+## (i.e. assuming only latent process is unknown)
+negsig2sk.min <- function(dd, datlist){
+  ## dd = variable design points
+  ss <- datlist$ss ## fixed points in the design
+  tt <- datlist$tt ## target points
+  covfun <- datlist$covfun
+  theta <- datlist$theta
+  sig2z <- datlist$sig2z
+  poly <- datlist$poly
+  invCz.s <- datlist$invCz.s
+  Cyy.s.t <- datlist$Cyy.s.t
+  Cy.t <- datlist$Cy.t
+  N.s <- nrow(ss)
+  N.t <- nrow(tt)
+  dd <- matrix(dd, nrow = 1)
+  N.d <- nrow(dd)
+  ## check that all design points are in the target county
+  check <- point.in.polygon(dd[,1], dd[,2], poly@coords[,1], poly@coords[,2])
+  if(sum(check) == N.d){
+    ## first, finish creating Cz and Czinv
+    Cz.d.s <- Cyyfun(dd, ss, N.d, N.s, theta, covfun)
+    Cz.d <- Czfun(dd, N.d, theta, sig2z, covfun)
+    DD <- chol2inv(chol(Cz.d - Cz.d.s%*%tcrossprod(invCz.s, Cz.d.s)))
+    AinvB <- tcrossprod(invCz.s, Cz.d.s)
+    AA <- invCz.s + AinvB%*%tcrossprod(DD,AinvB)
+    BB <- -AinvB%*%DD
+    invCz <- rbind(cbind(AA, BB), cbind(t(BB), DD))
+    ## next, finish creating Cyy
+    Cyy.d.t <- Cyyfun(dd, tt, N.d, N.t, theta, covfun)
+    Cyy <- rbind(Cyy.s.t, Cyy.d.t)
+    outs <- apply(Cyy, 2, function(x, invCz) crossprod(x, invCz)%*%x, invCz = invCz)
+    out <- min(outs) - Cy.t
+  } else {
+    out <- -Inf
+  }
+  return(out)
+}
+
 logit <- function(x) return(log(x/(1-x)))
 
 krigneglike <- function(pars, Z, X, loc, N, nbeta, covfun, log = TRUE){
@@ -47,7 +125,7 @@ expcov <- function(s1, s2, theta){
   sig1 <- theta[3]
   h <- s1 - s2
   euc <- sqrt(sum(h^2))
-  out <- sig0*(euc == 0) + sig1*exp(-(euc/theta1))
+  out <- sig0*(euc == 0) + exp(log(sig1) - (euc/theta1))
   return(out)
 }
 
