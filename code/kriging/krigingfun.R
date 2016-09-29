@@ -13,7 +13,7 @@ negsig2sk.mean <- function(dd, datlist){
   Cy.t <- datlist$Cy.t
   N.s <- nrow(ss)
   N.t <- nrow(tt)
-  dd <- matrix(dd, nrow = 1)
+  dd <- matrix(dd, ncol = 2)
   N.d <- nrow(dd)
   ## check that all design points are in the target county
   check <- point.in.polygon(dd[,1], dd[,2], poly@coords[,1], poly@coords[,2])
@@ -52,7 +52,7 @@ negsig2sk.min <- function(dd, datlist){
   Cy.t <- datlist$Cy.t
   N.s <- nrow(ss)
   N.t <- nrow(tt)
-  dd <- matrix(dd, nrow = 1)
+  dd <- matrix(dd, ncol = 2)
   N.d <- nrow(dd)
   ## check that all design points are in the target county
   check <- point.in.polygon(dd[,1], dd[,2], poly@coords[,1], poly@coords[,2])

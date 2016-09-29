@@ -143,21 +143,19 @@ datlist$ss <- currloc
 datlist$tt <- spsample(datlist$poly, 1000, "random")@coords
 datlist$invCz.s <- chol2inv(chol(Czfun(currloc, nrow(currloc), thetahat, 0, expcov)))
 datlist$Cyy.s.t <- Cyyfun(currloc, datlist$tt, nrow(currloc), nrow(datlist$tt), thetahat, expcov)
-datlist$Cy.t <- drop(Cyyfun(dd, dd, 1, 1, thetahat, expcov))
+datlist$Cy.t <- drop(Cyyfun(matrix(c(0,0), nrow=1), matrix(c(0,0), nrow=1), 1, 1, thetahat, expcov))
+
 save(datlist, file = "datlist.Rdata")
 
 p + geom_polygon(aes(longitude,latitude, group = Poly_Name), data = housgeom, fill = NA,
                  colour = "black") +
   geom_point(aes(u, v), data = data.frame(u = datlist$tt[,1]/(pi/180*6371),
                                           v = datlist$tt[,2]/(pi/180*6371)),
-             colour = "blue", alpha = 0.6, shape="+", size = I(3)) +
-  geom_point(aes(u, v), data = data.frame(u = dd[,1]/(pi/180*6371),
-                                          v = dd[,2]/(pi/180*6371)),
-             colour = "red", shape="X", size = I(5))
+             colour = "blue", alpha = 0.6, shape="+", size = I(3)) 
 
 
-niter <- 100
-nswarm <- 50
+niter <- 500
+nswarm <- 20
 inertia <- 0.7298
 cognitive <- 1.496
 social <- 1.496
@@ -172,11 +170,15 @@ nbhd[[1]] <- sapply(1:nswarm, function(x){return( (x + -1:1 - 1)%%nswarm + 1)}) 
 nbhd[[2]] <- sapply(1:nswarm, function(x){return( (x + -3:3 - 1)%%nswarm + 1)}) ## ring-3
 nbhd[[3]] <- matrix(1:nswarm, ncol=nswarm, nrow=nswarm) ## global
 
-npar <- 2
+npar <- 2*5
 inits <- list()
-inits[[1]] <- t(spsample(datlist$poly, nswarm, "random")@coords)
-idxs <- sample(1:nrow(datlist$tt), 50)
-inits[[2]] <- t(datlist$tt[idxs,])
+inits[[1]] <- replicate(nswarm, c(spsample(datlist$poly, npar/2, "random")@coords))
+idxs <- replicate(nswarm, sample(1:nrow(datlist$tt), npar/2))
+inits2 <- matrix(0, npar, nswarm)
+for(i in 1:nswarm){
+  inits2[,i] <- c(datlist$tt[idxs[,i],])
+}
+inits[[2]] <- inits2
 
 
 
@@ -195,9 +197,6 @@ system.time(meanpso2 <- pso(niter, nswarm, inertia, cognitive, social, inits[[2]
 system.time(minpso2 <- pso(niter, nswarm, inertia, cognitive, social, inits[[2]], nbhd[[1]],
                           negsig2sk.min, datlist = datlist))
 
-
-
-
 par(mfrow=c(2,1))
 plot(ts(meanpso$maxes))
 lines(ts(meanpso2$maxes), col = "red")
@@ -210,17 +209,17 @@ p + geom_polygon(aes(longitude,latitude, group = Poly_Name), data = housgeom, fi
   geom_point(aes(u, v), data = data.frame(u = datlist$tt[,1]/(pi/180*6371),
                                           v = datlist$tt[,2]/(pi/180*6371)),
              colour = "blue", alpha = 0.6, shape="+", size = I(3)) +
-  geom_point(aes(u, v), data = data.frame(u = meanpso$argmax[1]/(pi/180*6371),
-                                          v = meanpso$argmax[2]/(pi/180*6371)),
+  geom_point(aes(u, v), data = data.frame(u = meanpso$argmax[1:5]/(pi/180*6371),
+                                          v = meanpso$argmax[5 + 1:5]/(pi/180*6371)),
              colour = "red", shape="X", size = I(5)) +
-  geom_point(aes(u, v), data = data.frame(u = minpso$argmax[1]/(pi/180*6371),
-                                          v = minpso$argmax[2]/(pi/180*6371)),
+  geom_point(aes(u, v), data = data.frame(u = minpso$argmax[1:5]/(pi/180*6371),
+                                          v = minpso$argmax[5 + 1:5]/(pi/180*6371)),
              colour = "blue", shape="X", size = I(5)) +
-  geom_point(aes(u, v), data = data.frame(u = meanpso2$argmax[1]/(pi/180*6371),
-                                          v = meanpso2$argmax[2]/(pi/180*6371)),
+  geom_point(aes(u, v), data = data.frame(u = meanpso2$argmax[1:5]/(pi/180*6371),
+                                          v = meanpso2$argmax[5 + 1:5]/(pi/180*6371)),
              colour = "red", shape="O", size = I(5)) +
-  geom_point(aes(u, v), data = data.frame(u = minpso2$argmax[1]/(pi/180*6371),
-                                          v = minpso2$argmax[2]/(pi/180*6371)),
+  geom_point(aes(u, v), data = data.frame(u = minpso2$argmax[1:5]/(pi/180*6371),
+                                          v = minpso2$argmax[5 + 1:5]/(pi/180*6371)),
              colour = "blue", shape="O", size = I(5))
 
 

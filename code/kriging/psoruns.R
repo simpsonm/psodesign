@@ -22,11 +22,16 @@ nbhd[[1]] <- sapply(1:nswarm, function(x){return( (x + -1:1 - 1)%%nswarm + 1)}) 
 nbhd[[2]] <- sapply(1:nswarm, function(x){return( (x + -3:3 - 1)%%nswarm + 1)}) ## ring-3
 nbhd[[3]] <- matrix(1:nswarm, ncol=nswarm, nrow=nswarm) ## global
 
-npar <- 2
+ndesign <- 5
+npar <- 2*ndesign
 inits <- list()
-inits[[1]] <- t(spsample(datlist$poly, nswarm, "random")@coords)
-idxs <- sample(1:nrow(datlist$tt), nswarm)
-inits[[2]] <- t(datlist$tt[idxs,])
+inits[[1]] <- replicate(nswarm, c(spsample(datlist$poly, ndesign, "random")@coords))
+idxs <- replicate(nswarm, sample(1:nrow(datlist$tt), ndesign))
+inits2 <- matrix(0, npar, nswarm)
+for(i in 1:nswarm){
+  inits2[,i] <- c(datlist$tt[idxs[,i],])
+}
+inits[[2]] <- inits2
 
 system.time({
 for(m in 1:3){
