@@ -4,7 +4,7 @@ source("../psofun.R")
 source("krigingfun.R")
 load("datlist.Rdata")
 
-nrep <- 10
+nrep <- 5
 niter <- 500
 nswarm <- 20
 inertia <- 0.7298
