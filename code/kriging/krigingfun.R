@@ -1,3 +1,104 @@
+## mean negative universal kriging variance at a set of target points
+## (i.e. assuming only latent process and beta is unknown)
+negsig2uk.mean <- function(dd, datlist){
+  ## dd = variable design points
+  ss <- datlist$ss ## fixed points in the design
+  tt <- datlist$tt ## target points
+  covfun <- datlist$covfun
+  theta <- datlist$theta
+  sig2z <- datlist$sig2z
+  poly <- datlist$poly
+  invCz.s <- datlist$invCz.s
+  Cyy.s.t <- datlist$Cyy.s.t
+  Cy.t <- datlist$Cy.t
+  N.s <- nrow(ss)
+  N.t <- nrow(tt)
+  dd <- matrix(dd, ncol = 2)
+  N.d <- nrow(dd)
+  X.t <- cbind(1, tt)
+  X.s <- cbind(1, ss)
+  X.d <- cbind(1, dd)
+  X <- rbind(X.s, X.d)
+  ## check that all design points are in the target county
+  check <- point.in.polygon(dd[,1], dd[,2], poly@coords[,1], poly@coords[,2])
+  if(sum(check) == N.d){
+    ## first, finish creating Cz and Czinv
+    Cz.d.s <- Cyyfun(dd, ss, N.d, N.s, theta, covfun)
+    Cz.d <- Czfun(dd, N.d, theta, sig2z, covfun)
+    DD <- chol2inv(chol(Cz.d - Cz.d.s%*%tcrossprod(invCz.s, Cz.d.s)))
+    AinvB <- tcrossprod(invCz.s, Cz.d.s)
+    AA <- invCz.s + AinvB%*%tcrossprod(DD,AinvB)
+    BB <- -AinvB%*%DD
+    invCz <- rbind(cbind(AA, BB), cbind(t(BB), DD))
+    ## next, finish creating Cyy
+    Cyy.d.t <- Cyyfun(dd, tt, N.d, N.t, theta, covfun)
+    Cyy <- rbind(Cyy.s.t, Cyy.d.t)
+    outs1 <- apply(Cyy, 2, function(x, invCz) crossprod(x, invCz)%*%x, invCz = invCz)
+    XtinvCz <- crossprod(X, invCz)
+    prec <- XtinvCz%*%X
+    Rprec <- chol(prec)
+    invRprec <- backsolve(Rprec, diag(ncol(X)))
+    delta <- t(X.t) - XtinvCz%*%Cyy
+    outs2 <- apply(delta, 2, function(x, invRprec) tcrossprod(crossprod(x, invRprec)),
+                   invRprec = invRprec)
+    out <- mean(outs1) - Cy.t - mean(outs2)
+  } else {
+    out <- -Inf
+  }
+  return(out)
+}
+
+## min negative universal kriging variance at a set of target points
+## (i.e. assuming only latent process and beta is unknown)
+negsig2uk.min <- function(dd, datlist){
+  ## dd = variable design points
+  ss <- datlist$ss ## fixed points in the design
+  tt <- datlist$tt ## target points
+  covfun <- datlist$covfun
+  theta <- datlist$theta
+  sig2z <- datlist$sig2z
+  poly <- datlist$poly
+  invCz.s <- datlist$invCz.s
+  Cyy.s.t <- datlist$Cyy.s.t
+  Cy.t <- datlist$Cy.t
+  N.s <- nrow(ss)
+  N.t <- nrow(tt)
+  dd <- matrix(dd, ncol = 2)
+  N.d <- nrow(dd)
+  X.t <- cbind(1, tt)
+  X.s <- cbind(1, ss)
+  X.d <- cbind(1, dd)
+  X <- rbind(X.s, X.d)
+  ## check that all design points are in the target county
+  check <- point.in.polygon(dd[,1], dd[,2], poly@coords[,1], poly@coords[,2])
+  if(sum(check) == N.d){
+    ## first, finish creating Cz and Czinv
+    Cz.d.s <- Cyyfun(dd, ss, N.d, N.s, theta, covfun)
+    Cz.d <- Czfun(dd, N.d, theta, sig2z, covfun)
+    DD <- chol2inv(chol(Cz.d - Cz.d.s%*%tcrossprod(invCz.s, Cz.d.s)))
+    AinvB <- tcrossprod(invCz.s, Cz.d.s)
+    AA <- invCz.s + AinvB%*%tcrossprod(DD,AinvB)
+    BB <- -AinvB%*%DD
+    invCz <- rbind(cbind(AA, BB), cbind(t(BB), DD))
+    ## next, finish creating Cyy
+    Cyy.d.t <- Cyyfun(dd, tt, N.d, N.t, theta, covfun)
+    Cyy <- rbind(Cyy.s.t, Cyy.d.t)
+    outs1 <- apply(Cyy, 2, function(x, invCz) crossprod(x, invCz)%*%x, invCz = invCz)
+    XtinvCz <- crossprod(X, invCz)
+    prec <- XtinvCz%*%X
+    Rprec <- chol(prec)
+    invRprec <- backsolve(Rprec, diag(ncol(X)))
+    delta <- t(X.t) - XtinvCz%*%Cyy
+    outs2 <- apply(delta, 2, function(x, invRprec) tcrossprod(crossprod(x, invRprec)),
+                   invRprec = invRprec)
+    outs <- outs1 - outs2
+    out <- min(outs) - Cy.t
+  } else {
+    out <- -Inf
+  }
+  return(out)
+}
+
 ## mean negative simple kriging variance at a set of target points
 ## (i.e. assuming only latent process is unknown)
 negsig2sk.mean <- function(dd, datlist){

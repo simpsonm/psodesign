@@ -38,9 +38,9 @@ for(m in 1:3){
   for(i in 1:2){
     for(j in 1:2){
       if(j == 1){
-        obj <- negsig2sk.mean
+        obj <- negsig2uk.mean
       } else {
-        obj <- negsig2sk.min
+        obj <- negsig2uk.min
       }
       for(rep in 1:nrep){
         cat("nbhd = ")

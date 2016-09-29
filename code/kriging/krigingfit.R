@@ -154,7 +154,7 @@ p + geom_polygon(aes(longitude,latitude, group = Poly_Name), data = housgeom, fi
              colour = "blue", alpha = 0.6, shape="+", size = I(3)) 
 
 
-niter <- 500
+niter <- 100
 nswarm <- 20
 inertia <- 0.7298
 cognitive <- 1.496
@@ -170,37 +170,51 @@ nbhd[[1]] <- sapply(1:nswarm, function(x){return( (x + -1:1 - 1)%%nswarm + 1)}) 
 nbhd[[2]] <- sapply(1:nswarm, function(x){return( (x + -3:3 - 1)%%nswarm + 1)}) ## ring-3
 nbhd[[3]] <- matrix(1:nswarm, ncol=nswarm, nrow=nswarm) ## global
 
-npar <- 2*5
+ndesign <- 1
+npar <- 2*ndesign
 inits <- list()
-inits[[1]] <- replicate(nswarm, c(spsample(datlist$poly, npar/2, "random")@coords))
-idxs <- replicate(nswarm, sample(1:nrow(datlist$tt), npar/2))
+inits[[1]] <- replicate(nswarm, c(spsample(datlist$poly, ndesign, "random")@coords))
+idxs <- matrix(replicate(nswarm, sample(1:nrow(datlist$tt), ndesign)), nrow = ndesign)
 inits2 <- matrix(0, npar, nswarm)
 for(i in 1:nswarm){
   inits2[,i] <- c(datlist$tt[idxs[,i],])
 }
 inits[[2]] <- inits2
+vals <- apply(t(datlist$tt), 2, negsig2sk.mean, datlist = datlist)
+idxs2 <- order(vals, decreasing = TRUE)[1:ndesign]
+inits[[2]][,1] <- c(datlist$tt[idxs2,])
+
 
 
 
 source("../psofun.R")
 
 system.time(meanpso <- pso(niter, nswarm, inertia, cognitive, social, inits[[1]], nbhd[[1]],
-                           negsig2sk.mean, datlist = datlist))
+                           negsig2uk.mean, datlist = datlist))
 
 system.time(minpso <- pso(niter, nswarm, inertia, cognitive, social, inits[[1]], nbhd[[1]],
-                          negsig2sk.min, datlist = datlist))
+                          negsig2uk.min, datlist = datlist))
 
 
 system.time(meanpso2 <- pso(niter, nswarm, inertia, cognitive, social, inits[[2]], nbhd[[1]],
-                           negsig2sk.mean, datlist = datlist))
+                           negsig2uk.mean, datlist = datlist))
 
 system.time(minpso2 <- pso(niter, nswarm, inertia, cognitive, social, inits[[2]], nbhd[[1]],
-                          negsig2sk.min, datlist = datlist))
+                          negsig2uk.min, datlist = datlist))
+
+
+par(mfrow=c(1,1))
+plot(ts(meanpso$maxes), ylim = c(min(meanpso$maxes, meanpso2$maxes),
+                                 max(meanpso$maxes, meanpso2$maxes)))
+lines(ts(meanpso2$maxes), col = "red")
+
 
 par(mfrow=c(2,1))
-plot(ts(meanpso$maxes))
+plot(ts(meanpso$maxes), ylim = c(min(meanpso$maxes, meanpso2$maxes),
+                                 max(meanpso$maxes, meanpso2$maxes)))
 lines(ts(meanpso2$maxes), col = "red")
-plot(ts(minpso$maxes))
+plot(ts(minpso$maxes), ylim = c(min(minpso$maxes, minpso2$maxes),
+                                max(minpso$maxes, minpso2$maxes)))
 lines(ts(minpso2$maxes), col = "red")
 
 
@@ -209,17 +223,17 @@ p + geom_polygon(aes(longitude,latitude, group = Poly_Name), data = housgeom, fi
   geom_point(aes(u, v), data = data.frame(u = datlist$tt[,1]/(pi/180*6371),
                                           v = datlist$tt[,2]/(pi/180*6371)),
              colour = "blue", alpha = 0.6, shape="+", size = I(3)) +
-  geom_point(aes(u, v), data = data.frame(u = meanpso$argmax[1:5]/(pi/180*6371),
-                                          v = meanpso$argmax[5 + 1:5]/(pi/180*6371)),
+  geom_point(aes(u, v), data = data.frame(u = meanpso$argmax[1:ndesign]/(pi/180*6371),
+                                          v = meanpso$argmax[ndesign + 1:ndesign]/(pi/180*6371)),
              colour = "red", shape="X", size = I(5)) +
-  geom_point(aes(u, v), data = data.frame(u = minpso$argmax[1:5]/(pi/180*6371),
-                                          v = minpso$argmax[5 + 1:5]/(pi/180*6371)),
-             colour = "blue", shape="X", size = I(5)) +
-  geom_point(aes(u, v), data = data.frame(u = meanpso2$argmax[1:5]/(pi/180*6371),
-                                          v = meanpso2$argmax[5 + 1:5]/(pi/180*6371)),
+  geom_point(aes(u, v), data = data.frame(u = minpso$argmax[1:ndesign]/(pi/180*6371),
+                                          v = minpso$argmax[ndesign + 1:ndesign]/(pi/180*6371)),
+             colour = "blue", shape="X", size = I(5)) + 
+  geom_point(aes(u, v), data = data.frame(u = meanpso2$argmax[1:ndesign]/(pi/180*6371),
+                                          v = meanpso2$argmax[ndesign + 1:ndesign]/(pi/180*6371)),
              colour = "red", shape="O", size = I(5)) +
-  geom_point(aes(u, v), data = data.frame(u = minpso2$argmax[1:5]/(pi/180*6371),
-                                          v = minpso2$argmax[5 + 1:5]/(pi/180*6371)),
+  geom_point(aes(u, v), data = data.frame(u = minpso2$argmax[1:ndesign]/(pi/180*6371),
+                                          v = minpso2$argmax[ndesign + 1:ndesign]/(pi/180*6371)),
              colour = "blue", shape="O", size = I(5))
 
 
