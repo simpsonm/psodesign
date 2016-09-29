@@ -25,7 +25,7 @@ nbhd[[3]] <- matrix(1:nswarm, ncol=nswarm, nrow=nswarm) ## global
 npar <- 2
 inits <- list()
 inits[[1]] <- t(spsample(datlist$poly, nswarm, "random")@coords)
-idxs <- sample(1:nrow(datlist$tt), 50)
+idxs <- sample(1:nrow(datlist$tt), nswarm)
 inits[[2]] <- t(datlist$tt[idxs,])
 
 system.time({
