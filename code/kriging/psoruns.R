@@ -26,12 +26,15 @@ ndesign <- 5
 npar <- 2*ndesign
 inits <- list()
 inits[[1]] <- replicate(nswarm, c(spsample(datlist$poly, ndesign, "random")@coords))
-idxs <- replicate(nswarm, sample(1:nrow(datlist$tt), ndesign))
+idxs <- matrix(replicate(nswarm, sample(1:nrow(datlist$tt), ndesign)), nrow = ndesign)
 inits2 <- matrix(0, npar, nswarm)
 for(i in 1:nswarm){
   inits2[,i] <- c(datlist$tt[idxs[,i],])
 }
 inits[[2]] <- inits2
+vals <- apply(t(datlist$tt), 2, negsig2sk.mean, datlist = datlist)
+idxs2 <- order(vals, decreasing = TRUE)[1:ndesign]
+inits[[2]][,1] <- c(datlist$tt[idxs2,])
 
 system.time({
 for(m in 1:3){
