@@ -39,62 +39,24 @@ houstongeo <- list(coords = as.matrix(select(houston, u, v)),
                    data = houston$avg)
 colnames(houstongeo[[1]]) <- NULL
 
-trendtype <- "1st"
 
-## Fitting models with nugget fixed to zero
-ml1 <- likfit(houstongeo, ini = c(1,0.5), fix.nugget = TRUE, trend = trendtype)
-ml2 <- likfit(houstongeo, ini = c(.1,00.5), fix.nugget = TRUE, trend = trendtype)
-ml3 <- likfit(houstongeo, ini = c(10,5), fix.nugget = TRUE, trend = trendtype)
-ml4 <- likfit(houstongeo, ini = c(10,0.5), fix.nugget = TRUE, trend = trendtype)
-	 
-## Fitting models estimated nugget
-ml.n1 <- likfit(houstongeo, ini = c(1,0.5), fix.nugget = FALSE, nugget = 1, trend = trendtype)
-ml.n2 <- likfit(houstongeo, ini = c(.1,0.05), fix.nugget = FALSE, nugget = 1, trend = trendtype)
-ml.n3 <- likfit(houstongeo, ini = c(10,5), fix.nugget = FALSE, nugget = 1, trend = trendtype)
-ml.n4 <- likfit(houstongeo, ini = c(10,0.05), fix.nugget = FALSE, nugget = 1, trend = trendtype)
-ml.n5 <- likfit(houstongeo, ini = c(.1,5), fix.nugget = FALSE, nugget = 1, trend = trendtype)
+## initial fits for good starting values, but these ignore S and the measurement error variance
+ml.lin <- likfit(houstongeo, ini = c(1,0.5), fix.nugget = TRUE, nugget = 0, trend = "1st")
+ml.cte <- likfit(houstongeo, ini = c(1,0.5), fix.nugget = TRUE, nugget = 0, trend = "cte")
 
-ml.n1 <- likfit(houstongeo, ini = c(1,0.5), fix.nugget = FALSE, nugget = .1, trend = trendtype)
-ml.n2 <- likfit(houstongeo, ini = c(.1,0.05), fix.nugget = FALSE, nugget = .1, trend = trendtype)
-ml.n3 <- likfit(houstongeo, ini = c(10,5), fix.nugget = FALSE, nugget = .1, trend = trendtype)
-ml.n4 <- likfit(houstongeo, ini = c(10,0.05), fix.nugget = FALSE, nugget = .1, trend = trendtype)
-ml.n5 <- likfit(houstongeo, ini = c(.1,5), fix.nugget = FALSE, nugget = .1, trend = trendtype)
+parslin <- c(ml.lin$beta, 0.0001, log(ml.lin$sigmasq), ml.lin$phi)
+parscte <- c(ml.cte$beta, 0.0001, log(ml.cte$sigmasq), ml.cte$phi)
+parsquad <- c(ml.lin$beta, c(0,0,0), 0.0001, log(ml.lin$sigmasq), ml.lin$phi)
+                       
+confit <- mylikefit(parscte, "cte", houston)
+linfit <- mylikefit(parslin, "lin", houston)
+quadfit <- mylikefit(parsquad, "quad", houston)
 
-ml.n1 <- likfit(houstongeo, ini = c(1,0.5), fix.nugget = FALSE, nugget = 10, trend = trendtype)
-ml.n2 <- likfit(houstongeo, ini = c(.1,0.05), fix.nugget = FALSE, nugget = 10, trend = trendtype)
-ml.n3 <- likfit(houstongeo, ini = c(10,5), fix.nugget = FALSE, nugget = 10, trend = trendtype)
-ml.n4 <- likfit(houstongeo, ini = c(10,0.05), fix.nugget = FALSE, nugget = 10, trend = trendtype)
-ml.n5 <- likfit(houstongeo, ini = c(.1,5), fix.nugget = FALSE, nugget = 10, trend = trendtype)
-
-## basically, nugget is zero 
-
-ml <- likfit(houstongeo, ini = c(1,0.5), fix.nugget = TRUE, trend = trendtype)
-ml.n <- likfit(houstongeo, ini = c(1,0.5), fix.nugget = FALSE, nugget = 1, trend = trendtype)
-
-cbind(ml$beta +  qnorm(0.025) * sqrt(diag(as.matrix(ml$beta.var))),
-      ml$beta +  qnorm(0.975) * sqrt(diag(as.matrix(ml$beta.var))))
-
-cbind(ml$beta +  qnorm(0.005) * sqrt(diag(as.matrix(ml$beta.var))),
-      ml$beta +  qnorm(0.995) * sqrt(diag(as.matrix(ml$beta.var))))
-
-cbind(ml$beta +  qnorm(0.1) * sqrt(diag(as.matrix(ml$beta.var))),
-      ml$beta +  qnorm(0.9) * sqrt(diag(as.matrix(ml$beta.var))))
-
-## confidence intervals suggest linear in y axis is reasonable even at 99% level
-## but x axis is not a significant predictor even at 80% level
-
-## not shown: 2nd order polynomial clearly seems to be an overfit
+### AIC/BIC are basically agnotstic between linear vs constant and spatial vs no.
+### will assume spatial + linear
 
 
-
-
-##### now estimate the variogram nonparametrically using two methods
-
-
-## for use in objective function - for checking whether candidate points are in the poly
-harrispoly <- cbind(housgeom$longitude, housgeom$latitude)*pi/180*6371
-currloc <- cbind(houston$u, houston$v)
-
+##### now estimate the variogram nonparametrically using two methods (ignores S)
 trendtype <- "1st"
 cloud1 <- variog(houstongeo, option = "cloud", trend=trendtype)
 cloud2 <- variog(houstongeo, option = "cloud", estimator.type = "modulus",
@@ -108,42 +70,41 @@ plot(cloud2, main = "modulus estimator")
 plot(bin1, main = "classical estimator")
 plot(bin2, main = "modulus estimator")
 
-## obtain ML estimates
-ml <- likfit(houstongeo, ini = c(1,0.5), fix.nugget = TRUE, trend = trendtype)
-ml.n <- likfit(houstongeo, ini = c(1,0.5), fix.nugget = FALSE, nugget = 0, trend = trendtype)
-
 # Now, plotting fitted models against empirical variogram
 par(mfrow = c(2,1))
 plot(bin1, main = "classical variogram")
-lines(ml)
-lines(ml.n, lty = 2)
-legend(40, 15, legend=c("ML","ML.N"),lty=c(1,2),lwd=c(1,1), cex=0.7)
+seqs <- seq(0, 150, length.out=1000)
+lines(seqs, linfit$par[4] + linfit$par[5]*(1 - exp(-seqs/linfit$par[6])), col = "red")
 plot(bin2, main = "modulus variogram")
-lines(ml)
-lines(ml.n, lty = 2)
-legend(40, 15, legend=c("ML","ML.N"),lty=c(1,2),lwd=c(1,1), cex=0.7)
+lines(seqs, linfit$par[4] + linfit$par[5]*(1 - exp(-seqs/linfit$par[6])), col = "red")
 
-betahat <- ml$beta
-tau2hat <- ml$tausq
-sig2hat <- ml$sigmasq
-phihat <- ml$phi
-varbetahat <- ml$beta.var
-thetahat <- c(phihat, 0, sig2hat)
+betahat <- linfit$par[1:3]
+tau2hat <- linfit$par[4]
+sig2hat <- linfit$par[5]
+phihat <- linfit$par[6]
+thetahat <- c(sig2hat, phihat)
 
 basemap <- get_map(location = "houston", zoom = 9, maptype = 'terrain')
 p <- ggmap(basemap) + geom_point(aes(Longitude, Latitude), data = houston, size = I(3), alpha=0.6)
+
+
+## for use in objective function - for checking whether candidate points are in the poly
+harrispoly <- cbind(housgeom$longitude, housgeom$latitude)*pi/180*6371
+currloc <- cbind(houston$u, houston$v)
 
 N.sim <- 1000
 datlist <- list()
 datlist$poly <- Polygon(harrispoly)
 datlist$theta <- thetahat
 datlist$sig2z <- 0
-datlist$covfun <- expcov
+datlist$covfun <- expcov2
 datlist$ss <- currloc
 datlist$tt <- spsample(datlist$poly, 1000, "random")@coords
-datlist$invCz.s <- chol2inv(chol(Czfun(currloc, nrow(currloc), thetahat, 0, expcov)))
-datlist$Cyy.s.t <- Cyyfun(currloc, datlist$tt, nrow(currloc), nrow(datlist$tt), thetahat, expcov)
-datlist$Cy.t <- drop(Cyyfun(matrix(c(0,0), nrow=1), matrix(c(0,0), nrow=1), 1, 1, thetahat, expcov))
+Cz.s <- Czfun(currloc, nrow(currloc), thetahat, 0, expcov2)
+##+ diag(mean(S), length(S)) ## should we use that...?
+datlist$invCz.s <- chol2inv(chol(Cz.s))
+datlist$Cyy.s.t <- Cyyfun(currloc, datlist$tt, nrow(currloc), nrow(datlist$tt), thetahat, expcov2)
+datlist$Cy.t <- drop(Cyyfun(matrix(c(0,0), nrow=1), matrix(c(0,0), nrow=1), 1, 1, thetahat, expcov2))
 
 save(datlist, file = "datlist.Rdata")
 
@@ -170,7 +131,10 @@ nbhd[[1]] <- sapply(1:nswarm, function(x){return( (x + -1:1 - 1)%%nswarm + 1)}) 
 nbhd[[2]] <- sapply(1:nswarm, function(x){return( (x + -3:3 - 1)%%nswarm + 1)}) ## ring-3
 nbhd[[3]] <- matrix(1:nswarm, ncol=nswarm, nrow=nswarm) ## global
 
-ndesign <- 1
+vals <- apply(t(datlist$tt), 2, negsig2sk.mean, datlist = datlist)
+
+ndesign <- 5
+idxs2 <- order(vals, decreasing = TRUE)[1:ndesign]
 npar <- 2*ndesign
 inits <- list()
 inits[[1]] <- replicate(nswarm, c(spsample(datlist$poly, ndesign, "random")@coords))
@@ -180,8 +144,6 @@ for(i in 1:nswarm){
   inits2[,i] <- c(datlist$tt[idxs[,i],])
 }
 inits[[2]] <- inits2
-vals <- apply(t(datlist$tt), 2, negsig2sk.mean, datlist = datlist)
-idxs2 <- order(vals, decreasing = TRUE)[1:ndesign]
 inits[[2]][,1] <- c(datlist$tt[idxs2,])
 
 
@@ -201,12 +163,6 @@ system.time(meanpso2 <- pso(niter, nswarm, inertia, cognitive, social, inits[[2]
 
 system.time(minpso2 <- pso(niter, nswarm, inertia, cognitive, social, inits[[2]], nbhd[[1]],
                           negsig2uk.min, datlist = datlist))
-
-
-par(mfrow=c(1,1))
-plot(ts(meanpso$maxes), ylim = c(min(meanpso$maxes, meanpso2$maxes),
-                                 max(meanpso$maxes, meanpso2$maxes)))
-lines(ts(meanpso2$maxes), col = "red")
 
 
 par(mfrow=c(2,1))

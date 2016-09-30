@@ -1,3 +1,45 @@
+mylikefit <- function(pars, trendtype, houston, maxit = 500, reltol = .Machine$double.eps){
+  u <- houston$u
+  v <- houston$v
+  Z <- houston$avg
+  N <- length(Z)
+  S <- houston$se^2
+  loc <- cbind(u,v)
+  X <- switch(trendtype, cte = matrix(1, ncol = 1, nrow = N),
+              lin = cbind(1, u, v), quad = cbind(1, u, v, u^2, u*v, v^2))
+  nbeta <- ncol(X)
+  optimout <- optim(pars, krigneglike, method = "BFGS", hessian = TRUE,
+                    control = list(reltol = reltol, maxit= maxit),
+                    Z = Z, X = X, S = S, loc = loc, N = N,
+                    nbeta = nbeta, covfun = expcov2)
+  unpar <- optimout$par
+  par <- c(unpar[1:nbeta], exp(unpar[nbeta + 1:2]), unpar[nbeta + 3])
+  like <- -optimout$value  - N*log(2*pi)/2
+  hess <- optimout$hessian
+  K <- length(pars)
+  ntrans <- K - nbeta - 1
+  Gprime <- NULL
+  try({
+    uncovmat <- chol2inv(chol(hess))
+    Gprime <- diag(c(rep(1, nbeta), par[nbeta + 1:ntrans], 1))
+    covmat <- Gprime%*%uncovmat%*%Gprime
+  })
+  aic <- 2*K - 2*like
+  bic <- K*log(N) - 2*like
+  optimred <- optim(pars[-K], nospatneglike, method = "BFGS",
+                    control = list(reltol = reltol, maxit= maxit),
+                    Z = Z, X = X, S = S, N = N, nbeta = nbeta)
+  aicred <- 2*(K - 1) + 2*optimred$value + N*log(2*pi)
+  bicred <- (K - 1)*log(N) + 2*optimred$value + N*log(2*pi)
+  ics <- cbind(c(aic, bic), c(aicred, bicred))
+  rownames(ics) <- c("AIC", "BIC")
+  colnames(ics) <- c("Full", "Reduced")
+  out <- list(par = par, unpar = unpar, like = like, covmat = covmat, ics = ics,
+              optimout = optimout, optimred = optimred)
+  return(out)
+}
+
+
 ## mean negative universal kriging variance at a set of target points
 ## (i.e. assuming only latent process and beta is unknown)
 negsig2uk.mean <- function(dd, datlist){
@@ -179,33 +221,46 @@ negsig2sk.min <- function(dd, datlist){
 
 logit <- function(x) return(log(x/(1-x)))
 
-krigneglike <- function(pars, Z, X, loc, N, nbeta, covfun, log = TRUE){
+krigneglike <- function(pars, Z, X, S, loc, N, nbeta, covfun, log = TRUE){
   beta <- pars[1:nbeta]
-  phi <- (pars[-c(1:nbeta)])
-  sig2z <- phi[1]
-  theta <- phi[-1]
+  sig2z <- exp(pars[nbeta + 1])
+  theta <- c(exp(pars[nbeta + 2]), pars[nbeta + 3])
   mu <- X%*%beta
   delta <- Z - mu
-  Cz <- Czfun(loc, N, theta, sig2z, covfun)
-  R <- chol(Cz)
-  Rinv <- backsolve(R, diag(N))
-  out <- drop(tcrossprod(crossprod(delta, Rinv)) + 2*sum(log(diag(R))))
+  Cz <- Czfun(loc, N, theta, sig2z, covfun) + diag(S)
+  Rinv <- NULL
+  try({
+    R <- chol(Cz)
+    Rinv <- backsolve(R, diag(N))
+  })
+  if(is.null(Rinv)){
+    out <- Inf
+  } else {
+    out <- drop(tcrossprod(crossprod(delta, Rinv))/2 + sum(log(diag(R))))
+  }
   return(out)
 }
 
-krigneglikeun <- function(pars, Z, X, loc, N, nbeta, covfun, log = TRUE){
+nospatneglike <- function(pars, Z, X, S, N, nbeta, log = TRUE){
   beta <- pars[1:nbeta]
-  phi <- exp(pars[-c(1:nbeta)])
-  sig2z <- phi[1]
-  theta <- phi[-1]
+  sig2z <- exp(pars[nbeta + 1])
+  sig2y <- exp(pars[nbeta + 2])
   mu <- X%*%beta
   delta <- Z - mu
-  Cz <- Czfun(loc, N, theta, sig2z, covfun)
-  R <- chol(Cz)
-  Rinv <- backsolve(R, diag(N))
-  out <- drop(tcrossprod(crossprod(delta, Rinv)) + 2*sum(log(diag(R))))
+  Cz <- diag(S + sig2y)
+  Rinv <- NULL
+  try({
+    R <- chol(Cz)
+    Rinv <- backsolve(R, diag(N))
+  })
+  if(is.null(Rinv)){
+    out <- Inf
+  } else {
+    out <- drop(tcrossprod(crossprod(delta, Rinv))/2 + sum(log(diag(R))))
+  }
   return(out)
 }
+
 
 ## powered exponential covariance function
 powexpcov <- function(s1, s2, theta){
@@ -229,6 +284,18 @@ expcov <- function(s1, s2, theta){
   out <- sig0*(euc == 0) + exp(log(sig1) - (euc/theta1))
   return(out)
 }
+
+## exponential covariance function
+## note reversed order of phi and sig2
+expcov2 <- function(s1, s2, theta){
+  phi <- theta[2]
+  sig2 <- theta[1]
+  h <- s1 - s2
+  euc <- sqrt(sum(h^2))
+  out <- exp(log(sig2) - (euc/phi))
+  return(out)
+}
+
 
 ## matern covariance function
 materncov <- function(s1, s2, theta){

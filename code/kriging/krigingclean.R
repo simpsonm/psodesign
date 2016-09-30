@@ -8,10 +8,12 @@ houston8[houston8 == "NV"] <- NA
 for(i in 1:31){
   houston8[,1 + i] <- as.numeric(houston8[,1 + i])
 }
+houston8[which(houston8==0, TRUE)] <- NA
 houston8$nvalid <- apply(!is.na(as.matrix(houston8[,2:32])), 1, sum)
 houston8$avg <- apply((as.matrix((houston8[,2:32]))), 1, mean, na.rm=TRUE)
 houston8$sd <- apply((as.matrix((houston8[,2:32]))), 1, sd, na.rm=TRUE)
-houston8$se <- houston8$sd/sqrt(houston8$nvalid)
+houston8$se <- houston8$sd/sqrt(houston8$nvalid)*sqrt(1 - houston8$nvalid/31)
+
 
 houstongis <- read.table("houstongis.csv", TRUE, "\t")
 houstongis <- distinct(houstongis, Name, .keep_all=TRUE)
@@ -34,7 +36,5 @@ matches2 <- inner_join(misses, candidates)
 misses2 <- anti_join(misses, candidates)
 
 houstonout <- select(full_join(matches, matches2), Name, AQS, Latitude, Longitude, avg, sd, nvalid, se)
-
-houstonout <- filter(houstonout, avg > -Inf)
 
 write.csv(houstonout, file = "houstonout.csv", row.names=FALSE)
