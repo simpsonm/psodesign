@@ -19,6 +19,7 @@ mylikefit <- function(pars, trendtype, houston, maxit = 500, reltol = .Machine$d
   K <- length(pars)
   ntrans <- K - nbeta - 1
   Gprime <- NULL
+  covmat <- NULL
   try({
     uncovmat <- chol2inv(chol(hess))
     Gprime <- diag(c(rep(1, nbeta), par[nbeta + 1:ntrans], 1))

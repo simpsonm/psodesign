@@ -52,6 +52,10 @@ confit <- mylikefit(parscte, "cte", houston)
 linfit <- mylikefit(parslin, "lin", houston)
 quadfit <- mylikefit(parsquad, "quad", houston)
 
+confit$ics
+linfit$ics
+quadfit$ics
+
 ### AIC/BIC are basically agnotstic between linear vs constant and spatial vs no.
 ### will assume spatial + linear
 
@@ -96,7 +100,7 @@ N.sim <- 1000
 datlist <- list()
 datlist$poly <- Polygon(harrispoly)
 datlist$theta <- thetahat
-datlist$sig2z <- 0
+datlist$sig2z <- tau2hat
 datlist$covfun <- expcov2
 datlist$ss <- currloc
 datlist$tt <- spsample(datlist$poly, 1000, "random")@coords
