@@ -11,8 +11,7 @@
 *.csv
 
 # extra tex files for makefile
-psostatblind.tex
-psostatappblind.tex
+*blind.tex
 
 # emacs auto backups
 *~
