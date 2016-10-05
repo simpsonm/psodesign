@@ -1,5 +1,74 @@
 library(mnormt)
 
+spso2007 <- function(niter, nswarm, nnbor, inertia, cognitive, social, obj, lower, upper, ...){
+  npar <- length(lower) ## dimension of search space
+  if(nswarm < 1){
+    nswarm <- 10 + 2*sqrt(npar)  ## automatic setting of nswarm
+  }
+  ## initialize positions, velocities, and nbhds
+  x <- replicate(nswarm, runif(npar, lower, upper)) 
+  v <- (replicate(nswarm, runif(npar, lower, upper)) - x)/2
+  inform <- replicate(nswarm, sample(1:nswarm, nnbor, replace = TRUE))
+  nbhd <- lapply(1:nswarm, function(x) unique(c(which(inform == x, TRUE)[,2],x)))
+  ## initialize pbest, gbest, and nbest stuff
+  pbest <- x
+  gbest <- which.min(pbestval)
+  nbest <- x
+  pbestval <- apply(x, 2, obj, ...)
+  nbestval <- pbestval
+  gbestvals <- rep(0, niter)
+  gbestvals[1] <- pbestval[gbest]
+  gbests <- matrix(0, ncol = niter + 1, nrow = npar)
+  gbests[,1] <- pbest[,gbest]
+  for(iter in 1:niter){
+    partid <- sample(1:nswarm, nswarm)  ## random update order
+    for(id in 1:nswarm){
+      idx <- partid[id]
+      ## update nbhd best
+      nminidx <- nbhd[[idx]][which.min(pbestval[nbhd[[idx]]])]
+      nbestval[idx] <- pbestval[nminidx]
+      nbest[,idx] <- pbest[,nminidx]
+      ## update velocity
+      v[,idx] <- inertia*v[,idx] + runif(npar, 0, cognitive)*(pbest[,idx] - x[,idx])
+      if(nbestval[idx] < pbestval[idx]){
+        ## only include this part of the update if not at nbhd best
+        v[,idx] <- v[,idx] + runif(npar, 0, social)*(nbest[,idx] - x[,idx])
+      }
+      ## udpate position
+      x[,idx] <- x[,idx] + v[,idx]
+      ## if position invalid, put it on the boundary and set velocity to 0
+      toosmall <- which(x[,idx] < lower)
+      if(length(toosmall)>0){
+        x[toosmall, idx] <- lower[toosmall]
+        v[toosmall, idx] <- 0
+      }
+      toolarge <- which(x[,idx] > upper)
+      if(length(toolarge)>0){
+        x[toolarge, idx] <- upper[toolarge]
+        v[toolarge, idx] <- 0
+      }
+      ## compute new value and update pbests if its an improvement
+      newval <- obj(x[,idx], ...)
+      if(newval < pbestval[idx]){
+        pbestval[idx] <- newval
+        pbest[,idx] <- x[,idx]
+      }
+    }
+    ## update global best
+    gbest <- which.min(pbestval)
+    gbestvalue <- min(pbestval)
+    gbestvals[iter + 1] <- gbestvalue
+    gbests[,iter + 1] <- pbest[,gbest]
+    ## if no gbest improvements, create new nbhds
+    if(gbestvalue >= gbestvals[iter]){
+      nbhd <- lapply(1:nswarm, function(x) unique(c(which(inform == x, TRUE)[,2],x)))
+    }
+  }
+  outlist <- list(par = pbest[,gbest], value = gbestvalue, pos = x, vel = v,
+                  values = gbestvals, pars = gbests)
+  return(outlist)
+}
+
 ## rmt in mnormt library has a bug! use this instead
 rmtfixed <- function(n = 1, mean = rep(0, d), S, df = Inf, sqrt = NULL){
   sqrt.S <- if (is.null(sqrt)) 

@@ -1,3 +1,7 @@
+negfwrap <- function(x, opt){
+  return(-fwrap(x, opt))
+}
+
 fwrap <- function(x, opt){
   if(opt == 1){
     out <- f1(x)
