@@ -1,25 +1,30 @@
 library(mnormt)
 
-spso2007 <- function(niter, nswarm, nnbor, inertia, cognitive, social, obj, lower, upper, ...){
+sbbpso <- function(niter, nswarm, nnbor, sig, pcut=0.5, CF=FALSE, AT=FALSE, rate=0.3, df=1,
+                   ccc = 0.1, obj, ...){
   npar <- length(lower) ## dimension of search space
   if(nswarm < 1){
-    nswarm <- 10 + 2*sqrt(npar)  ## automatic setting of nswarm
+    nswarm <- 40  ## automatic setting of nswarm
+  }
+  sigs <- rep(sig, nswarm + 1)
+  if(AT){
+    logsig <- log(sig)
   }
   ## initialize positions, velocities, and nbhds
   x <- replicate(nswarm, runif(npar, lower, upper)) 
-  v <- (replicate(nswarm, runif(npar, lower, upper)) - x)/2
   inform <- replicate(nswarm, sample(1:nswarm, nnbor, replace = TRUE))
   nbhd <- lapply(1:nswarm, function(x) unique(c(which(inform == x, TRUE)[,2],x)))
   ## initialize pbest, gbest, and nbest stuff
   pbest <- x
-  gbest <- which.min(pbestval)
   nbest <- x
   pbestval <- apply(x, 2, obj, ...)
+  gbest <- which.min(pbestval)
   nbestval <- pbestval
   gbestvals <- rep(0, niter)
   gbestvals[1] <- pbestval[gbest]
   gbests <- matrix(0, ncol = niter + 1, nrow = npar)
   gbests[,1] <- pbest[,gbest]
+  better <- rep(0, nswarm)
   for(iter in 1:niter){
     partid <- sample(1:nswarm, nswarm)  ## random update order
     for(id in 1:nswarm){
@@ -28,31 +33,46 @@ spso2007 <- function(niter, nswarm, nnbor, inertia, cognitive, social, obj, lowe
       nminidx <- nbhd[[idx]][which.min(pbestval[nbhd[[idx]]])]
       nbestval[idx] <- pbestval[nminidx]
       nbest[,idx] <- pbest[,nminidx]
-      ## update velocity
-      v[,idx] <- inertia*v[,idx] + runif(npar, 0, cognitive)*(pbest[,idx] - x[,idx])
-      if(nbestval[idx] < pbestval[idx]){
-        ## only include this part of the update if not at nbhd best
-        v[,idx] <- v[,idx] + runif(npar, 0, social)*(nbest[,idx] - x[,idx])
-      }
-      ## udpate position
-      x[,idx] <- x[,idx] + v[,idx]
-      ## if position invalid, put it on the boundary and set velocity to 0
-      toosmall <- which(x[,idx] < lower)
-      if(length(toosmall)>0){
-        x[toosmall, idx] <- lower[toosmall]
-        v[toosmall, idx] <- 0
-      }
-      toolarge <- which(x[,idx] > upper)
-      if(length(toolarge)>0){
-        x[toolarge, idx] <- upper[toolarge]
-        v[toolarge, idx] <- 0
+      ## bbpso update
+      if(pbestval[idx] > nbestval[idx]){
+        ## if personal best is worse than nbhd best, compute SDs
+        if(CF){
+          ## coordinate-free way -> constant SD across coords
+          sds <- rep(sqrt(crossprod(pbest[,idx] - gbest))/npar, npar)*sig
+        } else {
+          ## standard BBPSO SD -> different SD across coords
+          sds <- abs(pbest[,idx] - gbest)*sig
+        }
+        sd0 <- which(sds == 0)
+        sd1 <- which(sds > 0)
+        if(length(sd1) > 0){
+          ## for SDs which are positive, do the usual bbpso draw
+          temp <- rmtfixed(1, (pbest[sd1,idx] + nbest[sd1,idx])/2, diag(sds[sd1]), df)
+          u <- runif(length(sd1))
+          ## include a 1 - pcut chance of just going to the personal best coordinate
+          x[sd1,idx] <- ifelse(u > pcut, temp, pbest[sd1,idx])
+        }
+        if(length(sd0) > 0){
+          ## for SDs which are negative, do a mutation from the entire swarm
+          id0s <- sample(2:nswarm, 3)
+          id0s[id0s <= idx] <- id0s[id0s <= idx] - 1
+          x[sd0,idx] <- pbest[sd0,id0s[1]] + (pbest[sd0,id0s[2]] - pbest[sd0,id0s[3]])/2
+        }
+      } else {
+        ## if personal best is the same as nbhd best, do a mutation from the entire swarm
+        id0s <- sample(2:nswarm, 3)
+        id0s[id0s <= idx] <- id0s[id0s <= idx] - 1
+        x[,idx] <- pbest[,id0s[1]] + (pbest[,id0s[2]] - pbest[,id0s[3]])/2
       }
       ## compute new value and update pbests if its an improvement
       newval <- obj(x[,idx], ...)
       if(newval < pbestval[idx]){
         pbestval[idx] <- newval
         pbest[,idx] <- x[,idx]
-      }
+        better[idx] <- 1
+      } else {
+        better[idx] <- 0
+      }      
     }
     ## update global best
     gbest <- which.min(pbestval)
@@ -63,9 +83,141 @@ spso2007 <- function(niter, nswarm, nnbor, inertia, cognitive, social, obj, lowe
     if(gbestvalue >= gbestvals[iter]){
       nbhd <- lapply(1:nswarm, function(x) unique(c(which(inform == x, TRUE)[,2],x)))
     }
+    ## update sigma if AT
+    if(AT){
+      logsig <- logsig + ccc*(mean(better) - rate)/2
+      sig <- exp(logsig)
+      sigs[iter + 1] <- sig
+    }
+  }
+  outlist <- list(par = pbest[,gbest], value = gbestvalue, pos = x, 
+                  values = gbestvals, pars = gbests, sigs = sigs)
+  return(outlist)
+}
+
+spso <- function(niter, nswarm, nnbor, inertia, cognitive, social, obj, lower, upper,
+                 style = "CI", CF = FALSE, ...){
+  npar <- length(lower) ## dimension of search space
+  if(nswarm < 1){
+    nswarm <- 10 + 2*sqrt(npar)  ## automatic setting of nswarm
+  }
+  ## initialization of non-constant inertia stuff
+  DI <- style == "DI"
+  AT <- style == "AT"
+  if(DI){
+    alpha <- inertia[1]
+    beta <- inertia[2]
+    inertia <- 1/(1 + (1/alpha)^beta)
+  } else if(AT){
+    ccc <- inertia[3]
+    rate <- inertia[2]
+    inertia <- inertia[1]
+    loginertia <- log(inertia)
+  }
+  inertias <- rep(inertia, nswarm + 1)  
+  ## initialize positions, velocities, and nbhds
+  x <- replicate(nswarm, runif(npar, lower, upper)) 
+  v <- replicate(nswarm, runif(npar, lower, upper)) - x  
+  inform <- replicate(nswarm, sample(1:nswarm, nnbor, replace = TRUE))
+  nbhd <- lapply(1:nswarm, function(x) unique(c(which(inform == x, TRUE)[,2],x)))
+  ## initialize pbest, gbest, and nbest stuff
+  pbest <- x
+  nbest <- x
+  pbestval <- apply(x, 2, obj, ...)
+  gbest <- which.min(pbestval)
+  nbestval <- pbestval
+  gbestvals <- rep(0, niter)
+  gbestvals[1] <- pbestval[gbest]
+  gbests <- matrix(0, ncol = niter + 1, nrow = npar)
+  gbests[,1] <- pbest[,gbest]
+  better <- rep(0, nswarm)
+  for(iter in 1:niter){
+    partid <- sample(1:nswarm, nswarm)  ## random update order
+    for(id in 1:nswarm){
+      idx <- partid[id]
+      ## update nbhd best
+      nminidx <- nbhd[[idx]][which.min(pbestval[nbhd[[idx]]])]
+      nbestval[idx] <- pbestval[nminidx]
+      nbest[,idx] <- pbest[,nminidx]
+      ## update velocity
+      if(CF){
+        ## coordinate free update of velocity
+        ## center of gravity
+        G <- x[,idx] + cognitive*(pbest[,idx] - x[,idx])/3
+        if(nbestval[idx] < pbestval[idx]){
+          ## only include this part of the update if not at nbhd best
+          G <- G + social*(nbest[,idx] - x[,idx])/3
+        }
+        Gxdist <- sqrt(sum((x[,idx] - G)^2))
+        ## draw from sphere
+        if(npar == 1){
+          xprime <- G + runif(1, -Gxdist, Gxdist)
+        } else if(npar == 2){
+          angle <- runif(1, 0, 2*pi)
+          radius <- runif(1, 0, Gxdist)
+          xprime <- radius*c(cos(angle), sin(angle)) + G
+        } else {
+          angles <- c(runif(npar - 2, 0, pi), runif(1, 0, 2*pi))
+          sines <- sin(angles)
+          cosines <- cos(angles)
+          radius <- runif(1, 0, Gxdist)
+          trigs <- c(cosines[1], cumprod(sines)[-(npar - 1)]*cosines[-1], cumprod(sines)[npar - 1])
+          xprime <- G + radius*trigs
+        }
+        v[,idx] <- inertia*v[,idx] + xprime - x[,idx]
+      } else {
+        ## standard update of velocity
+        ## update velocity
+        v[,idx] <- inertia*v[,idx] + runif(npar, 0, cognitive)*(pbest[,idx] - x[,idx])
+        if(nbestval[idx] < pbestval[idx]){
+          ## only include this part of the update if not at nbhd best
+          v[,idx] <- v[,idx] + runif(npar, 0, social)*(nbest[,idx] - x[,idx])
+        }
+      }
+      ## udpate position
+      x[,idx] <- x[,idx] + v[,idx]
+      ## if position invalid, put it on the boundary and set velocity to 0
+      toosmall <- which(x[,idx] < lower)
+      if(length(toosmall)>0){
+        x[toosmall, idx] <- lower[toosmall]
+        v[toosmall, idx] <- -0.5*v[toosmall, idx] 
+      }
+      toolarge <- which(x[,idx] > upper)
+      if(length(toolarge)>0){
+        x[toolarge, idx] <- upper[toolarge]
+        v[toolarge, idx] <- -0.5*v[toolarge, idx] 
+      }
+      ## compute new value and update pbests if its an improvement
+      newval <- obj(x[,idx], ...)
+      if(newval < pbestval[idx]){
+        pbestval[idx] <- newval
+        pbest[,idx] <- x[,idx]
+        better[idx] <- 1
+      } else {
+        better[idx] <- 0
+      }      
+    }
+    ## update global best
+    gbest <- which.min(pbestval)
+    gbestvalue <- min(pbestval)
+    gbestvals[iter + 1] <- gbestvalue
+    gbests[,iter + 1] <- pbest[,gbest]
+    ## if no gbest improvements, create new nbhds
+    if(gbestvalue >= gbestvals[iter]){
+      nbhd <- lapply(1:nswarm, function(x) unique(c(which(inform == x, TRUE)[,2],x)))
+    }
+    ## update inertia if DI or AT
+    if(DI){
+      inertia <- 1/(1 + ((iter + 1)/alpha)^beta)
+      inertias[iter + 1] <- inertia
+    } else if(AT){
+      loginertia <- loginertia + ccc*(mean(better) - rate)
+      inertia <- exp(loginertia)
+      inertias[iter + 1] <- inertia
+    }
   }
   outlist <- list(par = pbest[,gbest], value = gbestvalue, pos = x, vel = v,
-                  values = gbestvals, pars = gbests)
+                  values = gbestvals, pars = gbests, inertias = inertias)
   return(outlist)
 }
 

@@ -13,40 +13,53 @@ lower <- rep(-100, np)
 upper <- rep(100, np)
 nnbor <- round((1-(1-1/nswarm)^3)*nswarm,0)
 
-test1 <- psoptim(par = rep(NA, np), fn = negfwrap, opt = 1, lower = -100, upper = 100,
-                control = list(maxit = niter, s = nswarm, vectorize = FALSE))
+fnum <- 2
+test1 <- spso(niter, nswarm, nnbor, inertia, cognitive, social, negfwrap, lower,
+              upper, style = "CI", opt = fnum)
+test2 <- spso(niter, nswarm, nnbor, c(.2*niter, 2), cognitive, social, negfwrap, lower,
+              upper, style = "DI", opt = fnum)
+test3 <- spso(niter, nswarm, nnbor, c(1.2, 0.3, 0.1), cognitive, social, negfwrap, lower,
+              upper, style = "AT", opt = fnum)
+temp1 <- spso(niter, nswarm, nnbor, inertia, cognitive, social, negfwrap, lower,
+              upper, style = "CI", CF = TRUE, opt = fnum)
+temp2 <- spso(niter, nswarm, nnbor, c(.2*niter, 2), cognitive, social, negfwrap, lower,
+              upper, style = "DI", CF = TRUE, opt = fnum)
+temp3 <- spso(niter, nswarm, nnbor, c(1.2, 0.3, .1), cognitive, social, negfwrap, lower,
+              upper, style = "AT", CF = TRUE, opt = fnum)
+tt1 <- sbbpso(niter, nswarm, nnbor, 1, obj = negfwrap, opt = fnum)
+tt2 <- sbbpso(niter, nswarm, nnbor, 1, CF = TRUE, obj = negfwrap, opt = fnum)
+tt3 <- sbbpso(niter, nswarm, nnbor, 1, AT=TRUE, obj = negfwrap, opt = fnum)
+tt4 <- sbbpso(niter, nswarm, nnbor, 1, AT=TRUE, CF = TRUE, obj = negfwrap, opt = fnum)
+outs <- matrix(c(test1$value, test2$value, test3$value, temp1$value, temp2$value, temp3$value,
+                 tt1$value, tt2$value, tt3$value, tt4$value), ncol = 1)
+rownames(outs) <- c(paste("2007", c("CI", "DI", "AT"), sep="-"),
+                    paste("2011", c("CI", "DI", "AT"), sep="-"),
+                    paste("BBPSO", c("-", "-CF", "-AT", "-CF-AT"), sep=""))
+round(outs, 5)
 
-test2 <- spso2007(niter, nswarm, nnbor, inertia, cognitive, social, negfwrap, lower,
-                  upper, opt = 1)
+n <- 10
+p <- rnorm(n)
+g <- rnorm(n) + p
+w <- 0.9
+sig <- w*tcrossprod(p - g) + (1-w)*diag((p-g)^2)
+diag(1/abs(p-g))%*%sig%*%diag(1/abs(p-g))
+det(sig)
+try(cholsig <- chol(sig))
 
 
-test2 <- psoptim(par = rep(NA, np), fn = negfwrap, opt = 1, lower = -100, upper = 100,
-                 control = list(maxit = niter, s = nswarm, p = 1, vectorize = TRUE,
-                                type = "SPSO2011"))
 
-test3 <- psoptim(par = rep(NA, np), fn = negfwrap, opt = 1, lower = -100, upper = 100,
-                 control = list(maxit = niter, s = nswarm, p = 1, vectorize = FALSE,
-                                type = "SPSO2011"))
-
-test4 <- psoptim(par = rep(NA, np), fn = negfwrap, opt = 1, lower = -100, upper = 100,
-                 control = list(maxit = niter, s = nswarm, p = 1, vectorize = TRUE,
-                                w = inertia, c.p = cognitive, c.g = social))
-
-test5 <- psoptim(par = rep(NA, np), fn = negfwrap, opt = 1, lower = -100, upper = 100,
-                 control = list(maxit = niter, s = nswarm, p = 1, vectorize = TRUE,
-                                hybrid = TRUE))
-
-test6 <- psoptim(par = rep(NA, np), fn = negfwrap, opt = 1, lower = -100, upper = 100,
-                 control = list(maxit = niter, s = nswarm, p = 1, vectorize = TRUE,
-                                w = c(1, 0.3)))
-
-temp <- pso(niter, nswarm, inertia, cognitive, social, inits, nbhd[[2]], fwrap, opt=1)
-
-temp2 <- pso(niter, nswarm, 1, cognitive, social, inits, nbhd[[2]], fwrap, opt=n,
-            tune = TRUE, style = "adaptive", rate = rates[2])
-
+nbhd <- list()
+nbhd[[1]] <- sapply(1:nswarm, function(x){return( (x + -1:1 - 1)%%nswarm + 1)}) ## ring-1
+nbhd[[2]] <- matrix(1:nswarm, ncol=nswarm, nrow=nswarm) ## global
+nbhd[[3]] <- sapply(1:nswarm, function(x){return( (x + -3:3 - 1)%%nswarm + 1)}) ## ring-3
 
 inits <- matrix(runif(nswarm*np, -100, 100), ncol = nswarm)
+
+old <- pso(niter, nswarm, 1, cognitive, social, inits, nbhd[[2]], fwrap, opt=1,
+           tune = TRUE, style = "adaptive", rate = 0.3)
+
+
+
 nswarm <- 20
 np <- 20
 niter <- 500
