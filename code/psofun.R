@@ -1,4 +1,137 @@
 library(mnormt)
+library(fields)  ## for space covering design
+library(sp)
+str(poly)
+
+function [Q_best,D_best]=Exchange_alg_basic(nb,D_strt,DST)
+% nb - number of nearest neighbors to consider
+% D_strt - (p x 1) vector of location indices for starting design
+% DST - (p x p) distance matrix
+
+p=length(D_strt);
+
+%** initialize
+stpflg=0;
+D=D_strt;
+D_best=D;
+[Q_best]=Criterion_eval(D); %% you have to make this function specific to your problem
+Qvec(1)=Q_best;
+count=2;
+
+while stpflg==0
+   count
+   for i=1:p
+      Dn=get_neighbors(D(i),DST,nb);
+      for j=1:nb
+         D_old=D;
+         D(i)=Dn(j);
+         [Q_tmp]=Criterion_eval(D);
+         if Q_tmp < Q_best
+	    Q_best=Q_tmp;
+            D_best=D;
+            break
+         else
+            D=D_old;
+         end       
+      end 
+  end
+
+  Qvec(count)=Q_best;
+  if Qvec(count) == Qvec(count-1)
+     stpflg=1;
+  else
+     count=count+1;
+  end
+
+end
+
+npoly <- poly/(pi/180*6371)
+
+makegrid <- function(x, n = 10000, nsig = 2, cellsize, pretty = TRUE) {
+  mins <- apply(x, 2, min)
+  maxes <- apply(x, 2, max)
+  bb = cbind(mins, maxes)
+  offset = rep(0.5, nrow(bb))
+  if (missing(cellsize)) {
+    pw = 1/nrow(bb)
+    cellsize = signif(prod((apply(bb, 1, diff)/n)^pw), nsig)
+  }
+  if (length(cellsize) == 1) 
+    cellsize = rep(cellsize, nrow(bb))
+  min.coords = bb[, 1] + offset * cellsize
+  if (pretty) 
+    min.coords = signif(min.coords, max(ceiling(log10(abs(bb[1,])/cellsize))))
+  sel = min.coords - offset * cellsize > bb[, 1]
+  if (any(sel)) 
+    min.coords[sel] = min.coords[sel] - cellsize[sel]
+  expand.grid.arglist = list()
+  for (i in 1:nrow(bb)) {
+    name = paste("x", i, sep = "")
+    from = min.coords[i]
+    by = cellsize[i]
+    length.out = round(1 + (bb[i, 2] - from)/by)
+    expand.grid.arglist[[name]] = seq(from, by = by, length.out = length.out)
+  }
+  xy = do.call(expand.grid, expand.grid.arglist)
+  attr(xy, "cellsize") = cellsize
+  return(xy)
+}
+
+
+exch <- function(ncand, obj, poly, ...){
+  mins <- apply(poly, 2, min)
+  maxes <- apply(poly, 2, max)
+  by.x <- (maxes[1] - mins[1])/ncand
+  by.y <- (maxes[2] - mins[2])/ncand
+  cand <- expand.grid(seq(from = mins[1], by = by.x, length.out = ncand),
+                      seq(from = mins[2], by = by.y, length.out = ncand))
+  ## remove all candidate points not actually in a polygon
+  checks <- apply(cand, 1, function(x, poly) {
+    point.in.polygon(x[1], x[2], poly[,1], poly[,2])}, poly = poly)
+  grid <- as.matrix(cand[checks==1,])
+  ngrid <- nrow(grid)
+  DST <- matrix(0, ngrid, ngrid)
+  for(i in 2:ngrid){
+    for(j in 1:(i-1)){
+      DST[i,j] <- sqrt(sum((grid[i,] - grid[j,])^2))
+      DST[j,i] <- DST[i,j]
+    }
+  }
+
+}
+
+ga <- function(niter, nbatch, nswarm, nchrome, nrun, mutvar, mutrate, lower, upper, obj, ...){
+  npar <- nchrome*nrun
+  x <- replicate(nswarm, runif(npar, lower, upper))
+  vals <- apply(x, 2, obj, ...)
+  valsout <- matrix(0, ncol = nswarm, nrow = niter*nbatch+1)
+  valsout[1,] <- vals
+  for(bat in 1:nbatch){
+    for(iter in 1:niter){
+      ## crossover
+      xranks <- rank(vals)
+      parents <- replicate(nswarm, sample(1:nswarm, 2, prob = 1/xranks))
+      genes <- matrix(rbinom(nrun*nswarm, 1, 0.5), nrow=nrun)[rep(1:nrun, nchrome),]
+      xcross <- genes*x[,parents[1,]] + (1-genes)*x[,parents[2,]]
+      ## mutation
+      mutate <- matrix(rbinom(nrun*nswarm, 1, exp(-mutrate*iter)), nrow=nrun)[rep(1:nrun, nchrome),]
+      z <- (x - lower)/(upper - lower)
+      d <- log(z/(1-z)) + mutvar*exp(-mutrate*iter)*runif(npar*nswarm, -0.5, 0.5)
+      u <- lower + (upper - lower)/(1 + exp(-d))
+      xmut <- x*(1-mutate) + u*mutate
+      crossvals <- apply(xcross, 2, obj, ...)
+      mutvals <- apply(xmut, 2, obj, ...)
+      fullvals <- c(vals, crossvals, mutvals)
+      fullorder <- order(fullvals)
+      fullx <- cbind(x, xcross, xmut)
+      vals <- fullvals[fullorder[1:nswarm]]
+      x <- fullx[,fullorder[1:nswarm]]
+      valsout[(bat-1)*niter + iter + 1,] <- vals
+    }
+  }
+  out <- list(par = x[,1], value = vals[1], parpop = x, valpops = valsout)
+  return(out)
+}
 
 sbbpso <- function(niter, nswarm, nnbor, sig, pcut=0.5, CF=FALSE, AT=FALSE, rate=0.3, df=1,
                    ccc = 0.1, obj, ...){

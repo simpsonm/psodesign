@@ -1,8 +1,26 @@
 source("../psofun.R")
 source("testfuns.R")
+library(geoR)
+library(rgdal)
+
+ncand <- 10000
+coshape <- readOGR(dsn="../kriging/shape", layer="05000")
+
+poly <- coshape@polygons[[which(coshape$NAME == "Harris")]]@Polygons[[1]]@coords
+
+
+
+
+
+
+
+
+
+
+
+
 
 library(pso)
-
 np <- 10
 nswarm <- 40
 niter <- 1000
@@ -12,6 +30,16 @@ social <- log(2) + 1/2
 lower <- rep(-100, np)
 upper <- rep(100, np)
 nnbor <- round((1-(1-1/nswarm)^3)*nswarm,0)
+gniter <- 100
+nbatch <- 10
+nchrome <- 1
+nrun <- 10
+mutvar1 <- 3
+mutrate1 <- 0.1
+mutvar2 <- 1
+mutrate2 <- 1
+glower <- rep(-100, nchrome*nrun)
+gupper <- rep( 100, nchrome*nrun)
 
 fnum <- 2
 test1 <- spso(niter, nswarm, nnbor, inertia, cognitive, social, negfwrap, lower,
@@ -30,11 +58,21 @@ tt1 <- sbbpso(niter, nswarm, nnbor, 1, obj = negfwrap, opt = fnum)
 tt2 <- sbbpso(niter, nswarm, nnbor, 1, CF = TRUE, obj = negfwrap, opt = fnum)
 tt3 <- sbbpso(niter, nswarm, nnbor, 1, AT=TRUE, obj = negfwrap, opt = fnum)
 tt4 <- sbbpso(niter, nswarm, nnbor, 1, AT=TRUE, CF = TRUE, obj = negfwrap, opt = fnum)
+ga11 <- ga(gniter, nbatch, nswarm, nchrome, nrun, mutvar1, mutrate1, glower, gupper, negfwrap,
+           opt = fnum)
+ga12 <- ga(gniter, nbatch, nswarm, nchrome, nrun, mutvar1, mutrate2, glower, gupper, negfwrap,
+           opt = fnum)
+ga21 <- ga(gniter, nbatch, nswarm, nchrome, nrun, mutvar2, mutrate1, glower, gupper, negfwrap,
+           opt = fnum)
+ga22 <- ga(gniter, nbatch, nswarm, nchrome, nrun, mutvar2, mutrate2, glower, gupper, negfwrap,
+           opt = fnum)
 outs <- matrix(c(test1$value, test2$value, test3$value, temp1$value, temp2$value, temp3$value,
-                 tt1$value, tt2$value, tt3$value, tt4$value), ncol = 1)
+                 tt1$value, tt2$value, tt3$value, tt4$value,
+                 ga11$value, ga12$value, ga21$value, ga22$value), ncol = 1)
 rownames(outs) <- c(paste("2007", c("CI", "DI", "AT"), sep="-"),
                     paste("2011", c("CI", "DI", "AT"), sep="-"),
-                    paste("BBPSO", c("-", "-CF", "-AT", "-CF-AT"), sep=""))
+                    paste("BBPSO", c("-", "-CF", "-AT", "-CF-AT"), sep=""),
+                    paste("ga", c(11, 12, 21, 22), sep="-"))
 round(outs, 5)
 
 n <- 10
@@ -48,6 +86,8 @@ try(cholsig <- chol(sig))
 
 
 
+
+str(gatest)
 nbhd <- list()
 nbhd[[1]] <- sapply(1:nswarm, function(x){return( (x + -1:1 - 1)%%nswarm + 1)}) ## ring-1
 nbhd[[2]] <- matrix(1:nswarm, ncol=nswarm, nrow=nswarm) ## global
