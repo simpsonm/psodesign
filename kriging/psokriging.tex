@@ -191,12 +191,38 @@ Q_{uk}^*(\bm{d}) &= \max_{i=1,2\dots,N_t}\sigma^2_{uk}(\bm{t}_i;\bm{d}).
 \end{align*}
 In this context, \cite{zimmerman2006optimal} finds that the optimal design under both criteria is highly dependent on the class of mean function of the geostatistical process. In practice we are often interested in predicting at the entire spatial domain rather than a finite set of target locations. This changes the mean and maximum kriging variances to
 \begin{align*}
-\overline{Q}_{uk}(\bm{d}) &= \frac{1}{|\mathcal{D}|}\int_{\mathcal{D}}\sigma^2_{sk}(\bm{d};\bm{d})d\bm{u}\\
+\overline{Q}_{uk}(\bm{d}) &= \frac{1}{|\mathcal{D}|}\int_{\mathcal{D}}\sigma^2_{uk}(\bm{u};\bm{d})d\bm{u}\\
 \intertext{and}
-Q_{uk}^*(\bm{d}) &= \max_{\bm{u}\in\mathcal{D}}\sigma^2_{sk}(\bm{u};\bm{d}).
+Q_{uk}^*(\bm{d}) &= \max_{\bm{u}\in\mathcal{D}}\sigma^2_{uk}(\bm{u};\bm{d}).
 \end{align*}
 respectively. We can approximate both of these with a large but finite sample of target locations from $\mathcal{D}$, though if the sample is too small some design critera may favor points directly on top of the sampled locations. 
 
+\subsection{Accounting for Parameter Uncertainty}
+[THIS NEEDS TO BE MERGED WITH THE REST OF THE DOCUMENT, BUT FOR NOW IT'S HERE]
+
+Assuming that all covariance function parameters are known, the MSPE from kriging at an arbitrary location $\bm{u}$ is $\sigma_{uk}^2(\bm{u})$. This underestimates the MSPE when those parameters must be estimated. An approximation of this MSPE is given by \citep{zimmerman1992mean,abt1999estimating}
+\begin{align*}
+\E[Y(\bm{u}) - \widehat{Y}_{uk}(\bm{u})]^2 \approx \sigma^2_{fuk}(\bm{u};\bm{d},\bm{\theta}) = \sigma^2_{uk}(\bm{u};\bm{d},\bm{\theta}) + \tr[\bm{A}(\bm{u};\bm{d},\bm{\theta})\bm{I}^{-1}(\bm{d},\bm{\theta})]
+\end{align*}
+where $\bm{I}^{-1}$ is the inverse Fisher information (FI) matrix and $\bm{A} = \var[\partial \widehat{Y}_{uk} /\partial \bm{\theta}]$. The $ij$th element of the FI matrix can be derived as
+\begin{align*}
+\tr\left(\bm{C}_Z^{-1}\frac{\partial\bm{C}_Z}{\partial\theta_i}\bm{C}_Z^{-1}\frac{\partial\bm{C}_Z}{\partial\theta_j}\right).
+\end{align*}
+To derive $\bm{A}$ note that $\widehat{Y}_{uk}$ can be rewritten as
+\begin{align*}
+\widehat{Y}_{uk}(\bm{u}) = \bm{x}(\bm{u})'\bm{U}'\bm{Z} + \bm{c}_Y(\bm{u})'\bm{V}'\bm{Z}
+\end{align*}
+where $\bm{U} = \bm{C}_Z^{-1}\bm{X}(\bm{X}'\bm{C}_Z^{-1}\bm{X})^{-1}$ and $\bm{V} = \bm{C}_Z^{-1} - \bm{U}\bm{X}'\bm{C}_Z^{-1}$. Then elementary matrix calculus yields
+\begin{align*}
+\frac{\partial \widehat{Y}_{uk}(\bm{u})}{\partial \theta_i} &= \bm{x}(\bm{u})'\frac{\partial \bm{U}}{\partial \theta_i}'\bm{Z} + \frac{\partial \bm{c}_Y(\bm{u})}{\partial \theta_i}'\bm{V}'\bm{Z} + \bm{c}_Y(\bm{u})'\frac{\partial \bm{V}}{\partial \theta_i}'\bm{Z}\\
+&= \left[-\bm{V}\frac{\partial \bm{C}_Z}{\partial \theta_i}\bm{U}\bm{x}(\bm{u}) - \bm{V}\frac{\partial \bm{C}_Z}{\partial \theta_i}\bm{V}\bm{c}_Y(\bm{u}) + \bm{V}\frac{\partial \bm{c}_Y(\bm{u})}{\partial \theta_i}\right]'\bm{Z}\\
+&\equiv\bm{\delta}_i'\bm{Z}.
+\end{align*}
+Then 
+\begin{align*}
+\bm{A} = \var\left[\frac{\partial \widehat{Y}_{uk}(\bm{u})}{\partial \bm{\theta}}\right] = \var[\bm{\Delta}'\bm{Z}] = \bm{\Delta}'\bm{C}_Z^{-1}\bm{\Delta}
+\end{align*}
+where $\bm{\Delta} = (\bm{\delta}_1, \bm{\delta}_2, \dots, \bm{\delta}_p)$.
 \subsection{Houston Ozone Monitoring}\label{sec:houston}
 The Texas Commission on Environmental Quality (TCEQ) publishes a variety of environmental data for Texas, including many environmental indicators that directly relate to public health. We focus on ozone in the Houston-Galveston-Brazoria area. The TCEQ measures ozone at a variety of monitoring locations in this area and publishes daily maximum eight-hour ozone concentrations (DM8s) in parts per billion (ppb) for each monitoring location. DM8s are computed as follows. First, the TCEQ creates publishes an hourly average (in ppb) for each monitoring location. Then an eight hour average is constructed at that location for each contiguous eight-hour period where all eight measurements were present for a given day. The maximum of these eight-hour averages for a given day is the published DM8. Days with less than 18 valid eight-hour averages have no published DM8.
 
