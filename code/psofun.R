@@ -1,103 +1,66 @@
 library(mnormt)
-library(fields)  ## for space covering design
-library(sp)
-str(poly)
+library(sp)  ## needed for points in polygon function
 
-function [Q_best,D_best]=Exchange_alg_basic(nb,D_strt,DST)
-% nb - number of nearest neighbors to consider
-% D_strt - (p x 1) vector of location indices for starting design
-% DST - (p x p) distance matrix
-
-p=length(D_strt);
-
-%** initialize
-stpflg=0;
-D=D_strt;
-D_best=D;
-[Q_best]=Criterion_eval(D); %% you have to make this function specific to your problem
-Qvec(1)=Q_best;
-count=2;
-
-while stpflg==0
-   count
-   for i=1:p
-      Dn=get_neighbors(D(i),DST,nb);
-      for j=1:nb
-         D_old=D;
-         D(i)=Dn(j);
-         [Q_tmp]=Criterion_eval(D);
-         if Q_tmp < Q_best
-	    Q_best=Q_tmp;
-            D_best=D;
-            break
-         else
-            D=D_old;
-         end       
-      end 
-  end
-
-  Qvec(count)=Q_best;
-  if Qvec(count) == Qvec(count-1)
-     stpflg=1;
-  else
-     count=count+1;
-  end
-
-end
-
-npoly <- poly/(pi/180*6371)
-
-makegrid <- function(x, n = 10000, nsig = 2, cellsize, pretty = TRUE) {
-  mins <- apply(x, 2, min)
-  maxes <- apply(x, 2, max)
-  bb = cbind(mins, maxes)
-  offset = rep(0.5, nrow(bb))
-  if (missing(cellsize)) {
-    pw = 1/nrow(bb)
-    cellsize = signif(prod((apply(bb, 1, diff)/n)^pw), nsig)
-  }
-  if (length(cellsize) == 1) 
-    cellsize = rep(cellsize, nrow(bb))
-  min.coords = bb[, 1] + offset * cellsize
-  if (pretty) 
-    min.coords = signif(min.coords, max(ceiling(log10(abs(bb[1,])/cellsize))))
-  sel = min.coords - offset * cellsize > bb[, 1]
-  if (any(sel)) 
-    min.coords[sel] = min.coords[sel] - cellsize[sel]
-  expand.grid.arglist = list()
-  for (i in 1:nrow(bb)) {
-    name = paste("x", i, sep = "")
-    from = min.coords[i]
-    by = cellsize[i]
-    length.out = round(1 + (bb[i, 2] - from)/by)
-    expand.grid.arglist[[name]] = seq(from, by = by, length.out = length.out)
-  }
-  xy = do.call(expand.grid, expand.grid.arglist)
-  attr(xy, "cellsize") = cellsize
-  return(xy)
-}
-
-
-exch <- function(ncand, obj, poly, ...){
+exch <- function(ncand, obj, poly, nnbor, npoints, start = "rand", ...){
+  ndim <- ceiling(sqrt(ncand))
+  ncand <- ndim^2
   mins <- apply(poly, 2, min)
   maxes <- apply(poly, 2, max)
-  by.x <- (maxes[1] - mins[1])/ncand
-  by.y <- (maxes[2] - mins[2])/ncand
-  cand <- expand.grid(seq(from = mins[1], by = by.x, length.out = ncand),
-                      seq(from = mins[2], by = by.y, length.out = ncand))
+  by.x <- (maxes[1] - mins[1])/ndim
+  by.y <- (maxes[2] - mins[2])/ndim
+  cand2 <- expand.grid(1:ndim, 1:ndim)
+  cand <- expand.grid(seq(from = mins[1], by = by.x, length.out = ndim),
+                      seq(from = mins[2], by = by.y, length.out = ndim))
   ## remove all candidate points not actually in a polygon
   checks <- apply(cand, 1, function(x, poly) {
     point.in.polygon(x[1], x[2], poly[,1], poly[,2])}, poly = poly)
   grid <- as.matrix(cand[checks==1,])
+  grid2 <- as.matrix(cand2[checks==1,])
   ngrid <- nrow(grid)
+  ## make distance matrix
   DST <- matrix(0, ngrid, ngrid)
   for(i in 2:ngrid){
     for(j in 1:(i-1)){
-      DST[i,j] <- sqrt(sum((grid[i,] - grid[j,])^2))
+      DST[i,j] <- sum(abs(grid2[i,] - grid2[j,]))
       DST[j,i] <- DST[i,j]
     }
   }
-
+  ## start, if necessary
+  if(start == "rand"){
+    IDstart <- sample(1:ngrid, npoints)
+    Dstart <- grid[IDstart,]
+  }
+  Dbest <- Dstart
+  IDbest <- IDstart
+  Qbest <- obj(c(Dstart), ...)
+  ## main while loop
+  improve <- TRUE
+  D <- Dstart
+  ID <- IDstart
+  vals <- Qbest
+  count <- 1
+  while(improve){
+    for(i in 1:npoints){
+      IDnb <- order(DST[ID[i],])[-1]
+      Ddist <- DST[ID[i],IDnb]
+      Ddist <- Ddist[which(Ddist <= nnbor)]
+      for(j in 1:length(Ddist)){
+        Dtemp <- D
+        Dtemp[i,] <- grid[IDnb[j],]
+        Qtemp <- obj(c(Dtemp), ...)
+        if(Qtemp < Qbest){
+          Qbest <- Qtemp
+          D <- Dtemp
+          ID[i] <- IDnb[j]
+          Dbest <- D
+        }
+      }
+    }
+    vals <- c(vals, Qbest)
+    count <- count + 1
+    improve <- vals[count] < vals[count - 1]
+  }
+  return(list(par = Dbest, value = Qbest, vals = vals, count = count))
 }
 
 ga <- function(niter, nbatch, nswarm, nchrome, nrun, mutvar, mutrate, lower, upper, obj, ...){

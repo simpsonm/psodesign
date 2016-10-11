@@ -9,6 +9,7 @@ library(maptools)
 source("poly_coords_function.R")
 
 houston <- read.csv("houstonout.csv")
+houston$se <- 0
 
 ## county level shapefile
 coshape <- readOGR(dsn="shape", layer="05000")
@@ -60,7 +61,7 @@ quadfit$ics
 ### will assume spatial + linear
 
 
-##### now estimate the variogram nonparametrically using two methods (ignores S)
+##### now estimate the variogram nonparametrically using two methods
 trendtype <- "1st"
 cloud1 <- variog(houstongeo, option = "cloud", trend=trendtype)
 cloud2 <- variog(houstongeo, option = "cloud", estimator.type = "modulus",
@@ -96,21 +97,49 @@ p <- ggmap(basemap) + geom_point(aes(Longitude, Latitude), data = houston, size 
 harrispoly <- cbind(housgeom$longitude, housgeom$latitude)*pi/180*6371
 currloc <- cbind(houston$u, houston$v)
 
+
+
 N.sim <- 1000
 datlist <- list()
 datlist$poly <- Polygon(harrispoly)
 datlist$theta <- thetahat
 datlist$sig2z <- tau2hat
-datlist$covfun <- expcov2
 datlist$ss <- currloc
 datlist$tt <- spsample(datlist$poly, 1000, "random")@coords
-Cz.s <- Czfun(currloc, nrow(currloc), thetahat, 0, expcov2)
-##+ diag(mean(S), length(S)) ## should we use that...?
+N.t <- nrow(datlist$tt)
+D.t <- matrix(0, N.t, N.t)
+tt <- datlist$tt
+for(i in 2:N.t){
+  for(j in 1:(i-1)){
+    D.t[i,j] <- sqrt(sum((tt[i,] - tt[j,])^2))
+    D.t[j,i] <- D.t[i,j]
+  }
+}
+datlist$D.t <- D.t
+N.s <- nrow(datlist$ss)
+D.s <- matrix(0, N.s, N.s)
+ss <- datlist$ss
+for(i in 2:N.s){
+  for(j in 1:(i-1)){
+    D.s[i,j] <- sqrt(sum((ss[i,] - ss[j,])^2))
+    D.s[j,i] <- D.s[i,j]
+  }
+}
+datlist$D.s <- D.s
+D.s.t <- matrix(0, N.s, N.t)
+for(i in 1:N.s){
+  for(j in 1:N.t){
+    D.s.t[i,j] <- sqrt(sum((datlist$ss[i,] - tt[j,])^2))
+  }
+}
+datlist$D.s.t <- D.s.t
+Cz.s <- diag(datlist$sig2z, N.s) + datlist$theta[1]*exp(-D.s/datlist$theta[2])
 datlist$invCz.s <- chol2inv(chol(Cz.s))
-datlist$Cyy.s.t <- Cyyfun(currloc, datlist$tt, nrow(currloc), nrow(datlist$tt), thetahat, expcov2)
-datlist$Cy.t <- drop(Cyyfun(matrix(c(0,0), nrow=1), matrix(c(0,0), nrow=1), 1, 1, thetahat, expcov2))
+datlist$Cyy.s.t <- datlist$theta[1]*exp(-D.s.t/datlist$theta[2])
+datlist$Cy.t <- datlist$theta[1]
 
 save(datlist, file = "datlist.Rdata")
+
 
 p + geom_polygon(aes(longitude,latitude, group = Poly_Name), data = housgeom, fill = NA,
                  colour = "black") +
@@ -118,6 +147,9 @@ p + geom_polygon(aes(longitude,latitude, group = Poly_Name), data = housgeom, fi
                                           v = datlist$tt[,2]/(pi/180*6371)),
              colour = "blue", alpha = 0.6, shape="+", size = I(3)) 
 
+
+
+source("../psofun.R")
 
 niter <- 100
 nswarm <- 20
@@ -150,10 +182,6 @@ for(i in 1:nswarm){
 inits[[2]] <- inits2
 inits[[2]][,1] <- c(datlist$tt[idxs2,])
 
-
-
-
-source("../psofun.R")
 
 system.time(meanpso <- pso(niter, nswarm, inertia, cognitive, social, inits[[1]], nbhd[[1]],
                            negsig2uk.mean, datlist = datlist))
@@ -197,3 +225,15 @@ p + geom_polygon(aes(longitude,latitude, group = Poly_Name), data = housgeom, fi
              colour = "blue", shape="O", size = I(5))
 
 
+
+
+
+ncand <- 10000
+nnbor <- 5
+npoints <- 5
+poly <- datlist$poly@coords
+
+system.time(exchtest1 <- exch(ncand, sig2uk.mean, poly, nnbor, npoints, datlist = datlist))
+
+nnbor <- 10
+system.time(exchtest2 <- exch(ncand, sig2uk.mean, poly, nnbor, npoints, datlist = datlist))

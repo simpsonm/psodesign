@@ -40,6 +40,305 @@ mylikefit <- function(pars, trendtype, houston, maxit = 500, reltol = .Machine$d
   return(out)
 }
 
+## mean full uncertainty universal kriging variance at a set of target points
+## (i.e. assuming only latent process and beta is unknown)
+sig2fuk.mean <- function(dd, datlist){
+  ## dd = variable design points
+  ss <- datlist$ss ## fixed points in the design
+  tt <- datlist$tt ## target points
+  theta <- datlist$theta
+  sig2z <- datlist$sig2z
+  poly <- datlist$poly
+  invCz.s <- datlist$invCz.s
+  Cyy.s.t <- datlist$Cyy.s.t
+  Cy.t <- datlist$Cy.t
+  N.s <- nrow(ss)
+  N.t <- nrow(tt)
+  dd <- matrix(dd, ncol = 2)
+  N.d <- nrow(dd)
+  X.t <- cbind(1, tt)
+  X.s <- cbind(1, ss)
+  X.d <- cbind(1, dd)
+  X <- rbind(X.s, X.d)
+  ## check that all design points are in the target county
+  check <- point.in.polygon(dd[,1], dd[,2], poly@coords[,1], poly@coords[,2])
+  if(sum(check) == N.d){
+    ## first, finish creating Cz and Czinv
+    D.d <- matrix(0, N.d, N.d)
+    for(i in 2:N.d){
+      for(j in 1:(i-1)){
+        D.d[i,j] <- sqrt(sum((dd[i,] - dd[j,])^2))
+        D.d[j,i] <- D.d[i,j]
+      }
+    }
+    D.d.s <- matrix(0, N.d, N.s)
+    for(i in 1:N.d){
+      for(j in 1:N.s){
+        D.d.s[i,j] <- sqrt(sum((dd[i,] - ss[j,])^2))
+      }
+    }
+    D.d.t <- matrix(0, N.d, N.t)
+    for(i in 1:N.d){
+      for(j in 1:N.t){
+        D.d.t[i,j] <- sqrt(sum((dd[i,] - tt[j,])^2))
+      }
+    }
+    Cz.d.s <- theta[1]*exp(-D.d.s/theta[2])
+    Cz.d <- diag(sig2z, N.d) + theta[1]*exp(-D.d/theta[2])
+    DD <- chol2inv(chol(Cz.d - Cz.d.s%*%tcrossprod(invCz.s, Cz.d.s)))
+    AinvB <- tcrossprod(invCz.s, Cz.d.s)
+    AA <- invCz.s + AinvB%*%tcrossprod(DD,AinvB)
+    BB <- -AinvB%*%DD
+    invCz <- rbind(cbind(AA, BB), cbind(t(BB), DD))
+    ## next, finish creating Cyy
+    Cyy.d.t <- theta[1]*exp(-D.d.t/theta[2])
+    Cyy <- rbind(Cyy.s.t, Cyy.d.t)
+    D.sd.t <- rbind(D.s.t, D.d.t)
+    D.sd <- rbind(cbind(D.s, t(D.d.s)), cbind(D.d.s, D.d))
+    outs1 <- apply(Cyy, 2, function(x, invCz) crossprod(x, invCz)%*%x, invCz = invCz)
+    XtinvCz <- crossprod(X, invCz)
+    prec <- XtinvCz%*%X
+    Rprec <- chol(prec)
+    invRprec <- backsolve(Rprec, diag(ncol(X)))
+    delta <- t(X.t) - XtinvCz%*%Cyy
+    outs2 <- apply(delta, 2, function(x, invRprec) tcrossprod(crossprod(x, invRprec)),
+                   invRprec = invRprec)
+    U <- invCz%*%X%*%tcrossprod(invRprec)
+    V <- invCz - U%*%crossprod(X,invCz)
+    uv1s <- -V%*%tcrossprod(U, X.t) - V%*%V%*%Cyy + V%*%(D.sd.t == 0)
+    dtheta1 <- exp(-D.sd/theta[2])
+    d2 <- invCz%*%dtheta1
+    dtheta2 <- theta[1]*exp(-D.sd/theta[2])*D.sd/theta[2]^2
+    d3 <- invCz%*%dtheta2
+    d.sd.t.theta1 <- exp(-D.sd.t/theta[2])
+    uv2s <- -V%*%dtheta1%*%tcrossprod(U, X.t) - V%*%dtheta1%*%V%*%Cyy +
+      V%*%d.sd.t.theta1
+    uv3s <- -V%*%dtheta2%*%tcrossprod(U, X.t) - V%*%dtheta2%*%V%*%Cyy +
+      V%*%(theta[1]*d.sd.t.theta1*D.sd.t/theta[2]^2)
+    UVs <- array(c(uv1s, uv2s, uv3s), c(nrow(uv1s), ncol(uv1s), 3))
+    FI <- matrix(0, 3, 3)
+    invCz2 <- invCz%*%invCz
+    FI[1,1] <- sum(diag(invCz2))
+    FI[1,2] <- sum(diag(invCz%*%d2))
+    FI[2,1] <- FI[1,2]
+    FI[1,3] <- sum(diag(invCz%*%d3))
+    FI[3,1] <- FI[1,3]
+    FI[2,2] <- sum(diag(d2%*%d2))
+    FI[3,2] <- sum(diag(d2%*%d3))
+    FI[2,3] <- FI[3,2]
+    FI[3,3] <- sum(diag(d3%*%d3))
+    FIinv <- chol2inv(chol(FI))
+    parparts <- rep(0, N.t)
+    for(i in 1:N.t){
+       parparts[i] <- sum(diag(crossprod(UVs[,i,], invCz)%*%UVs[,i,]%*%FIinv))
+    }
+    out <- Cy.t + mean(outs2) - mean(outs1) + mean(parparts)
+  } else {
+    out <- Inf
+  }
+  return(out)
+}
+
+## max full uncertainty universal kriging variance at a set of target points
+## (i.e. assuming only latent process and beta is unknown)
+sig2fuk.max <- function(dd, datlist){
+  ## dd = variable design points
+  ss <- datlist$ss ## fixed points in the design
+  tt <- datlist$tt ## target points
+  theta <- datlist$theta
+  sig2z <- datlist$sig2z
+  poly <- datlist$poly
+  invCz.s <- datlist$invCz.s
+  Cyy.s.t <- datlist$Cyy.s.t
+  Cy.t <- datlist$Cy.t
+  N.s <- nrow(ss)
+  N.t <- nrow(tt)
+  dd <- matrix(dd, ncol = 2)
+  N.d <- nrow(dd)
+  X.t <- cbind(1, tt)
+  X.s <- cbind(1, ss)
+  X.d <- cbind(1, dd)
+  X <- rbind(X.s, X.d)
+  ## check that all design points are in the target county
+  check <- point.in.polygon(dd[,1], dd[,2], poly@coords[,1], poly@coords[,2])
+  if(sum(check) == N.d){
+    ## first, finish creating Cz and Czinv
+    D.d <- matrix(0, N.d, N.d)
+    for(i in 2:N.d){
+      for(j in 1:(i-1)){
+        D.d[i,j] <- sqrt(sum((dd[i,] - dd[j,])^2))
+        D.d[j,i] <- D.d[i,j]
+      }
+    }
+    D.d.s <- matrix(0, N.d, N.s)
+    for(i in 1:N.d){
+      for(j in 1:N.s){
+        D.d.s[i,j] <- sqrt(sum((dd[i,] - ss[j,])^2))
+      }
+    }
+    D.d.t <- matrix(0, N.d, N.t)
+    for(i in 1:N.d){
+      for(j in 1:N.t){
+        D.d.t[i,j] <- sqrt(sum((dd[i,] - tt[j,])^2))
+      }
+    }
+    Cz.d.s <- theta[1]*exp(-D.d.s/theta[2])
+    Cz.d <- diag(sig2z, N.d) + theta[1]*exp(-D.d/theta[2])
+    DD <- chol2inv(chol(Cz.d - Cz.d.s%*%tcrossprod(invCz.s, Cz.d.s)))
+    AinvB <- tcrossprod(invCz.s, Cz.d.s)
+    AA <- invCz.s + AinvB%*%tcrossprod(DD,AinvB)
+    BB <- -AinvB%*%DD
+    invCz <- rbind(cbind(AA, BB), cbind(t(BB), DD))
+    ## next, finish creating Cyy
+    Cyy.d.t <- theta[1]*exp(-D.d.t/theta[2])
+    Cyy <- rbind(Cyy.s.t, Cyy.d.t)
+    D.sd.t <- rbind(D.s.t, D.d.t)
+    D.sd <- rbind(cbind(D.s, t(D.d.s)), cbind(D.d.s, D.d))
+    outs1 <- apply(Cyy, 2, function(x, invCz) crossprod(x, invCz)%*%x, invCz = invCz)
+    XtinvCz <- crossprod(X, invCz)
+    prec <- XtinvCz%*%X
+    Rprec <- chol(prec)
+    invRprec <- backsolve(Rprec, diag(ncol(X)))
+    delta <- t(X.t) - XtinvCz%*%Cyy
+    outs2 <- apply(delta, 2, function(x, invRprec) tcrossprod(crossprod(x, invRprec)),
+                   invRprec = invRprec)
+    U <- invCz%*%X%*%tcrossprod(invRprec)
+    V <- invCz - U%*%crossprod(X,invCz)
+    uv1s <- -V%*%tcrossprod(U, X.t) - V%*%V%*%Cyy + V%*%(D.sd.t == 0)
+    dtheta1 <- exp(-D.sd/theta[2])
+    d2 <- invCz%*%dtheta1
+    dtheta2 <- theta[1]*exp(-D.sd/theta[2])*D.sd/theta[2]^2
+    d3 <- invCz%*%dtheta2
+    d.sd.t.theta1 <- exp(-D.sd.t/theta[2])
+    uv2s <- -V%*%dtheta1%*%tcrossprod(U, X.t) - V%*%dtheta1%*%V%*%Cyy +
+      V%*%d.sd.t.theta1
+    uv3s <- -V%*%dtheta2%*%tcrossprod(U, X.t) - V%*%dtheta2%*%V%*%Cyy +
+      V%*%(theta[1]*d.sd.t.theta1*D.sd.t/theta[2]^2)
+    UVs <- array(c(uv1s, uv2s, uv3s), c(nrow(uv1s), ncol(uv1s), 3))
+    FI <- matrix(0, 3, 3)
+    invCz2 <- invCz%*%invCz
+    FI[1,1] <- sum(diag(invCz2))
+    FI[1,2] <- sum(diag(invCz%*%d2))
+    FI[2,1] <- FI[1,2]
+    FI[1,3] <- sum(diag(invCz%*%d3))
+    FI[3,1] <- FI[1,3]
+    FI[2,2] <- sum(diag(d2%*%d2))
+    FI[3,2] <- sum(diag(d2%*%d3))
+    FI[2,3] <- FI[3,2]
+    FI[3,3] <- sum(diag(d3%*%d3))
+    FIinv <- chol2inv(chol(FI))
+    parparts <- rep(0, N.t)
+    for(i in 1:N.t){
+       parparts[i] <- sum(diag(crossprod(UVs[,i,], invCz)%*%UVs[,i,]%*%FIinv))
+    }
+    out <- Cy.t + max(outs2 - outs1 + parparts)
+  } else {
+    out <- Inf
+  }
+  return(out)
+}
+
+## mean negative universal kriging variance at a set of target points
+## (i.e. assuming only latent process and beta is unknown)
+sig2uk.mean <- function(dd, datlist){
+  ## dd = variable design points
+  ss <- datlist$ss ## fixed points in the design
+  tt <- datlist$tt ## target points
+  covfun <- datlist$covfun
+  theta <- datlist$theta
+  sig2z <- datlist$sig2z
+  poly <- datlist$poly
+  invCz.s <- datlist$invCz.s
+  Cyy.s.t <- datlist$Cyy.s.t
+  Cy.t <- datlist$Cy.t
+  N.s <- nrow(ss)
+  N.t <- nrow(tt)
+  dd <- matrix(dd, ncol = 2)
+  N.d <- nrow(dd)
+  X.t <- cbind(1, tt)
+  X.s <- cbind(1, ss)
+  X.d <- cbind(1, dd)
+  X <- rbind(X.s, X.d)
+  ## check that all design points are in the target county
+  check <- point.in.polygon(dd[,1], dd[,2], poly@coords[,1], poly@coords[,2])
+  if(sum(check) == N.d){
+    ## first, finish creating Cz and Czinv
+    Cz.d.s <- Cyyfun(dd, ss, N.d, N.s, theta, covfun)
+    Cz.d <- Czfun(dd, N.d, theta, sig2z, covfun)
+    DD <- chol2inv(chol(Cz.d - Cz.d.s%*%tcrossprod(invCz.s, Cz.d.s)))
+    AinvB <- tcrossprod(invCz.s, Cz.d.s)
+    AA <- invCz.s + AinvB%*%tcrossprod(DD,AinvB)
+    BB <- -AinvB%*%DD
+    invCz <- rbind(cbind(AA, BB), cbind(t(BB), DD))
+    ## next, finish creating Cyy
+    Cyy.d.t <- Cyyfun(dd, tt, N.d, N.t, theta, covfun)
+    Cyy <- rbind(Cyy.s.t, Cyy.d.t)
+    outs1 <- apply(Cyy, 2, function(x, invCz) crossprod(x, invCz)%*%x, invCz = invCz)
+    XtinvCz <- crossprod(X, invCz)
+    prec <- XtinvCz%*%X
+    Rprec <- chol(prec)
+    invRprec <- backsolve(Rprec, diag(ncol(X)))
+    delta <- t(X.t) - XtinvCz%*%Cyy
+    outs2 <- apply(delta, 2, function(x, invRprec) tcrossprod(crossprod(x, invRprec)),
+                   invRprec = invRprec)
+    out <- Cy.t + mean(outs2) - mean(outs1)
+  } else {
+    out <- Inf
+  }
+  return(out)
+}
+
+## max universal kriging variance at a set of target points
+## (i.e. assuming only latent process and beta is unknown)
+sig2uk.max <- function(dd, datlist){
+  ## dd = variable design points
+  ss <- datlist$ss ## fixed points in the design
+  tt <- datlist$tt ## target points
+  covfun <- datlist$covfun
+  theta <- datlist$theta
+  sig2z <- datlist$sig2z
+  poly <- datlist$poly
+  invCz.s <- datlist$invCz.s
+  Cyy.s.t <- datlist$Cyy.s.t
+  Cy.t <- datlist$Cy.t
+  N.s <- nrow(ss)
+  N.t <- nrow(tt)
+  dd <- matrix(dd, ncol = 2)
+  N.d <- nrow(dd)
+  X.t <- cbind(1, tt)
+  X.s <- cbind(1, ss)
+  X.d <- cbind(1, dd)
+  X <- rbind(X.s, X.d)
+  ## check that all design points are in the target county
+  check <- point.in.polygon(dd[,1], dd[,2], poly@coords[,1], poly@coords[,2])
+  if(sum(check) == N.d){
+    ## first, finish creating Cz and Czinv
+    Cz.d.s <- Cyyfun(dd, ss, N.d, N.s, theta, covfun)
+    Cz.d <- Czfun(dd, N.d, theta, sig2z, covfun)
+    DD <- chol2inv(chol(Cz.d - Cz.d.s%*%tcrossprod(invCz.s, Cz.d.s)))
+    AinvB <- tcrossprod(invCz.s, Cz.d.s)
+    AA <- invCz.s + AinvB%*%tcrossprod(DD,AinvB)
+    BB <- -AinvB%*%DD
+    invCz <- rbind(cbind(AA, BB), cbind(t(BB), DD))
+    ## next, finish creating Cyy
+    Cyy.d.t <- Cyyfun(dd, tt, N.d, N.t, theta, covfun)
+    Cyy <- rbind(Cyy.s.t, Cyy.d.t)
+    outs1 <- apply(Cyy, 2, function(x, invCz) crossprod(x, invCz)%*%x, invCz = invCz)
+    XtinvCz <- crossprod(X, invCz)
+    prec <- XtinvCz%*%X
+    Rprec <- chol(prec)
+    invRprec <- backsolve(Rprec, diag(ncol(X)))
+    delta <- t(X.t) - XtinvCz%*%Cyy
+    outs2 <- apply(delta, 2, function(x, invRprec) tcrossprod(crossprod(x, invRprec)),
+                   invRprec = invRprec)
+    outs <- outs2 - outs1
+    out <- Cy.t + max(outs)
+  } else {
+    out <- Inf
+  }
+  return(out)
+}
+
 
 ## mean negative universal kriging variance at a set of target points
 ## (i.e. assuming only latent process and beta is unknown)
