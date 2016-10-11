@@ -192,7 +192,7 @@ sbbpso <- function(niter, nswarm, nnbor, sig, pcut=0.5, CF=FALSE, AT=FALSE, rate
 }
 
 spso <- function(niter, nswarm, nnbor, inertia, cognitive, social, obj, lower, upper,
-                 style = "CI", CF = FALSE, ...){
+                 style = "CI", CF = FALSE, alpha = .2*niter, beta = 2, rate = 0.3, ccc = 0.1, ...){
   npar <- length(lower) ## dimension of search space
   if(nswarm < 1){
     nswarm <- 10 + 2*sqrt(npar)  ## automatic setting of nswarm
@@ -201,13 +201,8 @@ spso <- function(niter, nswarm, nnbor, inertia, cognitive, social, obj, lower, u
   DI <- style == "DI"
   AT <- style == "AT"
   if(DI){
-    alpha <- inertia[1]
-    beta <- inertia[2]
     inertia <- 1/(1 + (1/alpha)^beta)
   } else if(AT){
-    ccc <- inertia[3]
-    rate <- inertia[2]
-    inertia <- inertia[1]
     loginertia <- log(inertia)
   }
   inertias <- rep(inertia, nswarm + 1)  

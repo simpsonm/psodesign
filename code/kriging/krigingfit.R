@@ -99,13 +99,28 @@ currloc <- cbind(houston$u, houston$v)
 
 
 
-N.sim <- 1000
+N.grid <- 5000
+ndim <- ceiling(sqrt(N.grid))
+N.grid <- ndim^2
+mins <- apply(harrispoly, 2, min)
+maxes <- apply(harrispoly, 2, max)
+by.x <- (maxes[1] - mins[1])/ndim
+by.y <- (maxes[2] - mins[2])/ndim
+cand <- expand.grid(seq(from = mins[1], by = by.x, length.out = ndim),
+                    seq(from = mins[2], by = by.y, length.out = ndim))
+checks <- apply(cand, 1, function(x, poly) {
+  point.in.polygon(x[1], x[2], poly[,1], poly[,2])}, poly = harrispoly)
+grid <- as.matrix(cand[checks==1,])
+
+
+
+
 datlist <- list()
 datlist$poly <- Polygon(harrispoly)
 datlist$theta <- thetahat
 datlist$sig2z <- tau2hat
 datlist$ss <- currloc
-datlist$tt <- spsample(datlist$poly, 1000, "random")@coords
+datlist$tt <- grid
 N.t <- nrow(datlist$tt)
 D.t <- matrix(0, N.t, N.t)
 tt <- datlist$tt
@@ -151,25 +166,19 @@ p + geom_polygon(aes(longitude,latitude, group = Poly_Name), data = housgeom, fi
 
 source("../psofun.R")
 
+
+
 niter <- 100
-nswarm <- 20
+nswarm <- 40
 inertia <- 0.7298
 cognitive <- 1.496
 social <- 1.496
-nbhdnames <- c("ring-1", "ring-3", "global")
-rates <- c(0.5)
-dfs <- c(5)
-ccc <- c(0.1)
-alpha <- .2*niter
-beta <- 1
-nbhd <- list()
-nbhd[[1]] <- sapply(1:nswarm, function(x){return( (x + -1:1 - 1)%%nswarm + 1)}) ## ring-1
-nbhd[[2]] <- sapply(1:nswarm, function(x){return( (x + -3:3 - 1)%%nswarm + 1)}) ## ring-3
-nbhd[[3]] <- matrix(1:nswarm, ncol=nswarm, nrow=nswarm) ## global
-
-vals <- apply(t(datlist$tt), 2, negsig2sk.mean, datlist = datlist)
-
+nnbor <- 3
 ndesign <- 5
+lower <- rep(apply(datlist$poly@coords, 2, min), each = ndesign)
+upper <- rep(apply(datlist$poly@coords, 2, max), each = ndesign)
+
+
 idxs2 <- order(vals, decreasing = TRUE)[1:ndesign]
 npar <- 2*ndesign
 inits <- list()
@@ -182,20 +191,48 @@ for(i in 1:nswarm){
 inits[[2]] <- inits2
 inits[[2]][,1] <- c(datlist$tt[idxs2,])
 
+spsoCI <- spso(niter, nswarm, nnbor, inertia, cognitive, social, sig2fuk.mean, lower, upper,
+               style = "CI", CF = FALSE, datlist = datlist)
 
-system.time(meanpso <- pso(niter, nswarm, inertia, cognitive, social, inits[[1]], nbhd[[1]],
-                           negsig2uk.mean, datlist = datlist))
+spsoCI2 <- spso(niter, nswarm, nnbor, inertia, cognitive, social, sig2fuk.mean,
+                lower, upper, style = "AT", CF = FALSE, datlist = datlist)
 
-system.time(minpso <- pso(niter, nswarm, inertia, cognitive, social, inits[[1]], nbhd[[1]],
-                          negsig2uk.min, datlist = datlist))
+spsoCI.max <- spso(niter, nswarm, nnbor, inertia, cognitive, social, sig2fuk.max, lower, upper,
+                   style = "CI", CF = FALSE, datlist = datlist)
 
+spsoCI.max2 <- spso(niter, nswarm, nnbor, inertia, cognitive, social, sig2fuk.max,
+                   lower, upper, style = "AT", CF = FALSE, datlist = datlist)
 
-system.time(meanpso2 <- pso(niter, nswarm, inertia, cognitive, social, inits[[2]], nbhd[[1]],
-                           negsig2uk.mean, datlist = datlist))
+nbatch <- 1
+nchrome <- 2
+nrun <- ndesign
+mutvar <- 2
+mutrate <- .1
+mutvar2 <- 1
+mutrate2 <- .01
+## these seem like good parameter values!
 
-system.time(minpso2 <- pso(niter, nswarm, inertia, cognitive, social, inits[[2]], nbhd[[1]],
-                          negsig2uk.min, datlist = datlist))
+ga1 <- ga(niter, nbatch, floor(nswarm/2), nchrome, nrun, mutvar, mutrate, lower, upper,
+          sig2fuk.mean, datlist=datlist)
 
+ga2 <- ga(niter, nbatch, floor(nswarm/2), nchrome, nrun, mutvar2, mutrate2, lower, upper,
+          sig2fuk.mean, datlist=datlist)
+
+ga3 <- ga(niter, nbatch, floor(nswarm/2), nchrome, nrun, mutvar2, mutrate, lower, upper,
+          sig2fuk.mean, datlist=datlist)
+
+ga4 <- ga(niter, nbatch, floor(nswarm/2), nchrome, nrun, mutvar, mutrate2, lower, upper,
+          sig2fuk.mean, datlist=datlist)
+
+c(ga1$value, ga2$value, ga3$value, ga4$value)
+
+par(mfrow=c(2,1))
+plot(ts(spsoCI$values), ylim = c(min(spsoCI$values, spsoCI2$values),
+                                 max(spsoCI2$values)))
+lines(ts(spsoCI2$values), col = "red")
+plot(ts(spsoCI.max$values), ylim = c(min(spsoCI.max$values, spsoCI.max2$values),
+                                     max(spsoCI.max$values)))
+lines(ts(spsoCI.max2$values), col = "red")
 
 par(mfrow=c(2,1))
 plot(ts(meanpso$maxes), ylim = c(min(meanpso$maxes, meanpso2$maxes),
@@ -211,18 +248,20 @@ p + geom_polygon(aes(longitude,latitude, group = Poly_Name), data = housgeom, fi
   geom_point(aes(u, v), data = data.frame(u = datlist$tt[,1]/(pi/180*6371),
                                           v = datlist$tt[,2]/(pi/180*6371)),
              colour = "blue", alpha = 0.6, shape="+", size = I(3)) +
-  geom_point(aes(u, v), data = data.frame(u = meanpso$argmax[1:ndesign]/(pi/180*6371),
-                                          v = meanpso$argmax[ndesign + 1:ndesign]/(pi/180*6371)),
+  geom_point(aes(u, v), data = data.frame(u = spsoCI$par[1:ndesign]/(pi/180*6371),
+                                          v = spsoCI$par[ndesign + 1:ndesign]/(pi/180*6371)),
              colour = "red", shape="X", size = I(5)) +
-  geom_point(aes(u, v), data = data.frame(u = minpso$argmax[1:ndesign]/(pi/180*6371),
-                                          v = minpso$argmax[ndesign + 1:ndesign]/(pi/180*6371)),
-             colour = "blue", shape="X", size = I(5)) + 
-  geom_point(aes(u, v), data = data.frame(u = meanpso2$argmax[1:ndesign]/(pi/180*6371),
-                                          v = meanpso2$argmax[ndesign + 1:ndesign]/(pi/180*6371)),
+  geom_point(aes(u, v), data = data.frame(u = spsoCI2$par[1:ndesign]/(pi/180*6371),
+                                          v = spsoCI2$par[ndesign + 1:ndesign]/(pi/180*6371)),
              colour = "red", shape="O", size = I(5)) +
-  geom_point(aes(u, v), data = data.frame(u = minpso2$argmax[1:ndesign]/(pi/180*6371),
-                                          v = minpso2$argmax[ndesign + 1:ndesign]/(pi/180*6371)),
-             colour = "blue", shape="O", size = I(5))
+  geom_point(aes(u, v), data = data.frame(u = spsoCI.max$par[1:ndesign]/(pi/180*6371),
+                                          v = spsoCI.max$par[ndesign + 1:ndesign]/(pi/180*6371)),
+             colour = "blue", shape="X", size = I(5)) +
+  geom_point(aes(u, v), data = data.frame(u = spsoCI.max2$par[1:ndesign]/(pi/180*6371),
+                                          v = spsoCI.max2$par[ndesign + 1:ndesign]/(pi/180*6371)),
+             colour = "blue", shape="O", size = I(5)) 
+
+
 
 
 
