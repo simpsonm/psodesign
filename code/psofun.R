@@ -38,6 +38,7 @@ exch <- function(ncand, obj, poly, nnbor, npoints, start = "rand", ...){
   D <- Dstart
   ID <- IDstart
   vals <- Qbest
+  objcount <- 1
   count <- 1
   while(improve){
     for(i in 1:npoints){
@@ -48,6 +49,7 @@ exch <- function(ncand, obj, poly, nnbor, npoints, start = "rand", ...){
         Dtemp <- D
         Dtemp[i,] <- grid[IDnb[j],]
         Qtemp <- obj(c(Dtemp), ...)
+        objcount <- objcount + 1
         if(Qtemp < Qbest){
           Qbest <- Qtemp
           D <- Dtemp
@@ -60,7 +62,7 @@ exch <- function(ncand, obj, poly, nnbor, npoints, start = "rand", ...){
     count <- count + 1
     improve <- vals[count] < vals[count - 1]
   }
-  return(list(par = Dbest, value = Qbest, vals = vals, count = count))
+  return(list(par = Dbest, value = Qbest, vals = vals, count = count, objcount = objcount))
 }
 
 ga <- function(niter, nbatch, nswarm, nchrome, nrun, mutvar, mutrate, lower, upper, obj, ...){

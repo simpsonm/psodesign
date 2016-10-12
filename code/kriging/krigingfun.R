@@ -52,6 +52,9 @@ sig2fuk.mean <- function(dd, datlist){
   invCz.s <- datlist$invCz.s
   Cyy.s.t <- datlist$Cyy.s.t
   Cy.t <- datlist$Cy.t
+  D.s.t <- datlist$D.s.t
+  D.t <- datlist$D.t
+  D.s <- datlist$D.s
   N.s <- nrow(ss)
   N.t <- nrow(tt)
   dd <- matrix(dd, ncol = 2)
@@ -151,6 +154,9 @@ sig2fuk.max <- function(dd, datlist){
   invCz.s <- datlist$invCz.s
   Cyy.s.t <- datlist$Cyy.s.t
   Cy.t <- datlist$Cy.t
+  D.s.t <- datlist$D.s.t
+  D.t <- datlist$D.t
+  D.s <- datlist$D.s
   N.s <- nrow(ss)
   N.t <- nrow(tt)
   dd <- matrix(dd, ncol = 2)

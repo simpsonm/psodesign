@@ -4,118 +4,141 @@ source("../psofun.R")
 source("krigingfun.R")
 load("datlist.Rdata")
 
+
+nswarm <- 40
+niter <- 1000
+## need to think harder about niter and nrep
+## and maybe pare down the number of algorithms
 nrep <- 5
-niter <- 500
-nswarm <- 20
-inertia <- 0.7298
-cognitive <- 1.496
-social <- 1.496
-nbhdnames <- c("ring-1", "ring-3", "global")
-rates <- c(0.5)
-dfs <- c(5)
-ccc <- c(0.1)
-alpha <- .2*niter
-beta <- 1
-psoout <- NULL
-nbhd <- list()
-nbhd[[1]] <- sapply(1:nswarm, function(x){return( (x + -1:1 - 1)%%nswarm + 1)}) ## ring-1
-nbhd[[2]] <- sapply(1:nswarm, function(x){return( (x + -3:3 - 1)%%nswarm + 1)}) ## ring-3
-nbhd[[3]] <- matrix(1:nswarm, ncol=nswarm, nrow=nswarm) ## global
+inertias <- c(0.7298, 1/(log(2)*2))
+cognitives <- c(1.496, log(2) + 1/2)
+socials <- c(1.496, log(2) + 1/2)
+nnbors <- c(1, 3, 40)
+alpha <- 0.2*niter
+beta <- 2
+rates <- c(0.3, 0.5)
+ccc <- 0.1
+df <- 1
+pcuts <- c(0, 0.5)
+sig0 <- 1
+inertia0 <- 1.2
 
 ndesign <- 5
-npar <- 2*ndesign
-inits <- list()
-inits[[1]] <- replicate(nswarm, c(spsample(datlist$poly, ndesign, "random")@coords))
-idxs <- matrix(replicate(nswarm, sample(1:nrow(datlist$tt), ndesign)), nrow = ndesign)
-inits2 <- matrix(0, npar, nswarm)
-for(i in 1:nswarm){
-  inits2[,i] <- c(datlist$tt[idxs[,i],])
-}
-inits[[2]] <- inits2
-vals <- apply(t(datlist$tt), 2, negsig2sk.mean, datlist = datlist)
-idxs2 <- order(vals, decreasing = TRUE)[1:ndesign]
-inits[[2]][,1] <- c(datlist$tt[idxs2,])
+lower <- rep(apply(datlist$poly@coords, 2, min), each = ndesign)
+upper <- rep(apply(datlist$poly@coords, 2, max), each = ndesign)
 
-system.time({
-for(m in 1:3){
-  for(i in 1:2){
-    for(j in 1:2){
-      if(j == 1){
-        obj <- negsig2uk.mean
-      } else {
-        obj <- negsig2uk.min
-      }
-      for(rep in 1:nrep){
-        cat("nbhd = ")
-        cat(nbhdnames[m])
-        cat(", init = ")
-        cat(i)
-        cat(", obj = ")
-        cat(j)
-        cat(", rep = ")
-        cat(rep)
-        cat("\n")
-        print("PSO")
-        psotemp <- pso(niter, nswarm, inertia, cognitive, social, inits[[i]], nbhd[[m]],
-                       obj, datlist = datlist)
-        psotempout <- data.frame(algorithm = "PSO", obj = j,
-                                 init = i, nbhd = nbhdnames[m], rep = rep,
-                                 iteration = 0:niter, maxes = psotemp$maxes)
-        psoout <- rbind(psoout, psotempout)
-        print("BBPSO-MC")
-        psotemp <- bbpso(niter, nswarm, 0, 1, inits[[i]], nbhd[[m]], obj, Inf, FALSE,
-                         0, datlist = datlist)
-        psotempout <- data.frame(algorithm = "BBPSO-MC", obj = j,
-                                 init = i, nbhd = nbhdnames[m], rep = rep,
-                                 iteration = 0:niter, maxes = psotemp$maxes)
-        psoout <- rbind(psoout, psotempout)            
-        print("BBPSOxp-MC")
-        psotemp <- bbpso(niter, nswarm, 0, 1, inits[[i]], nbhd[[m]], obj, Inf, FALSE,
-                         .5, datlist = datlist)
-        psotempout <- data.frame(algorithm = "BBPSOxp-MC", obj = j,
-                                 init = i, nbhd = nbhdnames[m], rep = rep,
-                                 iteration = 0:niter, maxes = psotemp$maxes)
-        psoout <- rbind(psoout, psotempout)
-        print("DI-PSO")
-        psotemp <- pso(niter, nswarm, inertia, social, cognitive, inits[[i]], nbhd[[m]],
-                       obj, datlist = datlist, tune = TRUE, style = "deterministic",
-                       alpha = alpha, beta = beta)
-        psotempout <- data.frame(algorithm = "DI-PSO", obj = j,
-                                 init = i, nbhd = nbhdnames[m], rep = rep,
-                                 iteration = 0:niter, maxes = psotemp$maxes)
-        psoout <- rbind(psoout, psotempout)
-        print("AT-PSO & AT-BBPSO-MC & AT-BBPSOxp-MC")
-        for(rate in rates){
-          psotemp <- pso(niter, nswarm, 0.9, cognitive, social, inits[[i]], nbhd[[m]],
-                         obj, datlist = datlist, tune = TRUE, style = "adaptive",
-                         rate = rate, ccc = ccc)
-          psotempout <- data.frame(algorithm = paste("AT-PSO", rate, ccc, sep="-"),
-                                   obj = j,
-                                   init = i, nbhd = nbhdnames[m], rep = rep,
-                                   iteration = 0:niter, maxes = psotemp$maxes)
-          psoout <- rbind(psoout, psotempout)
-          for(df in dfs){
-            print(paste(c(rate, df)))
-            psoout <- rbind(psoout, psotempout)
-            psotemp <- bbpso(niter, nswarm, 1, rate, inits[[i]], nbhd[[m]], obj, df,
-                             TRUE, 0, datlist = datlist, ccc = ccc)
-            psotempout <- data.frame(algorithm = paste("AT-BBPSO-MC", df, rate, ccc, sep="-"),
-                                     obj = j,
-                                     init = i, nbhd = nbhdnames[m], rep = rep,
-                                     iteration = 0:niter, maxes = psotemp$maxes)
-            psoout <- rbind(psoout, psotempout)
-            psotemp <- bbpso(niter, nswarm, 1, rate, inits[[i]], nbhd[[m]], obj, df,
-                             TRUE, 0.5, datlist = datlist, ccc = ccc)
-            psotempout <- data.frame(algorithm = paste("AT-BBPSOxp-MC", df, rate, ccc, sep="-"),
-                                     obj = j,
-                                     init = i, nbhd = nbhdnames[m], rep = rep,
-                                     iteration = 0:niter, maxes = psotemp$maxes)
-            psoout <- rbind(psoout, psotempout)
+time <- 0:niter
+
+set.seed(3453)
+
+
+psoout <- NULL
+cat("\n")
+for(repl in 1:nrep){
+  for(nnbor in nnbors){
+    for(CF in c(TRUE, FALSE)){
+      for(parset in 1:2){
+        for(objnum in 1:2){
+          if(objnum == 1){
+            obj <- sig2fuk.mean
+            objname <- "sig2fuk.mean"
+          } else {
+            obj <- sig2fuk.max
+            objname <- "sig2fuk.max"
           }
+          cat("rep = "); cat(repl); cat("; obj = "); cat(objname); cat("; nnbor = "); cat(nnbor)
+          cat("; CF = "); cat(CF); cat("; parset = "); cat(parset); cat("\n")
+          for(style in c("AT1", "AT2")){
+            system.time({
+            rate <- ifelse(style=="AT1", rates[1], rates[2])
+            pcut <- pcuts[parset]
+            temp <- sbbpso(niter, nswarm, nnbor, sig0,
+                           pcut = pcut, CF = CF, AT = TRUE, rate = rate, df = df, ccc = 0.1,
+                           obj = obj, datlist = datlist)
+            algid <- paste("BBPSO", parset, ifelse(CF, "CF", "notCF"), style, sep = "-")
+            tempdat <- data.frame(obj = objname, logpost = temp[["values"]],
+                                  argnorm = apply(temp[["pars"]], 2, normvec),
+                                  time = time, algid = algid,
+                                  type = "BBPSO", parset = parset, CF = CF,
+                                  style = style, nbhd = nnbor, rep = repl,
+                                  inertias = temp$sigs)
+            psoout <- rbind(psoout, tempdat)
+            })
+          }
+          for(style in c("CI", "DI", "AT1", "AT2")){
+            rate <- ifelse(style=="AT1", rates[1], rates[2])
+            c.in <- ifelse(style=="CI", inertias[parset], inertia0)
+            c.co <- cognitives[parset]
+            c.so <- socials[parset]
+            temp <- spso(niter, nswarm, nnbor, c.in, c.co, c.so, obj, lower, upper,
+                         style = substr(style, 1, 2), CF = CF, alpha = alpha, beta = beta,
+                         rate = rate, ccc = ccc, datlist = datlist)
+            algid <- paste("PSO", parset, ifelse(CF, "CF", "notCF"), style, sep = "-")
+            tempdat <- data.frame(obj = objname, logpost = temp[["values"]],
+                                  argnorm = apply(temp[["pars"]], 2, normvec),
+                                  time = time, algid = algid,
+                                  type = "PSO", parset = parset, CF = CF,
+                                  style = style, nbhd = nnbor, rep = repl,
+                                  inertias = temp$inertias)
+            psoout <- rbind(psoout, tempdat)
+          }
+          write.csv(psoout, file = "psosimsout.csv", row.names=FALSE)
         }
-        write.csv(psoout, file = "psoout.csv", row.names=FALSE)
       }
     }
   }
 }
-})
+
+
+nbatches <- c(1,2)
+nchrome <- 2
+nrun <- ndesign
+mutvars <- c(1,2)
+mutrates <- c(1/100, 1/10)
+nexnbors <- c(1, 3, 5)
+ncand <- 2000
+
+for(repl in 1:nrep){
+  for(objnum in 1:2){
+    if(objnum == 1){
+      obj <- sig2fuk.mean
+      objname <- "sig2fuk.mean"
+    } else {
+      obj <- sig2fuk.max
+      objname <- "sig2fuk.max"
+    }
+    for(nbatch in nbatches){
+      for(mutvar in mutvars){
+        for(mutrate in mutrates){
+          temp <- ga(niter, nbatch, floor(nswarm/2), nchrome, nrun, mutvar, mutrate, lower, upper,
+                     obj, datlist=datlist)
+          algid <- paste("GA", nbatch, mutrate, mutvar, sep="-")
+          tempdat <- data.frame(obj = objname, logpost = temp[["values"]],
+                                argnorm = apply(temp[["pars"]], 2, normvec),
+                                time = time, algid = algid,
+                                type = "GA", parset = paste(nbatch, mutvar, mutrate, sep="-"),
+                                CF = NA, style = NA, nbhd = NA, rep = repl,
+                                inertias = NA)
+          psoout <- rbind(psoout, tempdat)
+        }
+      }
+    }
+    for(nexnbor in nexnbors){
+      ### this needs to be rewritten because of exch not having a fixed niter
+      temp <- exch(ncand, obj, datlist$poly@coords, nexnbor, ndesign, datlist = datlist)
+      algid <- paste("EX", nexnbor, sep="-")
+      tempdat <- data.frame(obj = objname, logpost = temp[["values"]],
+                            argnorm = apply(temp[["pars"]], 2, normvec),
+                            time = time, algid = algid,
+                            type = "GA", parset = nexnbor,
+                            CF = NA, style = NA, nbhd = NA, rep = repl,
+                            inertias = NA)
+      psoout <- rbind(psoout, tempdat)
+    }
+    write.csv(psoout, file = "psosimsout.csv", row.names=FALSE)
+  }
+}
+
+
+
+

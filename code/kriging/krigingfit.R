@@ -99,7 +99,7 @@ currloc <- cbind(houston$u, houston$v)
 
 
 
-N.grid <- 5000
+N.grid <- 2000
 ndim <- ceiling(sqrt(N.grid))
 N.grid <- ndim^2
 mins <- apply(harrispoly, 2, min)
@@ -191,8 +191,8 @@ for(i in 1:nswarm){
 inits[[2]] <- inits2
 inits[[2]][,1] <- c(datlist$tt[idxs2,])
 
-spsoCI <- spso(niter, nswarm, nnbor, inertia, cognitive, social, sig2fuk.mean, lower, upper,
-               style = "CI", CF = FALSE, datlist = datlist)
+system.time(spsoCI <- spso(niter, nswarm, nnbor, inertia, cognitive, social, sig2fuk.mean,
+                           lower, upper, style = "CI", CF = FALSE, datlist = datlist))
 
 spsoCI2 <- spso(niter, nswarm, nnbor, inertia, cognitive, social, sig2fuk.mean,
                 lower, upper, style = "AT", CF = FALSE, datlist = datlist)
