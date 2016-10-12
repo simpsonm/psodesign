@@ -108,7 +108,7 @@ sbbpso <- function(niter, nswarm, nnbor, sig, pcut=0.5, CF=FALSE, AT=FALSE, rate
   }
   ## initialize positions, velocities, and nbhds
   x <- replicate(nswarm, runif(npar, lower, upper)) 
-  inform <- replicate(nswarm, sample(1:nswarm, nnbor, replace = TRUE))
+  inform <- matrix(replicate(nswarm, sample(1:nswarm, nnbor, replace = TRUE)), nrow = nnbor)
   nbhd <- lapply(1:nswarm, function(x) unique(c(which(inform == x, TRUE)[,2],x)))
   ## initialize pbest, gbest, and nbest stuff
   pbest <- x
@@ -205,11 +205,11 @@ spso <- function(niter, nswarm, nnbor, inertia, cognitive, social, obj, lower, u
   } else if(AT){
     loginertia <- log(inertia)
   }
-  inertias <- rep(inertia, nswarm + 1)  
+  inertias <- rep(inertia, niter + 1)  
   ## initialize positions, velocities, and nbhds
   x <- replicate(nswarm, runif(npar, lower, upper)) 
   v <- replicate(nswarm, runif(npar, lower, upper)) - x  
-  inform <- replicate(nswarm, sample(1:nswarm, nnbor, replace = TRUE))
+  inform <- matrix(replicate(nswarm, sample(1:nswarm, nnbor, replace = TRUE)), nrow = nnbor)
   nbhd <- lapply(1:nswarm, function(x) unique(c(which(inform == x, TRUE)[,2],x)))
   ## initialize pbest, gbest, and nbest stuff
   pbest <- x
