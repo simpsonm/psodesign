@@ -41,24 +41,55 @@ houstongeo <- list(coords = as.matrix(select(houston, u, v)),
 colnames(houstongeo[[1]]) <- NULL
 
 
-## initial fits for good starting values, but these ignore S and the measurement error variance
+## MLEs, trying different starting values
 ml.lin <- likfit(houstongeo, ini = c(1,0.5), fix.nugget = TRUE, nugget = 0, trend = "1st")
 ml.cte <- likfit(houstongeo, ini = c(1,0.5), fix.nugget = TRUE, nugget = 0, trend = "cte")
 
-parslin <- c(ml.lin$beta, 0.0001, log(ml.lin$sigmasq), ml.lin$phi)
-parscte <- c(ml.cte$beta, 0.0001, log(ml.cte$sigmasq), ml.cte$phi)
-parsquad <- c(ml.lin$beta, c(0,0,0), 0.0001, log(ml.lin$sigmasq), ml.lin$phi)
-                       
-confit <- mylikefit(parscte, "cte", houston)
-linfit <- mylikefit(parslin, "lin", houston)
-quadfit <- mylikefit(parsquad, "quad", houston)
+ml.lin2 <- likfit(houstongeo, ini = c(1,0.05), fix.nugget = TRUE, nugget = 0, trend = "1st")
+ml.cte2 <- likfit(houstongeo, ini = c(1,0.05), fix.nugget = TRUE, nugget = 0, trend = "cte")
 
-confit$ics
-linfit$ics
-quadfit$ics
+ml.lin3 <- likfit(houstongeo, ini = c(10,0.05), fix.nugget = TRUE, nugget = 0, trend = "1st")
+ml.cte3 <- likfit(houstongeo, ini = c(10,0.05), fix.nugget = TRUE, nugget = 0, trend = "cte")
 
-### AIC/BIC are basically agnotstic between linear vs constant and spatial vs no.
-### will assume spatial + linear
+ml.lin4 <- likfit(houstongeo, ini = c(.0010,0.05), fix.nugget = TRUE, nugget = 0, trend = "1st")
+ml.cte4 <- likfit(houstongeo, ini = c(.0010,0.05), fix.nugget = TRUE, nugget = 0, trend = "cte")
+
+
+ml.lin.nug <- likfit(houstongeo, ini = c(1,0.5), fix.nugget = FALSE, trend = "1st")
+ml.cte.nug <- likfit(houstongeo, ini = c(1,0.5), fix.nugget = FALSE, trend = "cte")
+
+ml.lin.nug2 <- likfit(houstongeo, ini = c(1,0.005), fix.nugget = FALSE, trend = "1st")
+ml.cte.nug2 <- likfit(houstongeo, ini = c(1,0.005), fix.nugget = FALSE, trend = "cte")
+
+ml.lin.nug3 <- likfit(houstongeo, ini = c(100,0.5), fix.nugget = FALSE, trend = "1st")
+ml.cte.nug3 <- likfit(houstongeo, ini = c(100,0.5), fix.nugget = FALSE, trend = "cte")
+
+ml.lin.nug4 <- likfit(houstongeo, ini = c(.001,0.5), fix.nugget = FALSE, trend = "1st")
+ml.cte.nug4 <- likfit(houstongeo, ini = c(.001,0.5), fix.nugget = FALSE, trend = "cte")
+
+ml.lin.nug5 <- likfit(houstongeo, ini = c(.001,0.5), fix.nugget = FALSE, nugget = 100, trend = "1st")
+ml.cte.nug5 <- likfit(houstongeo, ini = c(.001,0.5), fix.nugget = FALSE, nugget = 100, trend = "cte")
+
+## tried a bunch of different starting values
+
+ml <- likfit(houstongeo, ini = c(1,0.5), fix.nugget = TRUE, trend = "1st")
+ml.n <- likfit(houstongeo, ini = c(1,0.5), fix.nugget = FALSE, nugget = 1, trend = "1st")
+
+## AIC/BIC favors no nugget, which is estimated to be zero when its included in the model.
+
+cbind(ml$beta +  qnorm(0.025) * sqrt(diag(as.matrix(ml$beta.var))),
+      ml$beta +  qnorm(0.975) * sqrt(diag(as.matrix(ml$beta.var))))
+
+cbind(ml$beta +  qnorm(0.005) * sqrt(diag(as.matrix(ml$beta.var))),
+      ml$beta +  qnorm(0.995) * sqrt(diag(as.matrix(ml$beta.var))))
+
+cbind(ml$beta +  qnorm(0.1) * sqrt(diag(as.matrix(ml$beta.var))),
+      ml$beta +  qnorm(0.9) * sqrt(diag(as.matrix(ml$beta.var))))
+
+## confidence intervals suggest linear in y axis is reasonable even at 99% level
+## but x axis is not a significant predictor even at 80% level
+
+## not shown: 2nd order polynomial clearly seems to be an overfit
 
 
 ##### now estimate the variogram nonparametrically using two methods
@@ -75,22 +106,25 @@ plot(cloud2, main = "modulus estimator")
 plot(bin1, main = "classical estimator")
 plot(bin2, main = "modulus estimator")
 
-# Now, plotting fitted models against empirical variogram
+
+## Now, plotting fitted models against empirical variogram
 par(mfrow = c(2,1))
 plot(bin1, main = "classical variogram")
-seqs <- seq(0, 150, length.out=1000)
-lines(seqs, linfit$par[4] + linfit$par[5]*(1 - exp(-seqs/linfit$par[6])), col = "red")
+lines(ml)
+lines(ml.n, lty = 2)
+legend(40, 15, legend=c("ML","ML.N"),lty=c(1,2),lwd=c(1,1), cex=0.7)
 plot(bin2, main = "modulus variogram")
-lines(seqs, linfit$par[4] + linfit$par[5]*(1 - exp(-seqs/linfit$par[6])), col = "red")
+lines(ml)
+lines(ml.n, lty = 2)
+legend(40, 15, legend=c("ML","ML.N"),lty=c(1,2),lwd=c(1,1), cex=0.7)
 
-betahat <- linfit$par[1:3]
-tau2hat <- linfit$par[4]
-sig2hat <- linfit$par[5]
-phihat <- linfit$par[6]
+## store parameter estimates
+betahat <- ml$beta
+tau2hat <- ml$tausq
+sig2hat <- ml$sigmasq
+phihat <- ml$phi
+varbetahat <- ml$beta.var
 thetahat <- c(sig2hat, phihat)
-
-basemap <- get_map(location = "houston", zoom = 9, maptype = 'terrain')
-p <- ggmap(basemap) + geom_point(aes(Longitude, Latitude), data = houston, size = I(3), alpha=0.6)
 
 
 ## for use in objective function - for checking whether candidate points are in the poly
@@ -98,7 +132,7 @@ harrispoly <- cbind(housgeom$longitude, housgeom$latitude)*pi/180*6371
 currloc <- cbind(houston$u, houston$v)
 
 
-
+## create prediction grid
 N.grid <- 2000
 ndim <- ceiling(sqrt(N.grid))
 N.grid <- ndim^2
@@ -112,27 +146,25 @@ checks <- apply(cand, 1, function(x, poly) {
   point.in.polygon(x[1], x[2], poly[,1], poly[,2])}, poly = harrispoly)
 grid <- as.matrix(cand[checks==1,])
 
-
-
-
+## create list of inputs to objective functions
 datlist <- list()
-datlist$poly <- Polygon(harrispoly)
-datlist$theta <- thetahat
-datlist$sig2z <- tau2hat
-datlist$ss <- currloc
-datlist$tt <- grid
-N.t <- nrow(datlist$tt)
-D.t <- matrix(0, N.t, N.t)
-tt <- datlist$tt
+datlist$poly <- Polygon(harrispoly) ## Harris County polygon
+datlist$theta <- thetahat           ## sig2 and phi estimates
+datlist$sig2z <- tau2hat            ## sig2z estimate (set to 0)
+datlist$ss <- currloc               ## current observation locations
+datlist$tt <- grid                  ## prediction locations
+N.t <- nrow(datlist$tt)             ## number of prediction locations
+D.t <- matrix(0, N.t, N.t)          ## prediction location distance matrix
+tt <- datlist$tt                    
 for(i in 2:N.t){
   for(j in 1:(i-1)){
     D.t[i,j] <- sqrt(sum((tt[i,] - tt[j,])^2))
     D.t[j,i] <- D.t[i,j]
   }
 }
-datlist$D.t <- D.t
-N.s <- nrow(datlist$ss)
-D.s <- matrix(0, N.s, N.s)
+datlist$D.t <- D.t                   
+N.s <- nrow(datlist$ss)             ## number of current observation locations
+D.s <- matrix(0, N.s, N.s)          ## observation location distance matrix
 ss <- datlist$ss
 for(i in 2:N.s){
   for(j in 1:(i-1)){
@@ -140,22 +172,27 @@ for(i in 2:N.s){
     D.s[j,i] <- D.s[i,j]
   }
 }
-datlist$D.s <- D.s
-D.s.t <- matrix(0, N.s, N.t)
+datlist$D.s <- D.s          
+D.s.t <- matrix(0, N.s, N.t)        ## observation vs. prediction distance matrix
 for(i in 1:N.s){
   for(j in 1:N.t){
     D.s.t[i,j] <- sqrt(sum((datlist$ss[i,] - tt[j,])^2))
   }
 }
-datlist$D.s.t <- D.s.t
+datlist$D.s.t <- D.s.t               
 Cz.s <- diag(datlist$sig2z, N.s) + datlist$theta[1]*exp(-D.s/datlist$theta[2])
-datlist$invCz.s <- chol2inv(chol(Cz.s))
-datlist$Cyy.s.t <- datlist$theta[1]*exp(-D.s.t/datlist$theta[2])
-datlist$Cy.t <- datlist$theta[1]
+datlist$invCz.s <- chol2inv(chol(Cz.s))  ## inverse of cov(Z) on observation locations
+datlist$Cyy.s.t <- datlist$theta[1]*exp(-D.s.t/datlist$theta[2])  ## cov(Y(s), Y(t)) matrix
+datlist$Cy.t <- datlist$theta[1]         ## variance at a point
 
 save(datlist, file = "datlist.Rdata")
 
 
+## map initialization
+basemap <- get_map(location = "houston", zoom = 9, maptype = 'terrain')
+p <- ggmap(basemap) + geom_point(aes(Longitude, Latitude), data = houston, size = I(3), alpha=0.6)
+
+## prediction locations map
 p + geom_polygon(aes(longitude,latitude, group = Poly_Name), data = housgeom, fill = NA,
                  colour = "black") +
   geom_point(aes(u, v), data = data.frame(u = datlist$tt[,1]/(pi/180*6371),
@@ -164,35 +201,39 @@ p + geom_polygon(aes(longitude,latitude, group = Poly_Name), data = housgeom, fi
 
 
 
+## test some optimzation routines
 source("../psofun.R")
 
-
-
-niter <- 100
+niter <- 500
 nswarm <- 40
-inertia <- 0.7298
-cognitive <- 1.496
-social <- 1.496
+inertias <- c(0.7298, 1/(log(2)*2))
+cognitives <- c(1.496, log(2) + 1/2)
+socials <- c(1.496, log(2) + 1/2)
 nnbor <- 3
 ndesign <- 5
 lower <- rep(apply(datlist$poly@coords, 2, min), each = ndesign)
 upper <- rep(apply(datlist$poly@coords, 2, max), each = ndesign)
 
 
-idxs2 <- order(vals, decreasing = TRUE)[1:ndesign]
-npar <- 2*ndesign
-inits <- list()
-inits[[1]] <- replicate(nswarm, c(spsample(datlist$poly, ndesign, "random")@coords))
-idxs <- matrix(replicate(nswarm, sample(1:nrow(datlist$tt), ndesign)), nrow = ndesign)
-inits2 <- matrix(0, npar, nswarm)
-for(i in 1:nswarm){
-  inits2[,i] <- c(datlist$tt[idxs[,i],])
-}
-inits[[2]] <- inits2
-inits[[2]][,1] <- c(datlist$tt[idxs2,])
+spsoCI1 <- spso(niter, nswarm, nnbor, inertias[1], cognitives[1], socials[1], sig2fuk.mean,
+                lower, upper, style = "CI", CF = FALSE, datlist = datlist)
 
-system.time(spsoCI <- spso(niter, nswarm, nnbor, inertia, cognitive, social, sig2fuk.mean,
-                           lower, upper, style = "CI", CF = FALSE, datlist = datlist))
+spsoCI2 <- spso(niter, nswarm, nnbor, inertias[2], cognitives[2], socials[2], sig2fuk.mean,
+                lower, upper, style = "CI", CF = FALSE, datlist = datlist)
+
+spsoCI1.max <- spso(niter, nswarm, nnbor, inertias[1], cognitives[1], socials[1], sig2fuk.max,
+                lower, upper, style = "CI", CF = FALSE, datlist = datlist)
+
+spsoCI2.max <- spso(niter, nswarm, nnbor, inertias[2], cognitives[2], socials[2], sig2fuk.max,
+                lower, upper, style = "CI", CF = FALSE, datlist = datlist)
+
+par(mfrow=c(2,1))
+plot(ts(spsoCI1$values))
+lines(ts(spsoCI2$values), col="red")
+plot(ts(spsoCI1.max$values))
+lines(ts(spsoCI2.max$values), col="red")
+
+
 
 spsoCI2 <- spso(niter, nswarm, nnbor, inertia, cognitive, social, sig2fuk.mean,
                 lower, upper, style = "AT", CF = FALSE, datlist = datlist)
