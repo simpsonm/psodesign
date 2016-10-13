@@ -109,9 +109,13 @@ sbbpso <- function(niter, nswarm, nnbor, sig, pcut=0.5, CF=FALSE, AT=FALSE, rate
     logsig <- log(sig)
   }
   ## initialize positions, velocities, and nbhds
-  x <- replicate(nswarm, runif(npar, lower, upper)) 
-  inform <- matrix(replicate(nswarm, sample(1:nswarm, nnbor, replace = TRUE)), nrow = nnbor)
-  nbhd <- lapply(1:nswarm, function(x) unique(c(which(inform == x, TRUE)[,2],x)))
+  x <- replicate(nswarm, runif(npar, lower, upper))
+  if(nnbor < nswarm){
+    inform <- matrix(replicate(nswarm, sample(1:nswarm, nnbor, replace = TRUE)), nrow = nnbor)
+    nbhd <- lapply(1:nswarm, function(x) unique(c(which(inform == x, TRUE)[,2],x)))
+  } else {
+    nbhd <- lapply(1:nswarm, function(x) 1:nswarm)
+  }  
   ## initialize pbest, gbest, and nbest stuff
   pbest <- x
   nbest <- x
@@ -177,8 +181,8 @@ sbbpso <- function(niter, nswarm, nnbor, sig, pcut=0.5, CF=FALSE, AT=FALSE, rate
     gbestvalue <- min(pbestval)
     gbestvals[iter + 1] <- gbestvalue
     gbests[,iter + 1] <- pbest[,gbest]
-    ## if no gbest improvements, create new nbhds
-    if(gbestvalue >= gbestvals[iter]){
+    ## if no gbest improvements, create new nbhds (assuming not gbest nbhd)
+    if(nnbor < nswarm & gbestvalue >= gbestvals[iter]){
       nbhd <- lapply(1:nswarm, function(x) unique(c(which(inform == x, TRUE)[,2],x)))
     }
     ## update sigma if AT
@@ -210,9 +214,13 @@ spso <- function(niter, nswarm, nnbor, inertia, cognitive, social, obj, lower, u
   inertias <- rep(inertia, niter + 1)  
   ## initialize positions, velocities, and nbhds
   x <- replicate(nswarm, runif(npar, lower, upper)) 
-  v <- replicate(nswarm, runif(npar, lower, upper)) - x  
-  inform <- matrix(replicate(nswarm, sample(1:nswarm, nnbor, replace = TRUE)), nrow = nnbor)
-  nbhd <- lapply(1:nswarm, function(x) unique(c(which(inform == x, TRUE)[,2],x)))
+  v <- replicate(nswarm, runif(npar, lower, upper)) - x
+  if(nnbor < nswarm){
+    inform <- matrix(replicate(nswarm, sample(1:nswarm, nnbor, replace = TRUE)), nrow = nnbor)
+    nbhd <- lapply(1:nswarm, function(x) unique(c(which(inform == x, TRUE)[,2],x)))
+  } else {
+    nbhd <- lapply(1:nswarm, function(x) 1:nswarm)
+  }
   ## initialize pbest, gbest, and nbest stuff
   pbest <- x
   nbest <- x
@@ -296,7 +304,7 @@ spso <- function(niter, nswarm, nnbor, inertia, cognitive, social, obj, lower, u
     gbestvals[iter + 1] <- gbestvalue
     gbests[,iter + 1] <- pbest[,gbest]
     ## if no gbest improvements, create new nbhds
-    if(gbestvalue >= gbestvals[iter]){
+    if(nnbor < nswarm & gbestvalue >= gbestvals[iter]){
       nbhd <- lapply(1:nswarm, function(x) unique(c(which(inform == x, TRUE)[,2],x)))
     }
     ## update inertia if DI or AT
