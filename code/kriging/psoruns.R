@@ -6,9 +6,7 @@ load("datlist.Rdata")
 
 
 nswarm <- 40
-niter <- 1000
-## need to think harder about niter and nrep
-## and maybe pare down the number of algorithms
+niter <- 500
 nrep <- 5
 inertias <- c(0.7298, 1/(log(2)*2))
 cognitives <- c(1.496, log(2) + 1/2)
@@ -97,7 +95,8 @@ mutvars <- c(1,2)
 mutrates <- c(1/100, 1/10)
 nexnbors <- c(1, 3, 5)
 ncand <- 2000
-
+gaout <- NULL
+exout <- NULL
 for(repl in 1:nrep){
   for(objnum in 1:2){
     if(objnum == 1){
@@ -110,16 +109,15 @@ for(repl in 1:nrep){
     for(nbatch in nbatches){
       for(mutvar in mutvars){
         for(mutrate in mutrates){
-          temp <- ga(niter, nbatch, floor(nswarm/2), nchrome, nrun, mutvar, mutrate, lower, upper,
-                     obj, datlist=datlist)
+          temp <- ga(niter/nbatch, nbatch, floor(nswarm/2), nchrome, nrun, mutvar, mutrate,
+                     lower, upper, obj, datlist=datlist)
           algid <- paste("GA", nbatch, mutrate, mutvar, sep="-")
           tempdat <- data.frame(obj = objname, logpost = temp[["values"]],
                                 argnorm = apply(temp[["pars"]], 2, normvec),
-                                time = time, algid = algid,
-                                type = "GA", parset = paste(nbatch, mutvar, mutrate, sep="-"),
-                                CF = NA, style = NA, nbhd = NA, rep = repl,
-                                inertias = NA)
-          psoout <- rbind(psoout, tempdat)
+                                time = time, algid = algid, type = "GA",
+                                nbatch = nbatch, mutrate = mutrate, mutvar = mutvar,
+                                rep = repl)
+          gaout <- rbind(gaout, tempdat)
         }
       }
     }
@@ -129,13 +127,14 @@ for(repl in 1:nrep){
       algid <- paste("EX", nexnbor, sep="-")
       tempdat <- data.frame(obj = objname, logpost = temp[["values"]],
                             argnorm = apply(temp[["pars"]], 2, normvec),
-                            time = time, algid = algid,
-                            type = "GA", parset = nexnbor,
-                            CF = NA, style = NA, nbhd = NA, rep = repl,
-                            inertias = NA)
-      psoout <- rbind(psoout, tempdat)
+                            objcount = temp$objcount,
+                            time = 1:temp$count, algid = algid,
+                            type = "GA", nnbor = nexnbor, rep = repl)
+
+      exout <- rbind(exout, tempdat)
     }
-    write.csv(psoout, file = "psosimsout.csv", row.names=FALSE)
+    write.csv(exout, file = "exsimsout.csv", row.names=FALSE)
+    write.csv(gaout, file = "gasimsout.csv", row.names=FALSE)
   }
 }
 

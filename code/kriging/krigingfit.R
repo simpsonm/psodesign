@@ -215,8 +215,7 @@ lower <- rep(apply(datlist$poly@coords, 2, min), each = ndesign)
 upper <- rep(apply(datlist$poly@coords, 2, max), each = ndesign)
 
 
-spsoCI1 <- spso(niter, nswarm, nnbor, inertias[1], cognitives[1], socials[1], sig2fuk.mean,
-                lower, upper, style = "CI", CF = FALSE, datlist = datlist)
+psotime <- system.time(spsoCI1 <- spso(niter, nswarm, nnbor, inertias[1], cognitives[1], socials[1], sig2fuk.mean, lower, upper, style = "CI", CF = FALSE, datlist = datlist))
 
 spsoCI2 <- spso(niter, nswarm, nnbor, inertias[2], cognitives[2], socials[2], sig2fuk.mean,
                 lower, upper, style = "CI", CF = FALSE, datlist = datlist)
@@ -245,6 +244,7 @@ spsoCI.max2 <- spso(niter, nswarm, nnbor, inertia, cognitive, social, sig2fuk.ma
                    lower, upper, style = "AT", CF = FALSE, datlist = datlist)
 
 nbatch <- 1
+nbatch2 <- 2
 nchrome <- 2
 nrun <- ndesign
 mutvar <- 2
@@ -253,8 +253,13 @@ mutvar2 <- 1
 mutrate2 <- .01
 ## these seem like good parameter values!
 
-ga1 <- ga(niter, nbatch, floor(nswarm/2), nchrome, nrun, mutvar, mutrate, lower, upper,
-          sig2fuk.mean, datlist=datlist)
+gatime1 <- system.time(ga1 <- ga(niter, nbatch, floor(nswarm/2), nchrome, nrun,
+                                 mutvar, mutrate, lower, upper,
+                                 sig2fuk.mean, datlist=datlist))
+
+gatime2 <- system.time(ga2 <- ga(niter/nbatch2, nbatch2, floor(nswarm/2), nchrome, nrun,
+                                 mutvar, mutrate, lower, upper,
+                                 sig2fuk.mean, datlist=datlist))
 
 ga2 <- ga(niter, nbatch, floor(nswarm/2), nchrome, nrun, mutvar2, mutrate2, lower, upper,
           sig2fuk.mean, datlist=datlist)
@@ -264,6 +269,10 @@ ga3 <- ga(niter, nbatch, floor(nswarm/2), nchrome, nrun, mutvar2, mutrate, lower
 
 ga4 <- ga(niter, nbatch, floor(nswarm/2), nchrome, nrun, mutvar, mutrate2, lower, upper,
           sig2fuk.mean, datlist=datlist)
+
+
+
+
 
 c(ga1$value, ga2$value, ga3$value, ga4$value)
 
@@ -308,12 +317,16 @@ p + geom_polygon(aes(longitude,latitude, group = Poly_Name), data = housgeom, fi
 
 
 
-ncand <- 10000
+ncand <- 2000
 nnbor <- 5
 npoints <- 5
 poly <- datlist$poly@coords
 
-system.time(exchtest1 <- exch(ncand, sig2uk.mean, poly, nnbor, npoints, datlist = datlist))
+system.time(exchtest1 <- exch(ncand, sig2fuk.mean, poly, nnbor, npoints, datlist = datlist))
 
-nnbor <- 10
-system.time(exchtest2 <- exch(ncand, sig2uk.mean, poly, nnbor, npoints, datlist = datlist))
+nnbor <- 7
+system.time(exchtest2 <- exch(ncand, sig2fuk.mean, poly, nnbor, npoints, datlist = datlist))
+
+
+nnbor <- 9
+system.time(exchtest3 <- exch(ncand, sig2fuk.mean, poly, nnbor, npoints, datlist = datlist))
