@@ -1,16 +1,4 @@
-\documentclass[12pt]{article}
-\setlength{\oddsidemargin}{-0.125in}
-\setlength{\topmargin}{-0.5in} \setlength{\textwidth}{6.5in}
-\setlength{\textheight}{9in}
-
-\setlength{\textheight}{9in} \setlength{\textwidth}{6.5in}
-\setlength{\topmargin}{-40pt} \setlength{\oddsidemargin}{0pt}
-\setlength{\evensidemargin}{0pt}
-
-\setlength{\textheight}{8.5in} \setlength{\textwidth}{6.5in}
-\setlength{\topmargin}{-36pt} \setlength{\oddsidemargin}{0pt}
-\setlength{\evensidemargin}{0pt} \tolerance=500
-\renewcommand{\baselinestretch}{1.5}
+\documentclass[cmbright]{staauth}
 
 \usepackage{amssymb, amsmath, latexsym, array, morefloats, epsfig, rotating, graphicx}
 \usepackage{subfigure, url, mathtools, enumerate, wasysym, threeparttable, lscape}
@@ -18,24 +6,10 @@
 \usepackage{bm, bbm,epstopdf}
 \usepackage{xr, zref, hyperref}
 
-\newenvironment{proof}[1][Proof]{\begin{trivlist}
-\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
-\newenvironment{definition}[1][Definition]{\begin{trivlist}
-\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
-\newenvironment{example}[1][Example]{\begin{trivlist}
-\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
-\newenvironment{remark}[1][Remark]{\begin{trivlist}
-\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
-
 \newcommand{\var}{\mathrm{var}}
 \newcommand{\cov}{\mathrm{cov}}
 \newcommand{\E}{\mathrm{E}}
 \newcommand{\tr}{\mathrm{tr}}
-
-\newcommand{\qed}{\nobreak \ifvmode \relax \else
-      \ifdim\lastskip<1.5em \hskip-\lastskip
-      \hskip1.5em plus0em minus0.5em \fi \nobreak
-      \vrule height0.75em width0.5em depth0.25em\fi}
 
 %- Makes the section title start with Appendix in the appendix environment
  \newcommand{\Appendix}
@@ -72,47 +46,32 @@
 
 
 \begin{document}
-\thispagestyle{empty} \baselineskip=28pt
-
-\begin{center}
-{\LARGE{\bf Adaptively-Tuned Particle Swarm Optimization with Application to Spatial Design}}
-\end{center}
-
-\baselineskip=12pt
-%%
-\vskip 2mm
-% if not blinded, give the authors
 \if0\blind
 {
-  \begin{center}
-    Matthew Simpson\footnote{(\baselineskip=10pt to whom correspondence should be addressed)
-      Department of Statistics, University of Missouri,
-      146 Middlebush Hall, Columbia, MO 65211-6100, themattsimpson@gmail.com}
-    % Matthew Simpson,\footnote{(\baselineskip=10pt to whom correspondence should be addressed)
-    % Department of Statistics, University of Missouri,
-    % 146 Middlebush Hall, Columbia, MO 65211-6100, themattsimpson@gmail.com}
-    % Christopher K. Wikle,\footnote{\label{note:aff}\baselineskip=10pt
-    % Department of Statistics, University of Missouri,
-    % 146 Middlebush Hall, Columbia, MO 65211-6100}
-    % and Scott H. Holan\textsuperscript{\ref{note:aff}}
-  \end{center}
-} \fi
-
-\vskip 2mm
-\begin{center}
-{\large{\bf Abstract}}
-\end{center}
-\baselineskip=12pt 
-
-\baselineskip=12pt
-\par\vfill\noindent
-{\bf KEY WORDS:} 
-
-\par\medskip\noindent
-
-
-\clearpage\pagebreak\newpage \pagenumbering{arabic}
-\baselineskip=24pt
+  \runninghead{M Simpson}{AT-PSO for Spatial Design}
+  \title{Adaptively-Tuned Particle Swarm Optimization with Application to Spatial Design}
+  \author{Matthew Simpson\affil{a}}
+  \address{\affilnum{a}Department of Statistics, University of Missouri,\\
+    146 Middlebush Hall, Columbia, MO 65211-6100}
+  \corremail{themattsimpson@gmail.com}
+  \received{00 Month Year}
+  \accepted{00 Month Year}
+}\fi
+\if1\blind
+{
+  \runninghead{}{AT-PSO for Spatial Design}
+  \title{Adaptively-Tuned Particle Swarm Optimization with Application to Spatial Design}
+  \author{}
+  \address{}
+  \corremail{}
+  \received{}
+  \accepted{}
+}\fi
+\begin{abstract}
+<Text>
+\end{abstract}
+\keywords{<Keywords>}
+\maketitle
 
 \section{Introduction}
 Particle swarm optimization (PSO) refers to a large class of heuristic optimization algorithms that use an analogy with animal flocking behavior in order to construct more robust optimization algorithms than many alternatives \citep{clerc2002particle,blum2008swarm,clerc2010particle}. This robustness makes them attractive for more difficult optimization problems, especially when near optimal solutions are tolerable. We introduce a new class of PSO algorithms, called adaptively tuned PSO (AT-PSO), which exploit an analogy with a class of adaptive Markov chain Monte Carlo algorithms in order to tune a crucial parameter of the PSO algorithm adaptively based on the state of th particle swarm. We show that the resulting algorithms tend to be superior to many PSO alternatives. Additionally, we several PSO algorithms by applying them to choosing a set of new monitoring locations for ozone in Harris County, Texas, where Houston is located. Section \ref{sec:pso} introduces various PSO and AT-PSO algorithms, and briefly discusses the results of an extended simulation study comparing them. Section \ref{sec:spatialdesign} introduces the generic spatial design problem and the Houson area ozone problem as an instance of that problem, and compares several PSO algorithms and some alternatives to solving the problem. Finally, Section \ref{sec:discuss} discusses our results and concludes.
@@ -241,7 +200,6 @@ We use two design criteria in order to choose the five new locations in Harris C
 \section{Discussion}\label{sec:discuss}
 [TO BE WRITTEN]
 
-\clearpage\pagebreak\newpage\thispagestyle{empty}
-\bibliographystyle{../jasa}
+\bibliographystyle{wb_stat}
 \bibliography{../pso}
 \end{document}

@@ -1,16 +1,4 @@
-\documentclass[12pt]{article}
-\setlength{\oddsidemargin}{-0.125in}
-\setlength{\topmargin}{-0.5in} \setlength{\textwidth}{6.5in}
-\setlength{\textheight}{9in}
-
-\setlength{\textheight}{9in} \setlength{\textwidth}{6.5in}
-\setlength{\topmargin}{-40pt} \setlength{\oddsidemargin}{0pt}
-\setlength{\evensidemargin}{0pt}
-
-\setlength{\textheight}{8.5in} \setlength{\textwidth}{6.5in}
-\setlength{\topmargin}{-36pt} \setlength{\oddsidemargin}{0pt}
-\setlength{\evensidemargin}{0pt} \tolerance=500
-\renewcommand{\baselinestretch}{1.5}
+\documentclass[cmbright]{staauth}
 
 \usepackage{amssymb, amsmath, latexsym, array, morefloats, epsfig, rotating, graphicx}
 \usepackage{subfigure, url, mathtools, enumerate, wasysym, threeparttable, lscape}
@@ -19,20 +7,6 @@
 \usepackage{tikz}
 \newcount\mycount
 \usepackage{xr, zref, hyperref}
-
-\newenvironment{proof}[1][Proof]{\begin{trivlist}
-\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
-\newenvironment{definition}[1][Definition]{\begin{trivlist}
-\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
-\newenvironment{example}[1][Example]{\begin{trivlist}
-\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
-\newenvironment{remark}[1][Remark]{\begin{trivlist}
-\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
-
-\newcommand{\qed}{\nobreak \ifvmode \relax \else
-      \ifdim\lastskip<1.5em \hskip-\lastskip
-      \hskip1.5em plus0em minus0.5em \fi \nobreak
-      \vrule height0.75em width0.5em depth0.25em\fi}
 
 %- Makes the section title start with Appendix in the appendix environment
  \newcommand{\Appendix}
@@ -70,44 +44,31 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
-\thispagestyle{empty} \baselineskip=28pt
-
-\thispagestyle{empty} \baselineskip=28pt
-
-%
-\begin{center}
-%{\LARGE{\bf Supplemental Web Material: Particle Swarm Optimization Assisted Metropolis Hastings Algorithms}}
-{\LARGE{\bf Adaptively-Tuned Particle Swarm Optimization with Application to Spatial Design}}
-\end{center}
-
-
-\baselineskip=12pt
-
-
-%%
-%%
-%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-\vskip 2mm
-% if not blinded, list the authors on the title page
 \if0\blind
 {
-  \begin{center}
-    Matthew Simpson,\footnote{(\baselineskip=10pt to whom correspondence should be addressed)
-      Department of Statistics, University of Missouri,
-      146 Middlebush Hall, Columbia, MO 65211-6100, themattsimpson@gmail.com}
-    % Christopher K. Wikle,\footnote{\label{note:aff}\baselineskip=10pt
-    % Department of Statistics, University of Missouri,
-    % 146 Middlebush Hall, Columbia, MO 65211-6100}
-    % and Scott H. Holan\textsuperscript{\ref{note:aff}}
-  \end{center}
-} \fi
+  \runninghead{M Simpson}{AT-PSO for Spatial Design Supplemental Material}
+  \title{Supplemental Web Material: Adaptively-Tuned Particle Swarm Optimization with Application to Spatial Design}
+  \author{Matthew Simpson\affil{a}}
+  \address{\affilnum{a}Department of Statistics, University of Missouri,\\
+    146 Middlebush Hall, Columbia, MO 65211-6100}
+  \corremail{themattsimpson@gmail.com}
+  \received{}
+  \accepted{}
 
-\clearpage\pagebreak\newpage \pagenumbering{arabic}
+}\fi
+\if1\blind
+{
+  \runninghead{}{AT-PSO for Spatial Design Supplemental Material}
+  \title{Supplemental Web Material: Adaptively-Tuned Particle Swarm Optimization with Application to Spatial Design}
+  \author{}
+  \address{}
+  \corremail{}
+  \received{}
+  \accepted{}
 
-\baselineskip=24pt
+}\fi
+
+\maketitle
 
 \Appendix
 \section{PSO and BBPSO details}\label{app:psodetail}
@@ -623,21 +584,6 @@ Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}
 \label{tab:psosim6}
 \end{table}
 
-\clearpage\pagebreak\newpage\thispagestyle{empty}
-\bibliographystyle{../jasa}
+\bibliographystyle{wb_stat}
 \bibliography{../pso}
 \end{document}
-
-%
-%
-%
-%
-%
-%
-%
-%
-%
-%\paragraph{Acknowledgments} We would like to thank an anonymous
-%referee for constructive comments that led to improvement of the
-%original manuscript.
-%
