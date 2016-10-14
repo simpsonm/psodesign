@@ -31,6 +31,7 @@ set.seed(3453)
 
 
 psoout <- NULL
+parout <- NULL
 cat("\n")
 for(repl in 1:nrep){
   for(nnbor in nnbors){
@@ -47,21 +48,25 @@ for(repl in 1:nrep){
           cat("rep = "); cat(repl); cat("; obj = "); cat(objname); cat("; nnbor = "); cat(nnbor)
           cat("; CF = "); cat(CF); cat("; parset = "); cat(parset); cat("\n")
           for(style in c("AT1", "AT2")){
-            system.time({
             rate <- ifelse(style=="AT1", rates[1], rates[2])
             pcut <- pcuts[parset]
+            system.time({
             temp <- sbbpso(niter, nswarm, nnbor, sig0,
                            pcut = pcut, CF = CF, AT = TRUE, rate = rate, df = df, ccc = 0.1,
                            obj = obj, datlist = datlist)
+            })
             algid <- paste("BBPSO", parset, ifelse(CF, "CF", "notCF"), style, sep = "-")
             tempdat <- data.frame(obj = objname, logpost = temp[["values"]],
-                                  argnorm = apply(temp[["pars"]], 2, normvec),
                                   time = time, algid = algid,
                                   type = "BBPSO", parset = parset, CF = CF,
                                   style = style, nbhd = nnbor, rep = repl,
                                   inertias = temp$sigs)
             psoout <- rbind(psoout, tempdat)
-            })
+            temppar <- data.frame(obj = objname, logpost = temp[["value"]],
+                                  algid = algid, type = "BBPSO", parset = parset, CF = CF,
+                                  style = style, nbhd = nnbor, rep = repl,
+                                  parid = 1:(ndesign*2), par = temp[["par"]])
+            parout <- rbind(parout, temppar)
           }
           for(style in c("CI", "DI", "AT1", "AT2")){
             rate <- ifelse(style=="AT1", rates[1], rates[2])
@@ -73,14 +78,19 @@ for(repl in 1:nrep){
                          rate = rate, ccc = ccc, datlist = datlist)
             algid <- paste("PSO", parset, ifelse(CF, "CF", "notCF"), style, sep = "-")
             tempdat <- data.frame(obj = objname, logpost = temp[["values"]],
-                                  argnorm = apply(temp[["pars"]], 2, normvec),
                                   time = time, algid = algid,
                                   type = "PSO", parset = parset, CF = CF,
                                   style = style, nbhd = nnbor, rep = repl,
                                   inertias = temp$inertias)
             psoout <- rbind(psoout, tempdat)
+            temppar <- data.frame(obj = objname, logpost = temp[["value"]],
+                                  algid = algid, type = "PSO", parset = parset, CF = CF,
+                                  style = style, nbhd = nnbor, rep = repl,
+                                  parid = 1:(ndesign*2), par = temp[["par"]])
+            parout <- rbind(parout, temppar)
           }
           write.csv(psoout, file = "psosimsout.csv", row.names=FALSE)
+          write.csv(parout, file = "parsimsout.csv", row.names=FALSE)
         }
       }
     }
@@ -113,11 +123,15 @@ for(repl in 1:nrep){
                      lower, upper, obj, datlist=datlist)
           algid <- paste("GA", nbatch, mutrate, mutvar, sep="-")
           tempdat <- data.frame(obj = objname, logpost = temp[["values"]],
-                                argnorm = apply(temp[["pars"]], 2, normvec),
                                 time = time, algid = algid, type = "GA",
                                 nbatch = nbatch, mutrate = mutrate, mutvar = mutvar,
                                 rep = repl)
           gaout <- rbind(gaout, tempdat)
+          temppar <- data.frame(obj = objname, logpost = temp[["value"]],
+                                algid = algid, type = "GA", parset = NA, CF = NA,
+                                style = NA, nbhd = NA, rep = repl,
+                                parid = 1:(ndesign*2), par = temp[["par"]])
+          parout <- rbind(parout, temppar)
         }
       }
     }
@@ -126,12 +140,15 @@ for(repl in 1:nrep){
       temp <- exch(ncand, obj, datlist$poly@coords, nexnbor, ndesign, datlist = datlist)
       algid <- paste("EX", nexnbor, sep="-")
       tempdat <- data.frame(obj = objname, logpost = temp[["values"]],
-                            argnorm = apply(temp[["pars"]], 2, normvec),
                             objcount = temp$objcount,
                             time = 1:temp$count, algid = algid,
-                            type = "GA", nnbor = nexnbor, rep = repl)
-
+                            type = "EX", nnbor = nexnbor, rep = repl)
       exout <- rbind(exout, tempdat)
+      temppar <- data.frame(obj = objname, logpost = temp[["value"]],
+                            algid = algid, type = "EX", parset = NA, CF = NA,
+                            style = NA, nbhd = NA, rep = repl,
+                            parid = 1:(ndesign*2), par = temp[["par"]])
+      parout <- rbind(parout, temppar)
     }
     write.csv(exout, file = "exsimsout.csv", row.names=FALSE)
     write.csv(gaout, file = "gasimsout.csv", row.names=FALSE)
