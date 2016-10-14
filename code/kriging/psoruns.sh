@@ -4,7 +4,7 @@
 #SBATCH -J psorunskriging
 #SBATCH -o psoruns.o
 #SBATCH -e psoruns.e
-#SBATCH --mem 5000
+#SBATCH --mem 4000
 #SBATCH -t 10-00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=themattsimpson@gmail.com
