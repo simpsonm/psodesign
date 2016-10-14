@@ -152,6 +152,7 @@ for(repl in 1:nrep){
     }
     write.csv(exout, file = "exsimsout.csv", row.names=FALSE)
     write.csv(gaout, file = "gasimsout.csv", row.names=FALSE)
+    write.csv(parout, file = "parsimsout.csv", row.names=FALSE)
   }
 }
 
