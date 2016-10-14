@@ -99,11 +99,11 @@
 {\large{\bf Abstract}}
 \end{center}
 Independent Metropolis-Hastings (IMH) algorithms are a well known strategy in Markov chain Monte Carlo (MCMC), but they require a suitably close approximation to the target distribution to be effective. Normal approximations to a posterior distribution are simple approximations that apply in a wide variety of cases, but they are sometimes difficult to obtain because they depend on finding a posterior mode which may require difficult optimization, and often it is not plausible that each element of the model parameter is approximately normal in the posterior. We endeavor to improve the attractiveness of IMH and IMH within Gibbs (IMHwG) MCMC algorithms based on Laplace approximations in several ways. First, we propose using particle swarm optimization (PSO) in order to find posterior modes, and introduce a new class of PSO algorithms, called adaptively tuned PSO, that perform well in a wide variety of settings. Second, we provide usable intuition for understanding when Laplace approximations are likely to be good. Finally, we show how to construct Laplace approximations to a conditional posterior for IMHwG without having to run an optimization algorithm every iteration of the MCMC algorithm We call these approximations global conditional Laplace approximations. In order to illustrate our method and compare it to alternatives, we provide two examples with simulations studies. First we apply it to estimating reduced rank spatial models of American Community Survey (ACS) 5-year estimates of county populations in the United States, and second we apply it to estimating a pair of hierarchical logistic regression models for predicting the outcome of the 1988 presidential election based on polls leading up to the election.
-\baselineskip=12pt 
+\baselineskip=12pt
 
 \baselineskip=12pt
 \par\vfill\noindent
-{\bf KEY WORDS:} 
+{\bf KEY WORDS:}
 Bayesian estimation; Markov chain Monte Carlo; Optimization; Particle swarm;
 \par\medskip\noindent
 
@@ -117,7 +117,7 @@ The IMH algorithm \citep{metropolis1953equation,hastings1970monte,robert2013mont
 
 We propose methods to help solve each of these problems so that IMH and the closely related independent Metropolis-Hastings within Gibbs (IMHwG) algorithms are more likely to be an attractive MCMC option. First, we propose PSO in order to find the posterior mode \citep{clerc2002particle,blum2008swarm,clerc2010particle}. PSO is a large class of heuristic optimization algorithms that use an analogy with animal flocking behavior in order to construct more robust optimization algorithms than many alternatives. Additionally, we introduce a new class of PSO algorithms, termed adaptively tuned PSO, and show that they are often superior than many of the PSO variants that exist in the literature both for finding posterior modes and for other optimization problems. Second, we provide intuition for when the Laplace approximation is likely to be good so that a user knows when an IMH or IMHwG algorithm based on a Laplace approximation is likely to be an attractive option for MCMC. Finally, we show how to construct efficient IMHwG algorithms using a Laplace approximation to the conditional posterior of a subvector of the model parameter. When this subvector is approximately normal in the posterior but has an intractable conditional posterior, but the rest of the elements of the model parameter have conditionally conjugate full conditionals, IMHwG using the Laplace approximation is attractive, but depends on an approximation to a conditional distribution that changes every iteration of the MCMC algorithm. The global conditional Laplace approximation we construct only requires running an optimization algorithm once, which makes MCMC much cheaper on a per iteration basis.
 
-We illustrate our method on two different modeling applications. The first application considers a group of reduced rank spatial models of American Community Survey ACS 5-year period estimates of county population estimates for the U.S. in 2014. In the second application, we adapt a hierarchical model for predicting the outcome of the 1988 presidential election from \citet{gelman2006data}. We fit these models using our proposed IMH and IMHwG algorithms and a variety of other MCMC algorithms, then compare the computational cost for each of the algorithms and discuss their ease of use. 
+We illustrate our method on two different modeling applications. The first application considers a group of reduced rank spatial models of American Community Survey ACS 5-year period estimates of county population estimates for the U.S. in 2014. In the second application, we adapt a hierarchical model for predicting the outcome of the 1988 presidential election from \citet{gelman2006data}. We fit these models using our proposed IMH and IMHwG algorithms and a variety of other MCMC algorithms, then compare the computational cost for each of the algorithms and discuss their ease of use.
 
 The remainder of this paper is organized as follows. Section~\ref{sec:pso} introduces PSO along with our novel adaptively tuned PSO algorithms.  Section~\ref{sec:laplace} introduces Laplace approximations and their use as IMH and IMHwG proposals, and discusses intuition for understanding when Laplace approximations are likely to be good and therefore yield good IMH and IMHwG algorithms, especially in the context of a class of generalized linear mixed models. Section~\ref{sec:pop} county population estimates example and shows how effective various PSO algorithms are at finding the posterior mode as well as how effective IMH and IMHwG algorithms are compare to several alternatives, and Section~\ref{sec:pres} introduces the election examples and provides similar PSO and MCMC results. Finally, Section~\ref{sec:discuss} concludes with a discussion of the strengths and weakness of our MCMC approach.
 
@@ -142,7 +142,7 @@ A variant of PSO, the bare bones PSO algorithm (BBPSO) is a PSO algorithm introd
 where $N(\mu,\sigma^2)$ is the normal distribution with mean $\mu$ and standard deviation $\sigma^2$. The updates of $\bm{p}_i(t)$ and $\bm{g}_i(t)$ are the same as in \eqref{eq:pso}. There are several variants of this algorithm proposed including using distributions from different location-scale families --- e.g., using the $t$-distribution and modifying the location or the scale parameters, for example \citet{krohling2009bare}, \citet{hsieh2010modified}, \citet{richer2006levy}, and \citet{campos2014bare}. Appendix \ref{subapp:bbpso} contains more detail on some of thees BBPSO variants.
 
 \subsection{Adaptively tuned BBPSO}\label{subsec:ATBBPSO}
-BBPSO adapts the size effective search space of the swarm over time through the variance term, $|p_{ij}(t) - g_{ij}(t)|^2$. As the personal best locations of the swarm move closer together, these variances decrease and the swarm tries locations which are closer to known high value areas in the space. This behavior is desirable, but the adaptation is forced to occur through one channel: the personal and group best locations. If the personal best locations of the swarm are arranged in a rough ring around the global optimum, smaller variances are desirable so that the new particle locations have a tendency to be in the center of the ring. On the other hand, if the personal best locations of the swarm are all to one side of the optimum and fairly far away, larger variances are desirable so that the particles can quickly approach the neighborhood of the optimum. BBPSO cannot distinguish between these two cases. [CAN ADD A GRAPHIC ILLUSTRATING THIS. WORTH IT?] 
+BBPSO adapts the size effective search space of the swarm over time through the variance term, $|p_{ij}(t) - g_{ij}(t)|^2$. As the personal best locations of the swarm move closer together, these variances decrease and the swarm tries locations which are closer to known high value areas in the space. This behavior is desirable, but the adaptation is forced to occur through one channel: the personal and group best locations. If the personal best locations of the swarm are arranged in a rough ring around the global optimum, smaller variances are desirable so that the new particle locations have a tendency to be in the center of the ring. On the other hand, if the personal best locations of the swarm are all to one side of the optimum and fairly far away, larger variances are desirable so that the particles can quickly approach the neighborhood of the optimum. BBPSO cannot distinguish between these two cases. [CAN ADD A GRAPHIC ILLUSTRATING THIS. WORTH IT?]
 
 In order to allow it to adapt in a more flexible manner, we modify the BBPSO variance to $\sigma^2(t)|p_{ij}(t) - g_{ij}(t)|^2$ and tune $\sigma^2(t)$ in a manner similar to adaptive random walk Metropolis MCMC algorithms \citep{andrieu2008tutorial}. Define the improvement rate of the swarm in period $t$ as $R(t) = \#\{i:Q(\bm{p}_i(t))> Q(\bm{p}_i(t-1))\}/n$ where if $A$ is a set then $\#A$ is the number of members of that set, and let $R^*$ denote the target improvement rate. Then what we term adaptively tuned BBPSO (AT-BBPSO) updates personal best and group best locations as in \eqref{eq:pso}, then updates particle locations as follows:
 \begin{align}\label{eq:at-bbpso}
@@ -151,7 +151,7 @@ In order to allow it to adapt in a more flexible manner, we modify the BBPSO var
 \end{align}
 where $df$ is a user chosen degrees of freedom parameter and $c$ is another user chosen parameter that controls the speed of adaptation. We use a $t$ kernel instead of a Gaussian in order to allow for more flexibility, and smaller values of $df$ appear to combine well with adaptively tuning $\sigma^2(t)$ --- in particular $df=1$. Since the target rate in AT-BBPSO is similar to the target rate in an adaptive random walk Metropolis algorithm, a priori values around $0.25$ and in particular below $0.5$ seem reasonable \citep{gelman1996efficient}. In practice we find that values from $R^*=0.3$ to $R^*=0.5$ tend to yield good AT-BBPSO algorithms. The parameter $c$ controls the speed of adaptation so that larger values of $c$ mean the algorithm adapts $\sigma^2(t)$ faster. We find that $c=0.1$ to be a good value, though anything within an order of magnitude often yields similar results. The initial value $\sigma^2(0)$ also needs to be chosen, though this does not have much impact on the algorithm as long as $c$ is not too small. We use $\sigma^2(0)=1$ to initialize the algorithm at the standard BBPSO algorithm.
 
-Both using a $t$ kernel and adding a fixed scale parameter have been discussed in the BBPSO literature, but as \citet{kennedy2003bare} notes, something about setting $\sigma=1$ is special that causes the algorithm to work well. Another similar BBPSO algorithm in the literature comes from \citet{hsieh2010modified}. They propose a modified version of BBPSO with 
+Both using a $t$ kernel and adding a fixed scale parameter have been discussed in the BBPSO literature, but as \citet{kennedy2003bare} notes, something about setting $\sigma=1$ is special that causes the algorithm to work well. Another similar BBPSO algorithm in the literature comes from \citet{hsieh2010modified}. They propose a modified version of BBPSO with
 \begin{align*}
 \theta_{ij}(t+1) \sim N\left(\omega\frac{p_{ij}(t) + g_{ij}(t)}{2}, \sigma^2|p_{ij}(t) - g_{ij}(t)|^2\right),
 \end{align*}
@@ -173,17 +173,17 @@ DI-PSO tends to improve on standard PSO if $\omega(t)$'s progression is set appr
 \bm{\theta}_i(t+1) &= \bm{\theta}_i(t) + \bm{v}_i(t+1),\nonumber\\
 \log\omega(t+1)& = \log\omega(t) + c\times\{R(t+1) - R^*\},
 \end{align}
-where $R(t)$ is the improvement rate of the swarm in iteration $t$, $R^*$ is the target improvement rate, and $c$ controls how much $R(t)$ changes on a per iteration basis. For AT-BBPSO we used an analogy with random walk Metropolis-Hastings algorithms to suggest that a good value for the target improvement rate is smaller than 0.5 but not too small and this turned out to be correct. The analogy does not apply as well here, though we still find in Appendix \ref{app:psocompare} that $R^*=0.3$ or $0.5$ still seems to work well for AT-PSO. The value of $c$ controls the speed of adaptation, and in particular if $c$ is small and $\omega(0)$ is large, AT-PSO can mimic DI-PSO to some extent. This turns out to produce poor AT-PSO algorithms, however. We use $c=0.1$ as a default value and in simulations not reported here, we find that the gains from optimizing $c$ appear to be small. However, very small values like those suggested by an attempt to mimic DI-PSO turn out to cause the algorithm to perform very poorly. 
+where $R(t)$ is the improvement rate of the swarm in iteration $t$, $R^*$ is the target improvement rate, and $c$ controls how much $R(t)$ changes on a per iteration basis. For AT-BBPSO we used an analogy with random walk Metropolis-Hastings algorithms to suggest that a good value for the target improvement rate is smaller than 0.5 but not too small and this turned out to be correct. The analogy does not apply as well here, though we still find in Appendix \ref{app:psocompare} that $R^*=0.3$ or $0.5$ still seems to work well for AT-PSO. The value of $c$ controls the speed of adaptation, and in particular if $c$ is small and $\omega(0)$ is large, AT-PSO can mimic DI-PSO to some extent. This turns out to produce poor AT-PSO algorithms, however. We use $c=0.1$ as a default value and in simulations not reported here, we find that the gains from optimizing $c$ appear to be small. However, very small values like those suggested by an attempt to mimic DI-PSO turn out to cause the algorithm to perform very poorly.
 
-A major strength of AT-PSO relative to DI-PSO and standard PSO is that AT-PSO can increase $\omega(t)$ when information from the swarm suggests there is an unexplored high value region of the space --- when too much of the swarm is improving on their personal best locations AT-PSO increases $\omega(t)$ until velocities start increasing, the swarm starts exploring a larger amount of the nearby space, and more of the particles fail to find improvements on their personal best. Just like in AT-BBPSO, this mechanism provides a way for the swarm to adapt its behavior on the fly based on local conditions and speed up convergence by allowing the particles that do improve to make larger improvements, but it can also cause premature convergence to a local optimum. While DI-PSO monotonically decreases $\omega(t)$ toward some minimum value, AT-PSO typically oscillates $\omega(t)$ so that the algorithm alternates between exploring and exploiting more, relative to standard PSO. Appendix \ref{app:psocompare} contains an extended simulation study comparing a variety of these PSO and BBPSO algorithms on a suite of test functions that demonstrates some of the behavior detailed above and shows that AT-PSO is an attractive PSO algorithm. 
+A major strength of AT-PSO relative to DI-PSO and standard PSO is that AT-PSO can increase $\omega(t)$ when information from the swarm suggests there is an unexplored high value region of the space --- when too much of the swarm is improving on their personal best locations AT-PSO increases $\omega(t)$ until velocities start increasing, the swarm starts exploring a larger amount of the nearby space, and more of the particles fail to find improvements on their personal best. Just like in AT-BBPSO, this mechanism provides a way for the swarm to adapt its behavior on the fly based on local conditions and speed up convergence by allowing the particles that do improve to make larger improvements, but it can also cause premature convergence to a local optimum. While DI-PSO monotonically decreases $\omega(t)$ toward some minimum value, AT-PSO typically oscillates $\omega(t)$ so that the algorithm alternates between exploring and exploiting more, relative to standard PSO. Appendix \ref{app:psocompare} contains an extended simulation study comparing a variety of these PSO and BBPSO algorithms on a suite of test functions that demonstrates some of the behavior detailed above and shows that AT-PSO is an attractive PSO algorithm.
 
 \section{Laplace Approximations and Independent Metropolis-Hastings}\label{sec:laplace}
 Ultimately we will use PSO algorithms to help construct MCMC algorithms for posterior sampling, in particular independent Metropolis-Hastings (IMH) algorithms based on Laplace approximations. To do this, first we introduce the Laplace approximation. Let $\bm{\theta}$ be the model parameter and $[\bm{\theta}|\bm{Y}_{1:n}]$ be its posterior distribution, available up to a normalizing constant. We use the generic notation $[X|Y]$ to denote the density or mass function of $X$ given $Y$.  Further let $\bm{\theta}^*_n$ denote the posterior mode of $[\bm{\theta}|\bm{Y}_{1:n}]$ and let $\bm{H}_n(\bm{\theta}^*_n)$ denote the Hessian matrix of $\log [\bm{\theta}|\bm{Y}_{1:n}]$ evaluated at $\bm{\theta}_n^*$. Then under suitable regularity conditions $\bm{\theta}$'s posterior distribution is asymptotically normal \citep[Sections~7.4.2~and~7.4.3]{schervish1997theory}, so for a fixed but large value of $n$, $\bm{\theta}|\bm{Y}_{1:n} \stackrel{a}{\sim} N(\bm{\theta}_n^*, -\bm{H}_n^{-1}(\bm{\theta}^*_n))$ where the notation $\stackrel{a}{\sim}$ means ``approximately distributed as.'' We do not discuss the precise technical conditions necessary for this result here, but intuitively for the approximation to be good each element of $\bm{\theta}$ must have enough ``observations'' for asymptotics to kick in. We put ``observations'' in scare quotes because often rather than data, it is other elements of $\bm{\theta}$ are directly informing on another element. In order to see this more clearly we add structure to the model by considering a class of generalized linear mixed models \citep[GLMMs;][]{stroup2012generalized}, but by no means is this the only class of models where the Laplace approximation works well.
 
 \subsection{Laplace approximations for GLMMs}\label{subsec:glm}
-Generalized linear mixed models with latent Gaussian processes (LGP) provide a plethora of examples where PSO assisted IMH algorithms are attractive for MCMC. That latent parameters are a priori Gaussian often increases the quality of the normal approximation to the posterior, but it is not a necessary feature of the model for the approximation to work well. We will conceptualize our model class using the strategy of \citet{berliner1996hierarchical} and \citet{wikle2003hierarchical}, that is hierarchically with a data model conditional on parameters and a latent process, a process model conditional on parameters, and finally a parameter model. Let $\bm{Z}=(Z_1,Z_2,\dots,Z_n)$ denote a vector of response variables. We assume a conditionally independent data model given a vector of location parameters $\bm{\mu} = (\mu_1, \mu_2, \dots, \mu_n)$ and a common dispersion parameter $\phi$, i.e. $Z_i \stackrel{ind}{\sim} [Z|\mu_i,\phi]$ where $[z|\mu,\phi]$ is some known family of density functions indexed by $(\mu, \phi)$, often an exponential family. The location parameters are a known function $g$ of a LGP, so $g^{-1}(\bm{\mu}) = \bm{Y} = \bm{X}\bm{\beta} + \bm{S}\bm{\delta}$. Here $\bm{X}'\bm{\beta}$ represents fixed effects and $\bm{S}'\bm{\delta}$ represents random effects, where $\bm{X}$ is a known $n\times p$ matrix, $\bm{S}$ is a known $n\times r$ matrix, $\bm{\beta}$ is an unknown $p$-dimensional vector and $\bm{\delta}$ is an unknown $r$-dimensional vector. Often $r\ll n$, but in some cases $r=n$. $\bm{\delta}$ is further modeled as Gaussian with mean zero and a covariance matrix $\bm{\Sigma}$ with a structure appropriate to the specific problem. Finally a prior on $(\phi, \bm{\beta}, \bm{\Sigma})$ serves as the parameter model where typically $\bm{\beta}$ is assumed normally distributed a priori so that $g^{-1}(\bm{\mu})$ is an LGP. The model can be generalized to multivariate $Z_i$ and multivariate $Y_i$, but we omit this complication here. 
+Generalized linear mixed models with latent Gaussian processes (LGP) provide a plethora of examples where PSO assisted IMH algorithms are attractive for MCMC. That latent parameters are a priori Gaussian often increases the quality of the normal approximation to the posterior, but it is not a necessary feature of the model for the approximation to work well. We will conceptualize our model class using the strategy of \citet{berliner1996hierarchical} and \citet{wikle2003hierarchical}, that is hierarchically with a data model conditional on parameters and a latent process, a process model conditional on parameters, and finally a parameter model. Let $\bm{Z}=(Z_1,Z_2,\dots,Z_n)$ denote a vector of response variables. We assume a conditionally independent data model given a vector of location parameters $\bm{\mu} = (\mu_1, \mu_2, \dots, \mu_n)$ and a common dispersion parameter $\phi$, i.e. $Z_i \stackrel{ind}{\sim} [Z|\mu_i,\phi]$ where $[z|\mu,\phi]$ is some known family of density functions indexed by $(\mu, \phi)$, often an exponential family. The location parameters are a known function $g$ of a LGP, so $g^{-1}(\bm{\mu}) = \bm{Y} = \bm{X}\bm{\beta} + \bm{S}\bm{\delta}$. Here $\bm{X}'\bm{\beta}$ represents fixed effects and $\bm{S}'\bm{\delta}$ represents random effects, where $\bm{X}$ is a known $n\times p$ matrix, $\bm{S}$ is a known $n\times r$ matrix, $\bm{\beta}$ is an unknown $p$-dimensional vector and $\bm{\delta}$ is an unknown $r$-dimensional vector. Often $r\ll n$, but in some cases $r=n$. $\bm{\delta}$ is further modeled as Gaussian with mean zero and a covariance matrix $\bm{\Sigma}$ with a structure appropriate to the specific problem. Finally a prior on $(\phi, \bm{\beta}, \bm{\Sigma})$ serves as the parameter model where typically $\bm{\beta}$ is assumed normally distributed a priori so that $g^{-1}(\bm{\mu})$ is an LGP. The model can be generalized to multivariate $Z_i$ and multivariate $Y_i$, but we omit this complication here.
 
-Three key factors affect the quality of the Laplace approximation for GLMMs: the sample size, how close the data model is to Gaussian at reasonable parameter values for the given dataset, and the structure of $\bm{\Sigma}$. Due to the asymptotic nature of the Laplace approximation, the larger the sample size the better the approximation is for $\bm{\beta}$, $\phi$, and if $r\ll n$, $\bm{\delta}$. To the extent that the data model is already approximately normal, smaller sample sizes will still yield reasonably good approximations. [I CAN ILLUSTRATE THIS WITH SOME SIMULATIONS IN A GLMM WITH A BETA DATA MODEL. NECESSARY?] The last factor can best be illustrated by considering two extremes: iid random effects where $\bm{\Sigma} = \sigma^2\bm{I}_r$, and fully correlated random effects where $\bm{\Sigma}$ is fully parameterized and unknown. In the iid case when $r$ is moderately large, e.g. $r=10$, $\sigma^2$ or more likely $\log\sigma^2$ is often approximately normal. The ``observations'' directly informing on $\sigma^2$ are the estimated random effects in $\bm{\delta}$ rather than data, but the Laplace approximation works all the same. In the fully correlated case, the only ``observation'' relevant to estimating $\bm{\Sigma}$ is $\bm{\delta}$, and there is only one observation to estimate $r(r+1)/2$ unique parameters. In this case it is unrealistic to expect $\bm{\Sigma}$ or any commonly used transformation of $\bm{\Sigma}$ to be approximately normal in the posterior unless there is strong information in the prior suggesting otherwise. 
+Three key factors affect the quality of the Laplace approximation for GLMMs: the sample size, how close the data model is to Gaussian at reasonable parameter values for the given dataset, and the structure of $\bm{\Sigma}$. Due to the asymptotic nature of the Laplace approximation, the larger the sample size the better the approximation is for $\bm{\beta}$, $\phi$, and if $r\ll n$, $\bm{\delta}$. To the extent that the data model is already approximately normal, smaller sample sizes will still yield reasonably good approximations. [I CAN ILLUSTRATE THIS WITH SOME SIMULATIONS IN A GLMM WITH A BETA DATA MODEL. NECESSARY?] The last factor can best be illustrated by considering two extremes: iid random effects where $\bm{\Sigma} = \sigma^2\bm{I}_r$, and fully correlated random effects where $\bm{\Sigma}$ is fully parameterized and unknown. In the iid case when $r$ is moderately large, e.g. $r=10$, $\sigma^2$ or more likely $\log\sigma^2$ is often approximately normal. The ``observations'' directly informing on $\sigma^2$ are the estimated random effects in $\bm{\delta}$ rather than data, but the Laplace approximation works all the same. In the fully correlated case, the only ``observation'' relevant to estimating $\bm{\Sigma}$ is $\bm{\delta}$, and there is only one observation to estimate $r(r+1)/2$ unique parameters. In this case it is unrealistic to expect $\bm{\Sigma}$ or any commonly used transformation of $\bm{\Sigma}$ to be approximately normal in the posterior unless there is strong information in the prior suggesting otherwise.
 
 When $r=n$ it is more important that the data model is already approximately normal and that the random effects are a priori modeled as Gaussian because there are only $n$ data points informing on $n$ latent random effects. Since the dimension of $\bm{\delta}$ is growing at the same rate as the sample size in that case, asymptotic arguments about $\bm{\delta}$'s posterior distribution do not apply. Additionally, when $n$ is large and $r=n$ it may be difficult to find the posterior mode in a reasonable amount of time using any optimization algorithm. The random effect component of many GLMMs is group specific --- e.g. group specific random intercepts, so $r$ is often much smaller than $n$ and these concerns do not apply. The same principles apply to other models outside of the GLMM framework --- each model parameter and random effect needs enough effective observations informing it so that the asymptotics can take hold or else other features of the model need to ensure that the parameters are approximately Gaussian in the posterior.
 
@@ -192,7 +192,7 @@ Given any reasonable approximation to the posterior distribution, we can constru
 
 This suggests an obvious alternative: construct a Metropolis within Gibbs MCMC algorithm \citep[Chapter~10.3]{robert2013monte} with an independent Metropolis step for $(\bm{\beta}, \bm{\delta})$, i.e an independent Metropolis-Hastings within Gibbs (IMHwG) algorithm. This algorithm consists of three steps: 1) sample $\bm{\Sigma}$ directly from its full conditional distribution, 2) sample $\phi$ directly from its full conditional distribution, and 3) sample $(\bm{\beta}, \bm{\delta})$ from its full conditional distribution using an independent Metropolis-Hastings step with the Laplace approximation as a proposal. Typically steps 1) and 2) are independent of each other, so the algorithm only consists of two Gibbs steps.
 
-The naive way to implement this algorithm is to construct the Laplace approximation to $[\bm{\beta},\bm{\delta}|\bm{\Sigma},\phi,\bm{Y},\bm{X}]$ every iteration of the MCMC algorithm to use it as the IMH step proposal. This cost gets multiplied by the number of MCMC iterations and can therefore be prohibitive when the optimization is costly. We call this approximation strategy the {\it local conditional Laplace approximation}. Alternatively, the joint Laplace approximation to the full joint posterior implies a conditional distribution for $\bm{\beta}, \bm{\delta}|\bm{\Sigma},\phi$, which we call the {\it global conditional Laplace approximation}. Let $\bm{\theta}_1 = (\bm{\beta}, \bm{\delta})$ and $\bm{\theta}_2 = (\phi, \bm{\Sigma})$, or rather $\bm{\theta}_2$ is a vector containing $\phi$ and the unique elements of $\bm{\Sigma}$. Then suppose we have the joint Laplace approximation to the posterior of $\bm{\theta} = (\bm{\theta}_1, \bm{\theta}_2)$ given by $\bm{\theta}|\bm{Y},\bm{X} \stackrel{a}{\sim} N(\bm{\theta}^*, (-\bm{H}^*)^{-1})$ where $\bm{\theta}^* = (\bm{\theta}^*_1, \bm{\theta}_2^*)$ and 
+The naive way to implement this algorithm is to construct the Laplace approximation to $[\bm{\beta},\bm{\delta}|\bm{\Sigma},\phi,\bm{Y},\bm{X}]$ every iteration of the MCMC algorithm to use it as the IMH step proposal. This cost gets multiplied by the number of MCMC iterations and can therefore be prohibitive when the optimization is costly. We call this approximation strategy the {\it local conditional Laplace approximation}. Alternatively, the joint Laplace approximation to the full joint posterior implies a conditional distribution for $\bm{\beta}, \bm{\delta}|\bm{\Sigma},\phi$, which we call the {\it global conditional Laplace approximation}. Let $\bm{\theta}_1 = (\bm{\beta}, \bm{\delta})$ and $\bm{\theta}_2 = (\phi, \bm{\Sigma})$, or rather $\bm{\theta}_2$ is a vector containing $\phi$ and the unique elements of $\bm{\Sigma}$. Then suppose we have the joint Laplace approximation to the posterior of $\bm{\theta} = (\bm{\theta}_1, \bm{\theta}_2)$ given by $\bm{\theta}|\bm{Y},\bm{X} \stackrel{a}{\sim} N(\bm{\theta}^*, (-\bm{H}^*)^{-1})$ where $\bm{\theta}^* = (\bm{\theta}^*_1, \bm{\theta}_2^*)$ and
 \begin{align*}
 \bm{\Omega}^* = (-\bm{H}^*)^{-1} = \begin{bmatrix} \bm{\Omega}^*_{11} & \bm{\Omega}^*_{12} \\ \bm{\Omega}^*_{21} & \bm{\Omega}^*_{22} \end{bmatrix}.
 \end{align*}
@@ -201,7 +201,7 @@ Then the global conditional Laplace approximation to the conditional posterior o
 The global approximation may be worse than the local approximation since the local approximation directly approximates the target conditional posterior, but the computation savings realized from only having to run the optimization algorithm once are typically significant and make it worthwhile. A problem with using either approximation is that by moving from an IMH algorithm to an IMHwG algorithm the mixing and convergence properties of the chain do deteriorate to the extent that $\bm{\theta}_1$ and $\bm{\theta}_2$ are dependent in the posterior. In practice this is often not an issue, or if it is it can typically be solved by reparameterizing the model, e.g. using a non-centered parameterization \citep{gelfand1995efficient,roberts1997updating,van2001art,bernardo2003non}.
 
 \section{Spatially Modeling County Population Estimates}\label{sec:pop}
-The American Community Survey (ACS) provides 5-year period estimates of county populations as recently as 2014. In 2014 there were 3,142 counties in the United States, including the District of Columbia and counties in Alaska and Hawaii.  We use two separate data models in order to illustrate when both the joint and global conditional Laplace approximations work well. The first is a Poisson data model, i.e., $Z_i \sim \mathrm{Poisson}(\lambda_i)$ where $\lambda_i = \exp(Y_i)$. Through visual inspection of a histogram, it was determined that log county populations look approximately normally distributed, so our second data model is $\log Z_i \sim N(\mu_i, \phi^2)$, where $\mu_i = Y_i$. 
+The American Community Survey (ACS) provides 5-year period estimates of county populations as recently as 2014. In 2014 there were 3,142 counties in the United States, including the District of Columbia and counties in Alaska and Hawaii.  We use two separate data models in order to illustrate when both the joint and global conditional Laplace approximations work well. The first is a Poisson data model, i.e., $Z_i \sim \mathrm{Poisson}(\lambda_i)$ where $\lambda_i = \exp(Y_i)$. Through visual inspection of a histogram, it was determined that log county populations look approximately normally distributed, so our second data model is $\log Z_i \sim N(\mu_i, \phi^2)$, where $\mu_i = Y_i$.
 
 The process model in both cases is a reduced rank spatial model $Y = \bm{X}\bm{\beta} + \bm{S}\bm{\delta}$, where $\bm{X}\bm{\beta}$ represents the process mean at each county and $\bm{S}\bm{\delta}$ implies the spatial correlation across counties. The spatial correlation term consists of a set of $r$ basis functions evaluated at each of the $n=3,142$ counties, denoted by the $n\times r$ matrix $\bm{S}$, and a common random effect $\bm{\delta}$. We assume that $\bm{\delta}$ is $r$-dimensional with $r \ll n$ so that the model is reduced rank. Any set of spatial basis functions could be used for $\bm{S}$ but we use the Moran's I (MI) basis set, described below, but see \citet{hughes2013dimension}, \citet{porter2015bayesian}, \citet{bradley2015multivariate} and references therein for additional discussion. Another possibility is to define a reduced rank model for a point-level spatial process using a basis function expansion and compute the implied set of basis functions for each of the census tracts by integrating the point level basis functions appropriately. See Sections 2.1, 3.1, and 4 of \citet{bradley2016regionalization} for details.
 
@@ -229,29 +229,29 @@ We conduct a simulation study using \verb0R0 \citep{R2008} to compare various PS
 \begin{tabular}{llrr|rrr|rrr}
 \multicolumn{2}{l}{Poisson IID}& \multicolumn{2}{c}{Maximum} & \multicolumn{3}{c}{IMH acc rate}  &\multicolumn{3}{c}{IMHwG acc rate}\\
 \hline
-Algorithm & Nbhd & Mean & SD & 1000 & 1500 & 2000 & 1000 & 1500 & 2000 \\ 
+Algorithm & Nbhd & Mean & SD & 1000 & 1500 & 2000 & 1000 & 1500 & 2000 \\
   \hline
-PSO & global & 0.00 & 0.00 & 0.77 & 0.88 & 0.88 & 0.79 & 0.91 & 0.92 \\ 
-  BBPSO-MC &  &  &  &  &  &  & 0.00 & 0.00 & 0.00 \\ 
-  BBPSOxp-MC &  &  &  & 0.50 & 0.51 & 0.50 & 0.00 & 0.00 & 0.00 \\ 
-  DI-PSO &  &  &  & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
-  AT-BBPSO-MC &  & -204.70 & 198.63 & 0.01 & 0.00 & 0.00 & 0.90 & 0.91 & 0.91 \\ 
-  AT-BBPSOxp-MC &  & -235.79 & 170.52 & 0.00 & 0.00 & 0.01 & 0.89 & 0.88 & 0.89 \\ 
+PSO & global & 0.00 & 0.00 & 0.77 & 0.88 & 0.88 & 0.79 & 0.91 & 0.92 \\
+  BBPSO-MC &  &  &  &  &  &  & 0.00 & 0.00 & 0.00 \\
+  BBPSOxp-MC &  &  &  & 0.50 & 0.51 & 0.50 & 0.00 & 0.00 & 0.00 \\
+  DI-PSO &  &  &  & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
+  AT-BBPSO-MC &  & -204.70 & 198.63 & 0.01 & 0.00 & 0.00 & 0.90 & 0.91 & 0.91 \\
+  AT-BBPSOxp-MC &  & -235.79 & 170.52 & 0.00 & 0.00 & 0.01 & 0.89 & 0.88 & 0.89 \\
   AT-PSO &  & -0.03 & 0.07 & 0.01 & 0.80 & 0.88 & 0.00 & 0.85 & 0.92 \\ \hline
-  PSO & ring-3 & -0.00 & 0.00 & 0.03 & 0.80 & 0.88 & 0.00 & 0.82 & 0.92 \\ 
-  BBPSO-MC &  &  &  &  &  &  & 0.00 & 0.00 & 0.00 \\ 
-  BBPSOxp-MC &  &  &  & 0.51 & 0.51 & 0.49 & 0.00 & 0.00 & 0.00 \\ 
-  DI-PSO &  & 0.00 & 0.00 & 0.87 & 0.89 & 0.88 & 0.90 & 0.91 & 0.91 \\ 
-  AT-BBPSO-MC &  & -638.71 & 242.53 & 0.00 & 0.00 & 0.00 & 0.78 & 0.88 & 0.84 \\ 
-  AT-BBPSOxp-MC &  & -507.12 & 247.00 & 0.00 & 0.00 & 0.00 & 0.34 & 0.85 & 0.83 \\ 
+  PSO & ring-3 & -0.00 & 0.00 & 0.03 & 0.80 & 0.88 & 0.00 & 0.82 & 0.92 \\
+  BBPSO-MC &  &  &  &  &  &  & 0.00 & 0.00 & 0.00 \\
+  BBPSOxp-MC &  &  &  & 0.51 & 0.51 & 0.49 & 0.00 & 0.00 & 0.00 \\
+  DI-PSO &  & 0.00 & 0.00 & 0.87 & 0.89 & 0.88 & 0.90 & 0.91 & 0.91 \\
+  AT-BBPSO-MC &  & -638.71 & 242.53 & 0.00 & 0.00 & 0.00 & 0.78 & 0.88 & 0.84 \\
+  AT-BBPSOxp-MC &  & -507.12 & 247.00 & 0.00 & 0.00 & 0.00 & 0.34 & 0.85 & 0.83 \\
   AT-PSO &  & 0.00 & 0.00 & 0.88 & 0.88 & 0.88 & 0.91 & 0.91 & 0.91 \\ \hline
-  PSO & ring-1 & -12.87 & 22.84 & 0.00 & 0.00 & 0.01 & 0.00 & 0.00 & 0.02 \\ 
-  BBPSO-MC &  &  &  &  &  & 0.00 & 0.00 & 0.00 & 0.00 \\ 
-  BBPSOxp-MC &  &  &  & 0.50 & 0.49 & 0.50 & 0.00 & 0.00 & 0.00 \\ 
-  DI-PSO &  & -5.15 & 8.92 & 0.00 & 0.02 & 0.30 & 0.00 & 0.00 & 0.30 \\ 
-  AT-BBPSO-MC &  & -2801.22 & 6831.40 & 0.00 & 0.00 & 0.00 & 0.47 & 0.80 & 0.83 \\ 
-  AT-BBPSOxp-MC &  & -627.07 & 151.61 & 0.00 & 0.00 & 0.00 & 0.80 & 0.83 & 0.81 \\ 
-  AT-PSO &  & 0.00 & 0.00 & 0.00 & 0.88 & 0.88 & 0.00 & 0.91 & 0.91 \\ 
+  PSO & ring-1 & -12.87 & 22.84 & 0.00 & 0.00 & 0.01 & 0.00 & 0.00 & 0.02 \\
+  BBPSO-MC &  &  &  &  &  & 0.00 & 0.00 & 0.00 & 0.00 \\
+  BBPSOxp-MC &  &  &  & 0.50 & 0.49 & 0.50 & 0.00 & 0.00 & 0.00 \\
+  DI-PSO &  & -5.15 & 8.92 & 0.00 & 0.02 & 0.30 & 0.00 & 0.00 & 0.30 \\
+  AT-BBPSO-MC &  & -2801.22 & 6831.40 & 0.00 & 0.00 & 0.00 & 0.47 & 0.80 & 0.83 \\
+  AT-BBPSOxp-MC &  & -627.07 & 151.61 & 0.00 & 0.00 & 0.00 & 0.80 & 0.83 & 0.81 \\
+  AT-PSO &  & 0.00 & 0.00 & 0.00 & 0.88 & 0.88 & 0.00 & 0.91 & 0.91 \\
    \hline
 \end{tabular}
 }
@@ -264,30 +264,30 @@ PSO & global & 0.00 & 0.00 & 0.77 & 0.88 & 0.88 & 0.79 & 0.91 & 0.92 \\
 \tiny{
 \begin{tabular}{llrr|rrr|rrr}
 \multicolumn{2}{l}{Poisson full}& \multicolumn{2}{c}{Maximum} & \multicolumn{3}{c}{IMH acc rate}  &\multicolumn{3}{c}{IMHwG acc rate}\\
-  \hline 
-Algorithm & Nbhd & Mean & SD & 1000 & 1500 & 2000 & 1000 & 1500 & 2000 \\ 
   \hline
-PSO & global & 0.00 & 0.01 & 0.00 & 0.26 & 0.47 & 0.18 & 0.81 & 0.96 \\ 
-  BBPSO-MC &  &  &  &  &  & 0.30 & 0.26 & 0.32 & 0.44 \\ 
-  BBPSOxp-MC &  &  &  & 0.49 &  & 0.49 & 0.33 & 0.34 & 0.34 \\ 
-  DI-PSO &  &  &  & 0.14 & 0.13 & 0.12 & 0.26 & 0.31 & 0.20 \\ 
-  AT-BBPSO-MC &  &  &  & 0.09 & 0.09 & 0.10 & 0.22 & 0.20 & 0.14 \\ 
-  AT-BBPSOxp-MC &  &  &  & 0.04 & 0.05 & 0.04 & 0.19 & 0.31 & 0.17 \\ 
+Algorithm & Nbhd & Mean & SD & 1000 & 1500 & 2000 & 1000 & 1500 & 2000 \\
+  \hline
+PSO & global & 0.00 & 0.01 & 0.00 & 0.26 & 0.47 & 0.18 & 0.81 & 0.96 \\
+  BBPSO-MC &  &  &  &  &  & 0.30 & 0.26 & 0.32 & 0.44 \\
+  BBPSOxp-MC &  &  &  & 0.49 &  & 0.49 & 0.33 & 0.34 & 0.34 \\
+  DI-PSO &  &  &  & 0.14 & 0.13 & 0.12 & 0.26 & 0.31 & 0.20 \\
+  AT-BBPSO-MC &  &  &  & 0.09 & 0.09 & 0.10 & 0.22 & 0.20 & 0.14 \\
+  AT-BBPSOxp-MC &  &  &  & 0.04 & 0.05 & 0.04 & 0.19 & 0.31 & 0.17 \\
   AT-PSO &  & -148.68 & 360.07 & 0.01 & 0.01 & 0.02 & 0.15 & 0.21 & 0.53 \\ \hline
-  PSO & ring-3 & -50.02 & 68.47 & 0.02 & 0.01 & 0.01 & 0.22 & 0.30 & 0.28 \\ 
-  BBPSO-MC &  &  &  &  &  &  & 0.48 & 0.46 & 0.46 \\ 
-  BBPSOxp-MC &  &  &  & 0.33 & 0.34 & 0.33 & 0.34 & 0.37 & 0.45 \\ 
-  DI-PSO &  & -12.71 & 9.00 & 0.01 & 0.01 & 0.00 & 0.20 & 0.19 & 0.04 \\ 
-  AT-BBPSO-MC &  &  &  & 0.07 & 0.05 & 0.06 & 0.22 & 0.21 & 0.27 \\ 
-  AT-BBPSOxp-MC &  &  &  & 0.03 & 0.02 & 0.03 & 0.18 & 0.15 & 0.25 \\ 
+  PSO & ring-3 & -50.02 & 68.47 & 0.02 & 0.01 & 0.01 & 0.22 & 0.30 & 0.28 \\
+  BBPSO-MC &  &  &  &  &  &  & 0.48 & 0.46 & 0.46 \\
+  BBPSOxp-MC &  &  &  & 0.33 & 0.34 & 0.33 & 0.34 & 0.37 & 0.45 \\
+  DI-PSO &  & -12.71 & 9.00 & 0.01 & 0.01 & 0.00 & 0.20 & 0.19 & 0.04 \\
+  AT-BBPSO-MC &  &  &  & 0.07 & 0.05 & 0.06 & 0.22 & 0.21 & 0.27 \\
+  AT-BBPSOxp-MC &  &  &  & 0.03 & 0.02 & 0.03 & 0.18 & 0.15 & 0.25 \\
   AT-PSO &  & 0.01 & 0.00 & 0.00 & 0.32 & 0.56 & 0.30 & 0.91 & 0.96 \\ \hline
-  PSO & ring-1 & -700.36 & 478.24 & 0.02 & 0.01 & 0.01 & 0.29 & 0.17 & 0.30 \\ 
-  BBPSO-MC &  &  &  & 0.49 &  & 0.50 & 0.51 & 0.50 & 0.50 \\ 
-  BBPSOxp-MC &  &  &  &  &  &  & 0.37 & 0.33 & 0.36 \\ 
-  DI-PSO &  & -428.38 & 390.46 & 0.01 & 0.01 & 0.00 & 0.13 & 0.20 & 0.15 \\ 
-  AT-BBPSO-MC &  &  &  & 0.06 & 0.06 & 0.06 & 0.22 & 0.22 & 0.21 \\ 
-  AT-BBPSOxp-MC &  &  &  & 0.04 & 0.03 & 0.04 & 0.26 & 0.25 & 0.23 \\ 
-  AT-PSO &  & -9.31 & 7.51 & 0.01 & 0.01 & 0.00 & 0.15 & 0.18 & 0.67 \\ 
+  PSO & ring-1 & -700.36 & 478.24 & 0.02 & 0.01 & 0.01 & 0.29 & 0.17 & 0.30 \\
+  BBPSO-MC &  &  &  & 0.49 &  & 0.50 & 0.51 & 0.50 & 0.50 \\
+  BBPSOxp-MC &  &  &  &  &  &  & 0.37 & 0.33 & 0.36 \\
+  DI-PSO &  & -428.38 & 390.46 & 0.01 & 0.01 & 0.00 & 0.13 & 0.20 & 0.15 \\
+  AT-BBPSO-MC &  &  &  & 0.06 & 0.06 & 0.06 & 0.22 & 0.22 & 0.21 \\
+  AT-BBPSOxp-MC &  &  &  & 0.04 & 0.03 & 0.04 & 0.26 & 0.25 & 0.23 \\
+  AT-PSO &  & -9.31 & 7.51 & 0.01 & 0.01 & 0.00 & 0.15 & 0.18 & 0.67 \\
    \hline
 \end{tabular}
 }
@@ -300,30 +300,30 @@ PSO & global & 0.00 & 0.01 & 0.00 & 0.26 & 0.47 & 0.18 & 0.81 & 0.96 \\
 \tiny{
 \begin{tabular}{llrr|rrr|rrr}
 \multicolumn{2}{l}{lognormal IID} & \multicolumn{2}{c}{Maximum} & \multicolumn{3}{c}{IMH acc rate}  &\multicolumn{3}{c}{IMHwG acc rate}\\
-  \hline 
-Algorithm & Nbhd & Mean & SD & 1000 & 1500 & 2000 & 1000 & 1500 & 2000 \\ 
   \hline
-PSO & global & 0.00 & 0.00 & 0.68 & 0.66 & 0.67 & 0.89 & 0.90 & 0.90 \\ 
-  BBPSO-MC &  & -4778.40 & 887.91 & 0.03 & 0.03 & 0.03 & 0.00 & 0.00 & 0.00 \\ 
-  BBPSOxp-MC &  & -4607.24 & 547.80 & 0.03 & 0.04 & 0.03 & 0.00 & 0.00 & 0.00 \\ 
-  DI-PSO &  & -348.97 & 825.87 & 0.01 & 0.01 & 0.02 & 0.01 & 0.01 & 0.01 \\ 
-  AT-BBPSO-MC &  & 0.00 & 0.00 & 0.68 & 0.63 & 0.67 & 0.89 & 0.90 & 0.89 \\ 
-  AT-BBPSOxp-MC &  & 0.00 & 0.00 & 0.65 & 0.67 & 0.66 & 0.90 & 0.89 & 0.89 \\ 
+Algorithm & Nbhd & Mean & SD & 1000 & 1500 & 2000 & 1000 & 1500 & 2000 \\
+  \hline
+PSO & global & 0.00 & 0.00 & 0.68 & 0.66 & 0.67 & 0.89 & 0.90 & 0.90 \\
+  BBPSO-MC &  & -4778.40 & 887.91 & 0.03 & 0.03 & 0.03 & 0.00 & 0.00 & 0.00 \\
+  BBPSOxp-MC &  & -4607.24 & 547.80 & 0.03 & 0.04 & 0.03 & 0.00 & 0.00 & 0.00 \\
+  DI-PSO &  & -348.97 & 825.87 & 0.01 & 0.01 & 0.02 & 0.01 & 0.01 & 0.01 \\
+  AT-BBPSO-MC &  & 0.00 & 0.00 & 0.68 & 0.63 & 0.67 & 0.89 & 0.90 & 0.89 \\
+  AT-BBPSOxp-MC &  & 0.00 & 0.00 & 0.65 & 0.67 & 0.66 & 0.90 & 0.89 & 0.89 \\
   AT-PSO &  & -0.00 & 0.00 & 0.67 & 0.66 & 0.66 & 0.90 & 0.89 & 0.89 \\ \hline
-  PSO & ring-3 & 0.00 & 0.00 & 0.64 & 0.67 & 0.69 & 0.90 & 0.89 & 0.90 \\ 
-  BBPSO-MC &  & -4631.74 & 1144.14 & 0.04 & 0.04 & 0.04 & 0.00 & 0.00 & 0.00 \\ 
-  BBPSOxp-MC &  & -4646.11 & 838.09 & 0.05 & 0.04 & 0.05 & 0.00 & 0.00 & 0.00 \\ 
-  DI-PSO &  & 0.00 & 0.00 & 0.66 & 0.66 & 0.67 & 0.90 & 0.90 & 0.89 \\ 
-  AT-BBPSO-MC &  & -0.00 & 0.00 & 0.65 & 0.69 & 0.66 & 0.89 & 0.90 & 0.89 \\ 
-  AT-BBPSOxp-MC &  & 0.00 & 0.00 & 0.68 & 0.66 & 0.67 & 0.89 & 0.89 & 0.90 \\ 
+  PSO & ring-3 & 0.00 & 0.00 & 0.64 & 0.67 & 0.69 & 0.90 & 0.89 & 0.90 \\
+  BBPSO-MC &  & -4631.74 & 1144.14 & 0.04 & 0.04 & 0.04 & 0.00 & 0.00 & 0.00 \\
+  BBPSOxp-MC &  & -4646.11 & 838.09 & 0.05 & 0.04 & 0.05 & 0.00 & 0.00 & 0.00 \\
+  DI-PSO &  & 0.00 & 0.00 & 0.66 & 0.66 & 0.67 & 0.90 & 0.90 & 0.89 \\
+  AT-BBPSO-MC &  & -0.00 & 0.00 & 0.65 & 0.69 & 0.66 & 0.89 & 0.90 & 0.89 \\
+  AT-BBPSOxp-MC &  & 0.00 & 0.00 & 0.68 & 0.66 & 0.67 & 0.89 & 0.89 & 0.90 \\
   AT-PSO &  & 0.00 & 0.00 & 0.66 & 0.65 & 0.66 & 0.90 & 0.90 & 0.90 \\ \hline
-  PSO & ring-1 & -0.00 & 0.00 & 0.66 & 0.67 & 0.69 & 0.89 & 0.89 & 0.89 \\ 
-  BBPSO-MC &  & -4867.31 & 832.07 & 0.00 & 0.03 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
-  BBPSOxp-MC &  & -4914.03 & 729.37 & 0.04 & 0.03 & 0.03 & 0.00 & 0.00 & 0.00 \\ 
-  DI-PSO &  & 0.00 & 0.00 & 0.67 & 0.67 & 0.69 & 0.89 & 0.89 & 0.89 \\ 
-  AT-BBPSO-MC &  & -0.04 & 0.06 & 0.47 & 0.62 & 0.65 & 0.58 & 0.81 & 0.88 \\ 
-  AT-BBPSOxp-MC &  & 0.00 & 0.00 & 0.67 & 0.67 & 0.67 & 0.90 & 0.89 & 0.90 \\ 
-  AT-PSO &  & 0.00 & 0.00 & 0.66 & 0.66 & 0.67 & 0.89 & 0.89 & 0.89 \\ 
+  PSO & ring-1 & -0.00 & 0.00 & 0.66 & 0.67 & 0.69 & 0.89 & 0.89 & 0.89 \\
+  BBPSO-MC &  & -4867.31 & 832.07 & 0.00 & 0.03 & 0.00 & 0.00 & 0.00 & 0.00 \\
+  BBPSOxp-MC &  & -4914.03 & 729.37 & 0.04 & 0.03 & 0.03 & 0.00 & 0.00 & 0.00 \\
+  DI-PSO &  & 0.00 & 0.00 & 0.67 & 0.67 & 0.69 & 0.89 & 0.89 & 0.89 \\
+  AT-BBPSO-MC &  & -0.04 & 0.06 & 0.47 & 0.62 & 0.65 & 0.58 & 0.81 & 0.88 \\
+  AT-BBPSOxp-MC &  & 0.00 & 0.00 & 0.67 & 0.67 & 0.67 & 0.90 & 0.89 & 0.90 \\
+  AT-PSO &  & 0.00 & 0.00 & 0.66 & 0.66 & 0.67 & 0.89 & 0.89 & 0.89 \\
    \hline
 \end{tabular}
 }
@@ -336,30 +336,30 @@ PSO & global & 0.00 & 0.00 & 0.68 & 0.66 & 0.67 & 0.89 & 0.90 & 0.90 \\
 \tiny{
 \begin{tabular}{llrr|rrr|rrr}
 \multicolumn{2}{l}{lognormal full}& \multicolumn{2}{c}{Maximum} & \multicolumn{3}{c}{IMH acc rate}  &\multicolumn{3}{c}{IMHwG acc rate}\\
-  \hline 
-Algorithm & Nbhd & Mean & SD & 1000 & 1500 & 2000 & 1000 & 1500 & 2000 \\ 
   \hline
-PSO & global & 0.00 & 2252.00 & 0.00 & 0.01 & 0.01 & 0.00 & 0.00 & 0.00 \\ 
-  BBPSO-MC &  &  &  & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
-  BBPSOxp-MC &  &  &  & 0.00 & 0.00 & 0.01 & 0.00 & 0.00 & 0.00 \\ 
-  DI-PSO &  &  &  & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
-  AT-BBPSO-MC &  & -3435.41 & 3984.32 & 0.00 & 0.02 & 0.02 & 0.00 & 0.00 & 0.00 \\ 
-  AT-BBPSOxp-MC &  & -1687.83 & 4864.88 & 0.02 & 0.02 & 0.02 & 0.00 & 0.00 & 0.00 \\ 
+Algorithm & Nbhd & Mean & SD & 1000 & 1500 & 2000 & 1000 & 1500 & 2000 \\
+  \hline
+PSO & global & 0.00 & 2252.00 & 0.00 & 0.01 & 0.01 & 0.00 & 0.00 & 0.00 \\
+  BBPSO-MC &  &  &  & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
+  BBPSOxp-MC &  &  &  & 0.00 & 0.00 & 0.01 & 0.00 & 0.00 & 0.00 \\
+  DI-PSO &  &  &  & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
+  AT-BBPSO-MC &  & -3435.41 & 3984.32 & 0.00 & 0.02 & 0.02 & 0.00 & 0.00 & 0.00 \\
+  AT-BBPSOxp-MC &  & -1687.83 & 4864.88 & 0.02 & 0.02 & 0.02 & 0.00 & 0.00 & 0.00 \\
   AT-PSO &  &  &  & 0.02 & 0.02 & 0.02 & 0.00 & 0.00 & 0.00 \\ \hline
-  PSO & ring-3 & -1502.49 & 3934.49 & 0.03 & 0.02 & 0.02 & 0.00 & 0.00 & 0.00 \\ 
-  BBPSO-MC &  &  &  & 0.00 & 0.01 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
-  BBPSOxp-MC &  &  &  & 0.01 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
-  DI-PSO &  &  &  & 0.02 & 0.01 & 0.01 & 0.00 & 0.00 & 0.00 \\ 
-  AT-BBPSO-MC &  & 538.54 & 3969.57 & 0.01 & 0.01 & 0.01 & 0.00 & 0.00 & 0.00 \\ 
-  AT-BBPSOxp-MC &  & 1790.45 & 828.97 & 0.00 & 0.00 & 0.01 & 0.00 & 0.00 & 0.00 \\ 
+  PSO & ring-3 & -1502.49 & 3934.49 & 0.03 & 0.02 & 0.02 & 0.00 & 0.00 & 0.00 \\
+  BBPSO-MC &  &  &  & 0.00 & 0.01 & 0.00 & 0.00 & 0.00 & 0.00 \\
+  BBPSOxp-MC &  &  &  & 0.01 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
+  DI-PSO &  &  &  & 0.02 & 0.01 & 0.01 & 0.00 & 0.00 & 0.00 \\
+  AT-BBPSO-MC &  & 538.54 & 3969.57 & 0.01 & 0.01 & 0.01 & 0.00 & 0.00 & 0.00 \\
+  AT-BBPSOxp-MC &  & 1790.45 & 828.97 & 0.00 & 0.00 & 0.01 & 0.00 & 0.00 & 0.00 \\
   AT-PSO &  & -4005.89 & 7799.88 & 0.02 & 0.02 & 0.01 & 0.00 & 0.00 & 0.00 \\ \hline
-  PSO & ring-1 &  &  & 0.02 & 0.01 & 0.01 & 0.00 & 0.00 & 0.00 \\ 
-  BBPSO-MC &  &  &  & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
-  BBPSOxp-MC &  &  &  & 0.01 & 0.00 & 0.01 & 0.00 & 0.00 & 0.00 \\ 
-  DI-PSO &  &  &  & 0.02 & 0.04 & 0.03 & 0.00 & 0.00 & 0.00 \\ 
-  AT-BBPSO-MC &  & 1841.08 & 259.27 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
-  AT-BBPSOxp-MC &  & 1014.75 & 2484.46 & 0.01 & 0.01 & 0.01 & 0.00 & 0.00 & 0.00 \\ 
-  AT-PSO &  & -2412.58 & 4888.32 & 0.03 & 0.02 & 0.03 & 0.00 & 0.00 & 0.00 \\ 
+  PSO & ring-1 &  &  & 0.02 & 0.01 & 0.01 & 0.00 & 0.00 & 0.00 \\
+  BBPSO-MC &  &  &  & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
+  BBPSOxp-MC &  &  &  & 0.01 & 0.00 & 0.01 & 0.00 & 0.00 & 0.00 \\
+  DI-PSO &  &  &  & 0.02 & 0.04 & 0.03 & 0.00 & 0.00 & 0.00 \\
+  AT-BBPSO-MC &  & 1841.08 & 259.27 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
+  AT-BBPSOxp-MC &  & 1014.75 & 2484.46 & 0.01 & 0.01 & 0.01 & 0.00 & 0.00 & 0.00 \\
+  AT-PSO &  & -2412.58 & 4888.32 & 0.03 & 0.02 & 0.03 & 0.00 & 0.00 & 0.00 \\
    \hline
 \end{tabular}
 }
@@ -373,27 +373,27 @@ PSO & global & 0.00 & 2252.00 & 0.00 & 0.01 & 0.01 & 0.00 & 0.00 & 0.00 \\
 \begin{tabular}{lr|rrrrr}
 \multicolumn{7}{l}{Poisson}\\
   \hline
-ranef &r & IMH & IMHwG & RWwG & B-RWwG & Stan \\ 
+ranef &r & IMH & IMHwG & RWwG & B-RWwG & Stan \\
   \hline
-IID & 10 & 23170 & 46177 & 8072 & 1168 & 34682 \\ 
-    &  20 & 16958 & 43005 & 5739 & 646 & 50000 \\ 
+IID & 10 & 23170 & 46177 & 8072 & 1168 & 34682 \\
+    &  20 & 16958 & 43005 & 5739 & 646 & 50000 \\
     &  30 & 30237 & 39739 & 4440 & 404 & 50000 \\ \hline
-full&  5 & 32 & 47240 & 8089 & 2070 & 28662 \\ 
-    & 7 & 37 & 42459 & 7811 & 1743 & 35298 \\ 
-    & 9 & 9 & 717 & 8298 & 1417 & 30805 \\ 
+full&  5 & 32 & 47240 & 8089 & 2070 & 28662 \\
+    & 7 & 37 & 42459 & 7811 & 1743 & 35298 \\
+    & 9 & 9 & 717 & 8298 & 1417 & 30805 \\
    \hline
 \end{tabular}
 \begin{tabular}{rrrrrr}
 \multicolumn{6}{l}{lognormal}\\
   \hline
- IMH & IMHwG & RWwG & B-RWwG & Gibbs & Stan \\ 
+ IMH & IMHwG & RWwG & B-RWwG & Gibbs & Stan \\
   \hline
- 2925 & 41538 & 10952 & 1227 & 45427 & 37850 \\ 
- 5831 & 40193 & 10621 & 613 & 44477 & 50000 \\ 
+ 2925 & 41538 & 10952 & 1227 & 45427 & 37850 \\
+ 5831 & 40193 & 10621 & 613 & 44477 & 50000 \\
  4789 & 39082 & 10594 & 399 & 43356 & 50000 \\ \hline
- 38 & 43 & 772 & 203 & 4029 & 35463 \\ 
- 44 & 26 & 586 & 114 & 3719 & 50000 \\ 
- 17 & 7 & 469 & 81 & 3549 & 40035 \\ 
+ 38 & 43 & 772 & 203 & 4029 & 35463 \\
+ 44 & 26 & 586 & 114 & 3719 & 50000 \\
+ 17 & 7 & 469 & 81 & 3549 & 40035 \\
    \hline
 \end{tabular}
 }
@@ -410,27 +410,27 @@ full&  5 & 32 & 47240 & 8089 & 2070 & 28662 \\
 \begin{tabular}{lr|rrrrr}
 \multicolumn{7}{l}{Poisson}\\
   \hline
-ranef & r & IMH & IMHwG & RWwG & B-RWwG & Stan \\ 
+ranef & r & IMH & IMHwG & RWwG & B-RWwG & Stan \\
   \hline
-IID &10 & 24 & 23 & 201 & 146 & 1911 \\ 
-    &20 & 27 & 26 & 506 & 215 & 1106 \\ 
+IID &10 & 24 & 23 & 201 & 146 & 1911 \\
+    &20 & 27 & 26 & 506 & 215 & 1106 \\
     &30 & 16 & 24 & 790 & 483 & 980 \\ \hline
-full&5 & 14433 & 21 & 131 & 170 & 2634 \\ 
-    &7 & 11188 & 20 & 145 & 167 & 1419 \\ 
-    &9 & 32197 & 876 & 126 & 153 & 1143 \\ 
+full&5 & 14433 & 21 & 131 & 170 & 2634 \\
+    &7 & 11188 & 20 & 145 & 167 & 1419 \\
+    &9 & 32197 & 876 & 126 & 153 & 1143 \\
    \hline
 \end{tabular}
 \begin{tabular}{rrrrrr}
 \multicolumn{6}{l}{lognormal}\\
   \hline
- IMH & IMHwG & RWwG & B-RWwG & Gibbs & Stan \\ 
+ IMH & IMHwG & RWwG & B-RWwG & Gibbs & Stan \\
   \hline
- 248 & 34 & 92 & 122 & 101 & 200 \\ 
- 110 & 35 & 249 & 265 & 75 & 153 \\ 
+ 248 & 34 & 92 & 122 & 101 & 200 \\
+ 110 & 35 & 249 & 265 & 75 & 153 \\
  130 & 35 & 280 & 292 & 63 & 107 \\ \hline
- 11673 & 23647 & 941 & 1158 & 837 & 1248 \\ 
- 11653 & 44999 & 1502 & 2072 & 932 & 1735 \\ 
- 21851 & 123163 & 1728 & 2344 & 727 & 1630 \\ 
+ 11673 & 23647 & 941 & 1158 & 837 & 1248 \\
+ 11653 & 44999 & 1502 & 2072 & 932 & 1735 \\
+ 21851 & 123163 & 1728 & 2344 & 727 & 1630 \\
    \hline
 \end{tabular}
 }
@@ -443,7 +443,7 @@ full&5 & 14433 & 21 & 131 & 170 & 2634 \\
 
 % [THE DETAILS HERE ARE CURRENTLY OUTDATED]
 
-% Figure \ref{fig:popmaxboxplot} contains boxplots of the results of the simulations for the Poisson county population models of Section~\ref{sec:pop}. Models with iid random effects had 30 random effects while models with fully correlated random effects had 15. Each box plot was created using the 10, 25, 50, 75, and 90 percentiles of the maximum value of the log posterior found in all 20 replications after 1,000 iterations. Figure \ref{fig:popmaxboxplot2} is similar, except for the lognormal models. Across all models we see that the ring-3 topology and BFGS initialization both improve each of the algorithms, especially in combination. In  Appendix \ref{app:psocompare} the ring-3 neighborhood performed the best on our suite of test functions, and the same seems to be true here. The BFGS initialization is cheap, taking essentially no time to compute, yet seems to drastically improve the quality of every PSO algorithms. In  Appendix \ref{app:psocompare} we speculated that the AT-PSO algorithms would benefit significantly from some sort of stage one optimization, and our results confirm this for all of the algorithms. Another lesson from these boxplots is that the AT-PSO and AT-BBPSO algorithms tend to do the best, especially when $R^*=0.5$ in both cases. 
+% Figure \ref{fig:popmaxboxplot} contains boxplots of the results of the simulations for the Poisson county population models of Section~\ref{sec:pop}. Models with iid random effects had 30 random effects while models with fully correlated random effects had 15. Each box plot was created using the 10, 25, 50, 75, and 90 percentiles of the maximum value of the log posterior found in all 20 replications after 1,000 iterations. Figure \ref{fig:popmaxboxplot2} is similar, except for the lognormal models. Across all models we see that the ring-3 topology and BFGS initialization both improve each of the algorithms, especially in combination. In  Appendix \ref{app:psocompare} the ring-3 neighborhood performed the best on our suite of test functions, and the same seems to be true here. The BFGS initialization is cheap, taking essentially no time to compute, yet seems to drastically improve the quality of every PSO algorithms. In  Appendix \ref{app:psocompare} we speculated that the AT-PSO algorithms would benefit significantly from some sort of stage one optimization, and our results confirm this for all of the algorithms. Another lesson from these boxplots is that the AT-PSO and AT-BBPSO algorithms tend to do the best, especially when $R^*=0.5$ in both cases.
 % \begin{figure}[!ht]
 % \centering
 % %\includegraphics[width=0.4\textwidth]{code/pop/maxplot11.png}
@@ -464,24 +464,24 @@ full&5 & 14433 & 21 & 131 & 170 & 2634 \\
 % \label{fig:popmaxboxplot2}
 % \end{figure}
 
-% Next we move to comparing various MCMC algorithms for both classes of models. The other MCMC algorithms we consider in this section are single move random walk Metropolis within Gibbs (RWwG), block random walk Metropolis within Gibbs (B-RWwG), Hamiltonian Monte Carlo as implemented by the Stan software \citep{carpenter2015stan} using the No U-turn Sampler \citep{homan2014no} and for the lognormal model for county populations, a two step Gibbs sampler (Gibbs). The last algorithm is only considered for the lognormal model because only in that case are all of the full conditionals tractable. We use standard settings to fit each of the models in Stan, though minimal tweaking was required in some cases. In all of the Gibbs algorithms, the blocks are the same as in the IMHwG algorithms detailed in the previous section. Both the RWwG and B-RWwG algorithms are tuned during the burn-in using an adaptive method. Appendix \ref{app:altmcmc} explains the details of the two random walk algorithms we use including how the adaptation was performed. 
+% Next we move to comparing various MCMC algorithms for both classes of models. The other MCMC algorithms we consider in this section are single move random walk Metropolis within Gibbs (RWwG), block random walk Metropolis within Gibbs (B-RWwG), Hamiltonian Monte Carlo as implemented by the Stan software \citep{carpenter2015stan} using the No U-turn Sampler \citep{homan2014no} and for the lognormal model for county populations, a two step Gibbs sampler (Gibbs). The last algorithm is only considered for the lognormal model because only in that case are all of the full conditionals tractable. We use standard settings to fit each of the models in Stan, though minimal tweaking was required in some cases. In all of the Gibbs algorithms, the blocks are the same as in the IMHwG algorithms detailed in the previous section. Both the RWwG and B-RWwG algorithms are tuned during the burn-in using an adaptive method. Appendix \ref{app:altmcmc} explains the details of the two random walk algorithms we use including how the adaptation was performed.
 
 % We compare these algorithms in Table [TO BE CONSTRUCTED] %\ref{tab:neff}
-%  in terms of two measures: the minimum estimated effective sample size for all parameters in the model ($n_{\text{eff}}$, see \citet[Section~12.3.5]{robert2013monte}), and time in seconds per $n_{\text{eff}}$. The effective sample size is the size of an iid sample which yields the same standard error for estimating the mean of some function of the parameters in our MCMC simulations, so we take the minimum estimated $n_{\text{eff}}$ among all elements of the parameter vector and latent process. 
+%  in terms of two measures: the minimum estimated effective sample size for all parameters in the model ($n_{\text{eff}}$, see \citet[Section~12.3.5]{robert2013monte}), and time in seconds per $n_{\text{eff}}$. The effective sample size is the size of an iid sample which yields the same standard error for estimating the mean of some function of the parameters in our MCMC simulations, so we take the minimum estimated $n_{\text{eff}}$ among all elements of the parameter vector and latent process.
 
 % [SIMULATIONS TO BE CONDUCTED - SHOULD TAKE A COUPLE DAYS ONCE THEY'RE RUNNING. FOR THE IMH AND IMHwG ALGORITHMS, THESE WILL ONLY USE ONE PSO ALGORITHM]
 
 
 % For the IMH and IMHwG algorithms, we ran the standard PSO algorithm using the ring-1 neighbhorhood with a swarm of 100 particles for 10,000 iterations in order to estimate the mode, then used $df=100$ in the $t$-proposal for both algorithms. Each algorithm was run until convergence, then a sample of 50,000 was collected. This allows us to compare each algorithm on a per iteration basis, but ignores the setup costs associated with each algorithm. The simulations were written entirely in \verb0R0 and run on a Dell laptop with an Intel Core i7-5600U CPU. Different languages and different CPUs will yield different timing results, but the relative comparisons should be similar.
 
-% For the Poisson model with iid random effects, the IMH and IMHwG algorithms yield significant gains in $n_{\text{eff}}$ over the random walk algorithms. IMH has comparable effective sample sizes to Stan in these cases, but the IMHwG algorithm does significantly better. We see a similar pattern for time per $n_{\text{eff}}$, though IMH and IMHwG are comparable by this measure while Stan requires more time to achieve a similar level of precision to IMH and IMHwG. Stan uses a much more general purpose algorithm that needs several log posterior evaluations per iteration, which hurts it in this relatively simple problem. 
+% For the Poisson model with iid random effects, the IMH and IMHwG algorithms yield significant gains in $n_{\text{eff}}$ over the random walk algorithms. IMH has comparable effective sample sizes to Stan in these cases, but the IMHwG algorithm does significantly better. We see a similar pattern for time per $n_{\text{eff}}$, though IMH and IMHwG are comparable by this measure while Stan requires more time to achieve a similar level of precision to IMH and IMHwG. Stan uses a much more general purpose algorithm that needs several log posterior evaluations per iteration, which hurts it in this relatively simple problem.
 
 % For the Poisson models with a fully parameterized covariance matrix, IMH has very poor effective sample sizes, but IMHwG still does well. The key here is that even though $\bm{L}$ is not plausibly Gaussian in the posteror, condtional on $\bm{L}$, $(\bm{\beta},\bm{\delta})$ is still plausibly Gaussian. So the normal approximation works well on those parameters. The random walk algorithms do reasonably well in this case due to the smaller size of the random effect vector, but Stan gives much higher effective sample sizes and IMHwG higher still. In terms of time per 1000 effective draws, IMHwG is the best option.
 
 
 % The story for the longnormal models is similar with some caveats. First, in the lognormal model with full random effects the IMH and IMHwG algorithms never work well, even for small $r$. Second, in the model with iid random effects, the IMH algorithm is much less competitive, though IMHwG still does well. The pure Gibbs sampler that is available for the lognormal models does worse than both Stan and IMHwG in terms of time per 1000 $n_{\text{eff}}$ in the iid models, but it does produce the best $n_{\text{eff}}$s. The Gibbs sampler is unambiguously the best algorithm under most conditions, though the difference between it and the IMHwG algorithm with high $df$ is small in terms of time per $n_{\text{eff}}$. This comparison between the IMH results in Poisson and lognormal iid models illustrates something important. The data model in lognormal case is closer to Gaussian than in the Poisson case, leading to $(\bm{\beta}, \bm{\delta})$ being more plausibly Gaussian in the posterior, adding another variance parameter in the lognormal case that is not plausibly Gaussian, $\phi^2$, hurts the normal approximation on the full posterior. Additionally the scale of $\sigma^2$ is different in the lognormal model, attenuating it toward zero. In many cases even with non-normal data models $(\bm{\beta}, \bm{\delta})$ are approximately normal in the posterior because of the amount of data directly informing on them, but higher level variance parameters tend to cause more problems for the approximation. This makes PSO assisted IMHwG a much more generally applicable algorithm than PSO assisted IMH.
 
-% These simulations do ignore the setup costs associated with each algorithm. Stan has an involved adaptation stage, though it converges immediately when it adapts well. The random walk algorithms all converge rather slowly. The PSO assisted IMH and IMHwG algorithms have neither of these setup costs, but trade them for costs of another sort: the time it takes to find the posterior mode. For small $r$ these costs are competitive with Stan and the random walk algorithm, e.g., $r=5$ in the fully parameterized models and $r=10$ in the iid models. We ran the PSO algorithms for 10,000 iterations in order to ensure that the mode was found across all of our simulations, but this is overkill by one or two orders of magnitude for small $r$ --- in Table \ref{tab:longaccrates} we see acceptance rates stabilizing at a very high level after many fewer PSO iterations when $r$ is relatively small. For larger $r$ this cost can become onerous. 
+% These simulations do ignore the setup costs associated with each algorithm. Stan has an involved adaptation stage, though it converges immediately when it adapts well. The random walk algorithms all converge rather slowly. The PSO assisted IMH and IMHwG algorithms have neither of these setup costs, but trade them for costs of another sort: the time it takes to find the posterior mode. For small $r$ these costs are competitive with Stan and the random walk algorithm, e.g., $r=5$ in the fully parameterized models and $r=10$ in the iid models. We ran the PSO algorithms for 10,000 iterations in order to ensure that the mode was found across all of our simulations, but this is overkill by one or two orders of magnitude for small $r$ --- in Table \ref{tab:longaccrates} we see acceptance rates stabilizing at a very high level after many fewer PSO iterations when $r$ is relatively small. For larger $r$ this cost can become onerous.
 
 % \begin{table}[ht]
 % \captionsetup{font=footnotesize}
@@ -493,30 +493,30 @@ full&5 & 14433 & 21 & 131 & 170 & 2634 \\
 %   \hline
 %   r & Stan & RWwG & B-RWwG & IMH & IMHwG \\
 %   \hline
-%   10 & 17159 & 0 & 1202 & 19051 & 45883 \\ 
-%   20 & 19125 & 0 & 557 & 23687 & 42283 \\ 
-%   30 & 25229 & 0 & 402 & 26355 & 41462 \\ 
+%   10 & 17159 & 0 & 1202 & 19051 & 45883 \\
+%   20 & 19125 & 0 & 557 & 23687 & 42283 \\
+%   30 & 25229 & 0 & 402 & 26355 & 41462 \\
 % \hline
 % \multicolumn{6}{c}{}\\
 % \multicolumn{6}{l}{Full Poisson $n_{\text{eff}}$}\\
 % \hline
-%   5 & 21899 & 7490 & 2318 & 33 & 46874 \\ 
-%   7 & 26592 & 8272 & 1771 & 7 & 45825 \\ 
-%   9 & 26393 & 8404 & 1433 & 66 & 45256 \\ 
+%   5 & 21899 & 7490 & 2318 & 33 & 46874 \\
+%   7 & 26592 & 8272 & 1771 & 7 & 45825 \\
+%   9 & 26393 & 8404 & 1433 & 66 & 45256 \\
 %    \hline
 % \multicolumn{6}{c}{}\\
 % \multicolumn{6}{l}{iid Poisson time$/n_{\text{eff}}\times$1,000}\\
 %   \hline
-%   10 & 173 & 1613304 & 81 & 17 & 13 \\ 
-%   20 & 144 & 35841461 & 288 & 22 & 23 \\ 
-%   30 & 102 & 18105527 & 296 & 29 & 33 \\ 
+%   10 & 173 & 1613304 & 81 & 17 & 13 \\
+%   20 & 144 & 35841461 & 288 & 22 & 23 \\
+%   30 & 102 & 18105527 & 296 & 29 & 33 \\
 % \hline
 % \multicolumn{6}{c}{}\\
 % \multicolumn{6}{l}{Full Poisson time$/n_{\text{eff}}\times$1,000}\\
 % \hline
-%   5 & 201 & 77 & 75 & 10406 & 14 \\ 
-%   7 & 158 & 114 & 104 & 51012 & 17 \\ 
-%   9 & 174 & 117 & 113 & 6268 & 19 \\ 
+%   5 & 201 & 77 & 75 & 10406 & 14 \\
+%   7 & 158 & 114 & 104 & 51012 & 17 \\
+%   9 & 174 & 117 & 113 & 6268 & 19 \\
 %    \hline
 % \end{tabular}
 % }
@@ -526,30 +526,30 @@ full&5 & 14433 & 21 & 131 & 170 & 2634 \\
 %   \hline
 %   r & Stan & Gibbs & RWwG & B-RWwG & IMH & IMHwG\\
 %   \hline
-%   10 & 19753 & 43296 & 81 & 1199 & 5649 & 40498 \\ 
-%   20 & 24665 & 45425 & 93 & 668 & 5594 & 38927 \\ 
-%   30 & 32769 & 44093 & 84 & 425 & 4457 & 38357 \\ 
+%   10 & 19753 & 43296 & 81 & 1199 & 5649 & 40498 \\
+%   20 & 24665 & 45425 & 93 & 668 & 5594 & 38927 \\
+%   30 & 32769 & 44093 & 84 & 425 & 4457 & 38357 \\
 % \hline
 % \multicolumn{7}{c}{}\\
 % \multicolumn{7}{l}{Full lognormal $n_{\text{eff}}$}\\
 % \hline
-%   5 & 27289 & 4135 & 745 & 214 & 13 & 109 \\ 
-%   7 & 24981 & 3699 & 558 & 103 & 33 & 4 \\ 
-%   9 & 40000 & 3473 & 469 & 71 & 44 & 5 \\ 
+%   5 & 27289 & 4135 & 745 & 214 & 13 & 109 \\
+%   7 & 24981 & 3699 & 558 & 103 & 33 & 4 \\
+%   9 & 40000 & 3473 & 469 & 71 & 44 & 5 \\
 %    \hline
 % \multicolumn{7}{c}{}\\
 % \multicolumn{7}{l}{iid lognormal time$/n_{\text{eff}}\times$1,000}\\
 % \hline
-%   10 & 19 & 55 & 6327 & 55 & 88 & 25 \\ 
-%   20 & 16 & 54 & 16616 & 172 & 105 & 34 \\ 
-%   30 & 11 & 54 & 33873 & 316 & 180 & 47 \\ 
+%   10 & 19 & 55 & 6327 & 55 & 88 & 25 \\
+%   20 & 16 & 54 & 16616 & 172 & 105 & 34 \\
+%   30 & 11 & 54 & 33873 & 316 & 180 & 47 \\
 % \hline
 % \multicolumn{7}{c}{}\\
 % \multicolumn{7}{l}{Full lognormal time$/n_{\text{eff}}\times$1,000}\\
 % \hline
-%   5 & 121 & 570 & 579 & 692 & 34701 & 9706 \\ 
-%   7 & 188 & 705 & 1222 & 1608 & 13569 & 267879 \\ 
-%   9 & 169 & 675 & 1343 & 1975 & 11678 & 248761 \\ 
+%   5 & 121 & 570 & 579 & 692 & 34701 & 9706 \\
+%   7 & 188 & 705 & 1222 & 1608 & 13569 & 267879 \\
+%   9 & 169 & 675 & 1343 & 1975 & 11678 & 248761 \\
 % \hline
 % \end{tabular}
 % }
@@ -560,7 +560,7 @@ full&5 & 14433 & 21 & 131 & 170 & 2634 \\
 
 
 \section{Predicting the 1988 presidential election}\label{sec:pres}
-\citet[Chapter~14]{gelman2006data} describes a model used to predict state-level opinions about the 1988 presidential candidates from national polls in order to predict the outcome of the election. They model the responses to a series of seven polls conducted by CBS News during the week before the 1988 presidential election. The variable of interest is binary: $Z_i=1$ if the $i$th respondent said they supported the Republican candidate and $Z_i=0$ if they said they supported the Democratic candidate, with undecideds being excluded. Focusing on the last poll, they ultimately estimate a logistic regression model with fixed effects for race (whether the respondent was African American or not), sex, and race$\times$sex, and random effects for four age categories, four education categories, and 16 age$\times$education categories, as well as for the respondent's state of residence (including District of Columbia). The mean of the state random effect distribution is one of five region random effects plus the proportion of the state that voted republican in the last election times a slope coefficient. 
+\citet[Chapter~14]{gelman2006data} describes a model used to predict state-level opinions about the 1988 presidential candidates from national polls in order to predict the outcome of the election. They model the responses to a series of seven polls conducted by CBS News during the week before the 1988 presidential election. The variable of interest is binary: $Z_i=1$ if the $i$th respondent said they supported the Republican candidate and $Z_i=0$ if they said they supported the Democratic candidate, with undecideds being excluded. Focusing on the last poll, they ultimately estimate a logistic regression model with fixed effects for race (whether the respondent was African American or not), sex, and race$\times$sex, and random effects for four age categories, four education categories, and 16 age$\times$education categories, as well as for the respondent's state of residence (including District of Columbia). The mean of the state random effect distribution is one of five region random effects plus the proportion of the state that voted republican in the last election times a slope coefficient.
 
 The model is somewhat overparameterized since it has age, education, and age$\times$education random effects, so we reduce its size by omitting the age and education random effects. In our model the age$\times$education random effects now represent the random effects for each age$\times$education category rather than an interaction term. The single poll data model is
 \begin{align*}
@@ -584,10 +584,10 @@ where $p_i$ denotes which poll respondent $i$ was surveyed in. The process model
 \begin{align*}
 \alpha_s[k] \stackrel{ind}{\sim}& N(\alpha_r[r_k] + prev_k\beta_{prev}, \sigma^2_s) \mbox{ for } k=1,2,\dots,51,\\
 \alpha_{ae}[k] \stackrel{iid}{\sim}& N(0, \sigma^2_{ae}) \mbox{ for } k=1,2,\dots,16,\\
-\alpha_{r}[k] \stackrel{iid}{\sim}& N(0, \sigma^2_{r}) \mbox{ for } k=1,2,\dots,5,\\ 
+\alpha_{r}[k] \stackrel{iid}{\sim}& N(0, \sigma^2_{r}) \mbox{ for } k=1,2,\dots,5,\\
 \alpha_{p}[k] \stackrel{iid}{\sim}& N(0, \sigma^2_{p}) \mbox{ for } k=1,2,\dots,7 \mbox{\ \ \ \ (all polls process model). }
 \end{align*}
-In both models we assume each of the $\beta$s have independent $N(0,1000)$ priors, and each of the 
+In both models we assume each of the $\beta$s have independent $N(0,1000)$ priors, and each of the
 $\sigma^2$s have $IG(1,1)$ priors. Including the random effects the single poll model contains 80 parameters while the all polls model contains 89 parameters. Writing down the log posteriors and deriving the Hessians is straightforward but tedious for these models, so we omit these steps, though note that for both the PSO and IMH algorithms the variances should be transformed to the log scale. For MCMC algorithms with multiple Gibbs steps, in single poll model of Section~\ref{sec:pres}, we draw $(\beta_0, \beta_f, \beta_b, \bm{\alpha}_{s}, \bm{\alpha}_{ae})$ in the Metropolis step, while in the all polls model we draw all of those parameters and additionally $\bm{\alpha}_p$ in the Metropolis step. Then for both models there are two additional Gibbs steps --- one where each random effect variance is drawn, and one where $(\beta_{prev}, \bm{\alpha}_r)$ is drawn. These full conditionals are straightforward to derive, so we do not reproduce them here. [SHOULD WE ADD THESE DETAILS INTO AN APPENDIX?]
 
 \subsection{Election models PSO and MCMC results}
@@ -617,12 +617,12 @@ For our purposes, the PSO algorithms are useful only insofar as they allow us to
 % \begin{tabular}{r|rrr|rrr|rrr|rrr}
 % \multicolumn{1}{c}{IMH\phantom{wG}} & \multicolumn{3}{c}{iid lognormal}&\multicolumn{3}{c}{iid Poisson} & \multicolumn{3}{c}{full lognormal}&\multicolumn{3}{c}{full Poisson}\\
 %   \hline
-% df & r = 10 & 20 & 30 & 10 & 20 & 30 & 5 & 7 & 9 & 5 & 7 & 9 \\  
+% df & r = 10 & 20 & 30 & 10 & 20 & 30 & 5 & 7 & 9 & 5 & 7 & 9 \\
 %   \hline
-% 1 & 0.24 & 0.19 & 0.15 & 0.29 & 0.23 & 0.09 & 0.00 & 0.00 & 0.00 & 0.01 & 0.00 & 0.01 \\ 
-%   4 & 0.47 & 0.37 & 0.32 & 0.54 & 0.45 & 0.18 & 0.01 & 0.00 & 0.00 & 0.01 & 0.00 & 0.00 \\ 
-%   10 & 0.60 & 0.52 & 0.46 & 0.71 & 0.63 & 0.25 & 0.02 & 0.00 & 0.00 & 0.03 & 0.00 & 0.00 \\ 
-%   100 & 0.72 & 0.70 & 0.68 & 0.88 & 0.88 & 0.37 & 0.02 & 0.00 & 0.00 & 0.03 & 0.01 & 0.00 \\ 
+% 1 & 0.24 & 0.19 & 0.15 & 0.29 & 0.23 & 0.09 & 0.00 & 0.00 & 0.00 & 0.01 & 0.00 & 0.01 \\
+%   4 & 0.47 & 0.37 & 0.32 & 0.54 & 0.45 & 0.18 & 0.01 & 0.00 & 0.00 & 0.01 & 0.00 & 0.00 \\
+%   10 & 0.60 & 0.52 & 0.46 & 0.71 & 0.63 & 0.25 & 0.02 & 0.00 & 0.00 & 0.03 & 0.00 & 0.00 \\
+%   100 & 0.72 & 0.70 & 0.68 & 0.88 & 0.88 & 0.37 & 0.02 & 0.00 & 0.00 & 0.03 & 0.01 & 0.00 \\
 %    \hline
 % \end{tabular}}}\\
 % %\vspace*{0.5 cm}
@@ -631,12 +631,12 @@ For our purposes, the PSO algorithms are useful only insofar as they allow us to
 % \begin{tabular}{r|rrr|rrr|rrr|rrr}
 % \multicolumn{1}{c}{IMHwG} & \multicolumn{3}{c}{iid lognormal}&\multicolumn{3}{c}{iid Poisson} & \multicolumn{3}{c}{full lognormal}&\multicolumn{3}{c}{full Poisson}\\
 %   \hline
-% df & r = 10 & 20 & 30 & 10 & 20 & 30 & 5 & 7 & 9 & 5 & 7 & 9 \\  
+% df & r = 10 & 20 & 30 & 10 & 20 & 30 & 5 & 7 & 9 & 5 & 7 & 9 \\
 %   \hline
-% 1 & 0.31 & 0.23 & 0.19 & 0.31 & 0.23 & 0.11 & 0.01 & 0.00 & 0.00 & 0.17 & 0.17 & 0.06 \\ 
-%   4 & 0.58 & 0.46 & 0.40 & 0.58 & 0.46 & 0.18 & 0.01 & 0.00 & 0.00 & 0.57 & 0.12 & 0.07 \\ 
-%   10 & 0.75 & 0.65 & 0.56 & 0.76 & 0.64 & 0.27 & 0.01 & 0.00 & 0.00 & 0.44 & 0.11 & 0.09 \\ 
-%   100 & 0.94 & 0.92 & 0.89 & 0.96 & 0.94 & 0.36 & 0.02 & 0.00 & 0.00 & 0.50 & 0.14 & 0.03 \\ 
+% 1 & 0.31 & 0.23 & 0.19 & 0.31 & 0.23 & 0.11 & 0.01 & 0.00 & 0.00 & 0.17 & 0.17 & 0.06 \\
+%   4 & 0.58 & 0.46 & 0.40 & 0.58 & 0.46 & 0.18 & 0.01 & 0.00 & 0.00 & 0.57 & 0.12 & 0.07 \\
+%   10 & 0.75 & 0.65 & 0.56 & 0.76 & 0.64 & 0.27 & 0.01 & 0.00 & 0.00 & 0.44 & 0.11 & 0.09 \\
+%   100 & 0.94 & 0.92 & 0.89 & 0.96 & 0.94 & 0.36 & 0.02 & 0.00 & 0.00 & 0.50 & 0.14 & 0.03 \\
 %    \hline
 % \end{tabular}}}
 % \caption{ Acceptance rates for the PSO assisted IMH algorithm (a) and the IMH within Gibbs algorithm (b) in the Poisson and lognormal models with either iid or fully correlated random effects. For each algorithm and each model the initial posterior mode was estimated using the default PSO algorithm, then acceptance rates were computed from a sample of 9000 after a burn-in of 1000. The parameter $r$ denotes the number of random effects in the model and $df$ denotes the degrees of freedom parameter used in the $t$ proposal.}
@@ -657,25 +657,25 @@ For our purposes, the PSO algorithms are useful only insofar as they allow us to
 %   \hline
 % \multicolumn{1}{c|}{PSO alg} & \multicolumn{1}{c|}{$n_{\text{iter}}$} & r = 10 & 30 & 50 & 10 & 30 & 50 & 5 & 10 & 15 & 5 & 10 & 15\\
 %   \hline
-% PSO & 100 & 0.21 & 0.02 & 0.01 & 0.00 & 0.43 & 0.50 & 0.01 & 0.00 & 0.00 & 0.04 & 0.10 & 0.18 \\ 
-% BBPSOxp-MC&  & 0.59 & 0.02 & 0.00 & 0.31 & 0.12 & 0.24 & 0.01 & 0.00 & 0.00 & 0.02 & 0.03 & 0.04 \\ 
-% AT-1-0.1 &  & 0.67 & 0.00 & 0.00 & 0.23 & 0.00 & 0.30 & 0.00 & 0.00 & 0.00 & 0.01 & 0.03 & 0.05 \\ 
-% AT-5-0.3 &  & 0.55 & 0.01 & 0.00 & 0.31 & 0.12 & 0.27 & 0.01 & 0.00 & 0.00 & 0.03 & 0.03 & 0.06 \\ 
+% PSO & 100 & 0.21 & 0.02 & 0.01 & 0.00 & 0.43 & 0.50 & 0.01 & 0.00 & 0.00 & 0.04 & 0.10 & 0.18 \\
+% BBPSOxp-MC&  & 0.59 & 0.02 & 0.00 & 0.31 & 0.12 & 0.24 & 0.01 & 0.00 & 0.00 & 0.02 & 0.03 & 0.04 \\
+% AT-1-0.1 &  & 0.67 & 0.00 & 0.00 & 0.23 & 0.00 & 0.30 & 0.00 & 0.00 & 0.00 & 0.01 & 0.03 & 0.05 \\
+% AT-5-0.3 &  & 0.55 & 0.01 & 0.00 & 0.31 & 0.12 & 0.27 & 0.01 & 0.00 & 0.00 & 0.03 & 0.03 & 0.06 \\
 % \hline
-% PSO & 1,000 & 0.71 & 0.67 & 0.58 & 0.89 & 0.25 & 0.01 & 0.01 & 0.00 & 0.00 & 0.27 & 0.01 & 0.04 \\ 
-% BBPSOxp-MC&  & 0.71 & 0.66 & 0.51 & 0.88 & 0.01 & 0.02 & 0.01 & 0.00 & 0.00 & 0.02 & 0.00 & 0.01 \\ 
-% AT-1-0.1 &  & 0.72 & 0.66 & 0.53 & 0.88 & 0.01 & 0.02 & 0.01 & 0.00 & 0.00 & 0.04 & 0.01 & 0.01 \\ 
-% AT-5-0.3 &  & 0.71 & 0.65 & 0.54 & 0.88 & 0.02 & 0.02 & 0.01 & 0.00 & 0.00 & 0.05 & 0.00 & 0.01 \\ 
+% PSO & 1,000 & 0.71 & 0.67 & 0.58 & 0.89 & 0.25 & 0.01 & 0.01 & 0.00 & 0.00 & 0.27 & 0.01 & 0.04 \\
+% BBPSOxp-MC&  & 0.71 & 0.66 & 0.51 & 0.88 & 0.01 & 0.02 & 0.01 & 0.00 & 0.00 & 0.02 & 0.00 & 0.01 \\
+% AT-1-0.1 &  & 0.72 & 0.66 & 0.53 & 0.88 & 0.01 & 0.02 & 0.01 & 0.00 & 0.00 & 0.04 & 0.01 & 0.01 \\
+% AT-5-0.3 &  & 0.71 & 0.65 & 0.54 & 0.88 & 0.02 & 0.02 & 0.01 & 0.00 & 0.00 & 0.05 & 0.00 & 0.01 \\
 % \hline
-% PSO & 5,000 & 0.70 & 0.66 & 0.54 & 0.89 & 0.88 & 0.85 & 0.03 & 0.00 & 0.00 & 0.00 & 0.05 & 0.02 \\ 
-% BBPSOxp-MC&  & 0.73 & 0.64 & 0.54 & 0.89 & 0.01 & 0.01 & 0.00 & 0.00 & 0.00 & 0.20 & 0.00 & 0.01 \\ 
-% AT-1-0.1 &  & 0.72 & 0.68 & 0.58 & 0.89 & 0.10 & 0.00 & 0.04 & 0.00 & 0.00 & 0.37 & 0.00 & 0.01 \\ 
-% AT-5-0.3 &  & 0.71 & 0.67 & 0.55 & 0.89 & 0.01 & 0.01 & 0.01 & 0.00 & 0.00 & 0.13 & 0.00 & 0.01 \\ 
+% PSO & 5,000 & 0.70 & 0.66 & 0.54 & 0.89 & 0.88 & 0.85 & 0.03 & 0.00 & 0.00 & 0.00 & 0.05 & 0.02 \\
+% BBPSOxp-MC&  & 0.73 & 0.64 & 0.54 & 0.89 & 0.01 & 0.01 & 0.00 & 0.00 & 0.00 & 0.20 & 0.00 & 0.01 \\
+% AT-1-0.1 &  & 0.72 & 0.68 & 0.58 & 0.89 & 0.10 & 0.00 & 0.04 & 0.00 & 0.00 & 0.37 & 0.00 & 0.01 \\
+% AT-5-0.3 &  & 0.71 & 0.67 & 0.55 & 0.89 & 0.01 & 0.01 & 0.01 & 0.00 & 0.00 & 0.13 & 0.00 & 0.01 \\
 % \hline
-% PSO & 10,000 & 0.69 & 0.66 & 0.55 & 0.89 & 0.88 & 0.84 & 0.03 & 0.00 & 0.00 & 0.35 & 0.42 & 0.01 \\ 
-% BBPSOxp-MC&  & 0.71 & 0.67 & 0.54 & 0.89 & 0.00 & 0.01 & 0.02 & 0.00 & 0.00 & 0.23 & 0.00 & 0.01 \\ 
-% AT-1-0.1 &  & 0.72 & 0.67 & 0.55 & 0.88 & 0.46 & 0.01 & 0.01 & 0.00 & 0.00 & 0.46 & 0.00 & 0.01 \\ 
-% AT-5-0.3 &  & 0.73 & 0.67 & 0.50 & 0.88 & 0.01 & 0.01 & 0.02 & 0.00 & 0.00 & 0.50 & 0.00 & 0.01 \\ 
+% PSO & 10,000 & 0.69 & 0.66 & 0.55 & 0.89 & 0.88 & 0.84 & 0.03 & 0.00 & 0.00 & 0.35 & 0.42 & 0.01 \\
+% BBPSOxp-MC&  & 0.71 & 0.67 & 0.54 & 0.89 & 0.00 & 0.01 & 0.02 & 0.00 & 0.00 & 0.23 & 0.00 & 0.01 \\
+% AT-1-0.1 &  & 0.72 & 0.67 & 0.55 & 0.88 & 0.46 & 0.01 & 0.01 & 0.00 & 0.00 & 0.46 & 0.00 & 0.01 \\
+% AT-5-0.3 &  & 0.73 & 0.67 & 0.50 & 0.88 & 0.01 & 0.01 & 0.02 & 0.00 & 0.00 & 0.50 & 0.00 & 0.01 \\
 %    \hline
 % \end{tabular}}}\\
 
@@ -686,24 +686,24 @@ For our purposes, the PSO algorithms are useful only insofar as they allow us to
 %   \hline
 % \multicolumn{1}{c|}{PSO alg} & \multicolumn{1}{c|}{$n_{\text{iter}}$} & r = 10 & 30 & 50 & 10 & 30 & 50 & 5 & 10 & 15 & 5 & 10 & 15\\
 %   \hline
-% PSO & 100 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.33 & 0.15 & 0.15 \\ 
-% BBPSOxp-MC&  & 0.73 & 0.02 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.24 & 0.15 & 0.08 \\ 
-% AT-1-0.1 &  & 0.78 & 0.02 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.29 & 0.28 & 0.08 \\ 
-% AT-5-0.3 &  & 0.66 & 0.01 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.40 & 0.09 & 0.07 \\ 
+% PSO & 100 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.33 & 0.15 & 0.15 \\
+% BBPSOxp-MC&  & 0.73 & 0.02 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.24 & 0.15 & 0.08 \\
+% AT-1-0.1 &  & 0.78 & 0.02 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.29 & 0.28 & 0.08 \\
+% AT-5-0.3 &  & 0.66 & 0.01 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.40 & 0.09 & 0.07 \\
 % \hline
-% PSO & 1,000 & 0.93 & 0.89 & 0.84 & 0.96 & 0.30 & 0.00 & 0.02 & 0.00 & 0.00 & 0.77 & 0.06 & 0.02 \\ 
-% BBPSOxp-MC&  & 0.94 & 0.87 & 0.67 & 0.96 & 0.00 & 0.00 & 0.02 & 0.00 & 0.00 & 0.20 & 0.06 & 0.03 \\ 
-% AT-1-0.1 &  & 0.93 & 0.90 & 0.80 & 0.97 & 0.00 & 0.00 & 0.02 & 0.00 & 0.00 & 0.37 & 0.11 & 0.04 \\ 
-% AT-5-0.3 &  & 0.93 & 0.85 & 0.76 & 0.95 & 0.00 & 0.00 & 0.01 & 0.00 & 0.00 & 0.51 & 0.20 & 0.05 \\ 
+% PSO & 1,000 & 0.93 & 0.89 & 0.84 & 0.96 & 0.30 & 0.00 & 0.02 & 0.00 & 0.00 & 0.77 & 0.06 & 0.02 \\
+% BBPSOxp-MC&  & 0.94 & 0.87 & 0.67 & 0.96 & 0.00 & 0.00 & 0.02 & 0.00 & 0.00 & 0.20 & 0.06 & 0.03 \\
+% AT-1-0.1 &  & 0.93 & 0.90 & 0.80 & 0.97 & 0.00 & 0.00 & 0.02 & 0.00 & 0.00 & 0.37 & 0.11 & 0.04 \\
+% AT-5-0.3 &  & 0.93 & 0.85 & 0.76 & 0.95 & 0.00 & 0.00 & 0.01 & 0.00 & 0.00 & 0.51 & 0.20 & 0.05 \\
 % \hline
-% PSO & 5,000 & 0.93 & 0.90 & 0.85 & 0.97 & 0.91 & 0.86 & 0.02 & 0.00 & 0.00 & 0.97 & 0.86 & 0.04 \\ 
-% BBPSOxp-MC&  & 0.94 & 0.88 & 0.80 & 0.96 & 0.07 & 0.00 & 0.02 & 0.00 & 0.00 & 0.89 & 0.10 & 0.07 \\ 
-% AT-1-0.1 &  & 0.93 & 0.89 & 0.84 & 0.96 & 0.07 & 0.00 & 0.00 & 0.00 & 0.00 & 0.95 & 0.17 & 0.08 \\ 
-% AT-5-0.3 &  & 0.93 & 0.89 & 0.80 & 0.96 & 0.00 & 0.00 & 0.03 & 0.00 & 0.00 & 0.64 & 0.12 & 0.01 \\ 
+% PSO & 5,000 & 0.93 & 0.90 & 0.85 & 0.97 & 0.91 & 0.86 & 0.02 & 0.00 & 0.00 & 0.97 & 0.86 & 0.04 \\
+% BBPSOxp-MC&  & 0.94 & 0.88 & 0.80 & 0.96 & 0.07 & 0.00 & 0.02 & 0.00 & 0.00 & 0.89 & 0.10 & 0.07 \\
+% AT-1-0.1 &  & 0.93 & 0.89 & 0.84 & 0.96 & 0.07 & 0.00 & 0.00 & 0.00 & 0.00 & 0.95 & 0.17 & 0.08 \\
+% AT-5-0.3 &  & 0.93 & 0.89 & 0.80 & 0.96 & 0.00 & 0.00 & 0.03 & 0.00 & 0.00 & 0.64 & 0.12 & 0.01 \\
 % \hline
-% PSO & 10,000 & 0.93 & 0.90 & 0.85 & 0.96 & 0.91 & 0.87 & 0.03 & 0.00 & 0.00 & 0.97 & 0.95 & 0.02 \\ 
-% BBPSOxp-MC&  & 0.93 & 0.89 & 0.85 & 0.96 & 0.31 & 0.00 & 0.01 & 0.00 & 0.00 & 0.97 & 0.24 & 0.07 \\ 
-% AT-1-0.1 &  & 0.93 & 0.90 & 0.85 & 0.96 & 0.45 & 0.00 & 0.01 & 0.00 & 0.00 & 0.97 & 0.09 & 0.06 \\ 
+% PSO & 10,000 & 0.93 & 0.90 & 0.85 & 0.96 & 0.91 & 0.87 & 0.03 & 0.00 & 0.00 & 0.97 & 0.95 & 0.02 \\
+% BBPSOxp-MC&  & 0.93 & 0.89 & 0.85 & 0.96 & 0.31 & 0.00 & 0.01 & 0.00 & 0.00 & 0.97 & 0.24 & 0.07 \\
+% AT-1-0.1 &  & 0.93 & 0.90 & 0.85 & 0.96 & 0.45 & 0.00 & 0.01 & 0.00 & 0.00 & 0.97 & 0.09 & 0.06 \\
 % AT-5-0.3 &  & 0.93 & 0.89 & 0.83 & 0.97 & 0.00 & 0.00 & 0.03 & 0.00 & 0.00 & 0.95 & 0.03 & 0.03 \\    \hline
 % \end{tabular}}}
 % \caption{ Acceptance rates for the PSO assisted IMH algorithm (a) and the IMH within Gibbs algorithm (b) in the Poisson and lognormal models with either iid or fully correlated random effects. For each algorithm and each model the initial posterior mode was estimated using several PSO algorithms with a swarm size of 1,000, run for $n_{\text{iter}}=$10,000 iterations. Then both the IMH and IMHwG MCMC algorithms were fit using each PSO algorithm's estimate of the mode after 100, 1,000, 5,000, and 10,000 iterations. Acceptance rates were computed by using from a sample of 9,000 after a burn-in of 1,000. The parameter $r$ denotes the number of random effects in the model. The AT-1-0.1 algorithm is AT-BBPSOxp-MC with $df=1$ and $R^*=0.1$, and similarly for AT-5-0.3.}
@@ -734,7 +734,7 @@ Our approach is fairly hands off, so long as the conditions listed above appear 
 
 
  The AT-BBPSOxp-MC algorithms we introduced still require a larger swarm size or more iterations or both to do as well as standard PSO when standard PSO works well. With the same swarm size and number of iterations AT-BBPSOxp-MC does only slightly worse than standard PSO in terms of maximizing the objective function, but that slight difference often amounts to a large difference in the Metropolis acceptance rate for the resulting MCMC algorithms. When AT-BBPSOxp-MC does do better than standard PSO, the resulting MCMC algorithms do not always have high acceptance rates, at least not without running AT-BBPSOxp-MC with a high swarm size for many iterations. So in practice we recommend using standard PSO first. If the resulting MCMC algorithms have poor acceptance rates or if it seems likely a priori that PSO might have trouble, then it can be useful to explore the options provided by AT-BBPSOxp-MC with the caveat that a large swarm size and number of iterations may be required.
- 
+
 \clearpage\pagebreak\newpage\thispagestyle{empty}
 \bibliographystyle{jasa}
 \bibliography{pso}
