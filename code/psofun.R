@@ -244,10 +244,11 @@ spso <- function(niter, nswarm, nnbor, inertia, cognitive, social, obj, lower, u
       if(CF){
         ## coordinate free update of velocity
         ## center of gravity
-        G <- x[,idx] + cognitive*(pbest[,idx] - x[,idx])/3
         if(nbestval[idx] < pbestval[idx]){
-          ## only include this part of the update if not at nbhd best
-          G <- G + social*(nbest[,idx] - x[,idx])/3
+          G <- x[,idx] + cognitive*(pbest[,idx] - x[,idx])/3 + social*(nbest[,idx] - x[,idx])/3
+        } else {
+          ## only use cognitive component if nbhd best = p best
+          G <- x[,idx] + cognitive*(pbest[,idx] - x[,idx])/2
         }
         Gxdist <- sqrt(sum((x[,idx] - G)^2))
         ## draw from sphere
