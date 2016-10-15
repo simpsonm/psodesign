@@ -55,46 +55,53 @@
 \appendix
 \section{PSO and BBPSO details}\label{app:psodetail}
 
-In Section \ref{sec:pso} we introduced PSO, BBPSO, and our adaptively tuned variants of both. Here we describe in detail several BBPSO variants as well as a class of neighborhood topologies called the ring topologies.
+In Section \ref{sec:pso} we introduced PSO, BBPSO, and our adaptively tuned variants of both. Here we describe in detail several modifcations to both PSO and BBPSO.
+
+\subsection{PSO}\label{subapp:pso}
+The standard PSO algorithm is given by equation \eqref{eq:pso}. We consider several additions and modifications to this algorithm below. Each of these modifications is combined with adaptively tuned inertia as in equation \eqref{eq:atpso} to create the AT-PSO algorithms we employ.
+
+\subsubsection{Initialization:}
+In order to initialize the swarm, the number of particles, their initial locations, and their initial velocities have to be chosen. \citet{clerc2011spso} suggests making the swarm size a function of the dimension of the search space, but notes that this is known to be suboptimal. We use their alternative suggest to use a default swarm size of 40. We assume the search space is a $D$-dimensional hypercube given by $\bigtimes_{j=1}^D[min_j, max_j]$. Then each particle's initial location is randomly generated uniformly on the cube, i.e. $\theta_{ij}(0)\stackrel{ind}{\sim}U(min_j, max_j)$ for $i=1,2,\dots,n$ and $j=1,2,\dots,D$. Each particle's velocity is initalized based on its location via  $v_{ij}(0)\stackrel{ind}{\sim}U(min_j - x_{ij}(0), max_j - x_{ij}(0))$ for $i=1,2,\dots,n$ and $j=1,2,\dots,D$.
+
+In Section \ref{sec:houston} each design point is constrained to be in Harris County, TX, wich is not a rectangle. We intialize the swarm by placing intial design points on the smallest rectangle containing Harris County. Design points outside of Harris County will quickly move back into the county due to the confinement strategy.
+
+\subsubsection{Confinement:}
+Even though the initialization of the swarm is confined to a hypercube, nothing prevents any given particle from leaving the search space. There are a number of things that can be done in order to solve this problem and each has advantages and disadvantages depending on the situation \citep{helwig2007particle}. We focus on two approaches. One is to move any particle that leaves the search space to the nearest point still inside the search space and then adjust its velocity, e.g. \citet{clerc2011spso} suggests that whenever $x_{ij}(t) > max_j$, it should be set to $x_{ij}(t) = max_j$ and similarly when $x_{ij}(t) < min_j$ it should be set to $x_{ij}(t) = min_d$, and in both cases the velocity along that dimension should be reversed and halved, i.e. $v_{ij}(t) = -0.5 v_{ij}(t)$. This causes particles to bounce off the boundary and move back towards the middle of the search space. This is the default strategy we use.
+
+Another strategy is to simply define the objective function to be $\pm\infty$ outside of the search space ($+$ when minimizing, $-$ when maximizing) so that the swarm tries to stay in bounds naturally. In Section \ref{sec:houston} we employ this method in combination with the other strategy. When a design point is proposed outside of the smallest rectangle containing Harris County, we move it back to the edge of the rectangle using the method described in the previous paragraph. All points inside the rectangle but outside Harris County are defined to have infinite MSPE variance in order to further restrict the swarm to the desired area.
+
+\subsubsection{Redraw Neighborhoods:}
+In Section \ref{sec:pso} we briefly described a variant of the stochastic star neighborhood which we use. This neighborhood is stochastic, meaning that each particle's neighbors are randomly drawn when the algorithm is initialized. After an iteration in which the best known value of the objective function is unchanged, each particle's neighbors are randomly redrawn according to the same distribution.
+
+\subsubsection{Asynchronous Updates:}
+The way we defined PSO in equation \eqref{eq:pso} each particle can update simultaneously. This means that the algorithm is parallelizable, which is a major advantage for implementation on modern GPUs. However, asynchronously updating the particles typically results in faster converging algorithms when it is computationally feasible. In an asynchronous update from period $t$ to $t+1$, particle $i$ recognizes that particle $i-1$ has already updated its personal best location to $\bm{p}_{i-1}(t+1)$ by the time it is $i$'s turn to update. So $i$ computes its group best location taking this into account. This causes particle $i=1$ to behave differently from particle $i=n$ since particle $n$ always has better information in order to perform its update, so every iteration the particles are randomly reordered. More formally, before every iteration sample $o_1(t+1), o_2(t+1), \dots, o_{n}(t+1)$ from $\{1,2,\dots,n\}$ without replacement. Then the particles update starting with $o_1$, $o_2$, etc., where the group best update becomes $\bm{g}_{o_i}(t+1) = \arg\min_{\{\bm{p}_{o_j}(t+1)|j\in\mathcal{N}_i\}}Q(\bm{p}_j(t_j^*))$ where $t^*_j=t+1$ if $j<i$ and $t$ otherwise. We asynchronously update in all of our algorithms.
+
+\subsubsection{Coordinate Free Velocity Updates:}
+The standard velocity update in equation \eqref{eq:pso} is well known to bias the algorithm towards locations near the coordinate axes and especially the origin \citep{monson2005exposing,spears2010biases}. In general we may not know if the true optimum is near an axis, so this behavior is undesirable. There are several alternative velocity updates available, e.g. in \citet{monson2005exposing}. We use the coordinate free (CF) update suggested by \citet{clerc2011spso}. First define the center of gravity for particle $i$ to be $\bm{c}_i(t) = \bm{\theta}_i(t) + \phi_1\{\bm{p}_i(t) - \bm{\theta}_i(t)\}/3 + \phi_2\{\bm{g}_i(t) - \bm{\theta}_i(t)\}/3$. Let $\mathcal{H}_i(t)$ denote the hypersphere centered at $\bm{c}_i(t)$ with radius $||\bm{c}_i(t) - \bm{\theta}_i(t)||$ where $||.||$ denotes Euclidean distance. Then a new point $\bm{\theta}_i'(t)$ is drawn randomly from $\mathcal{H}_i(t)$ by sampling a direction and a radius, each uniformly. This is \emph{not} the same as drawing uniformly over $\mathcal{H}_i(t)$ and in fact favors points near the center. Then the CF velocity update is given by $\bm{v}_i(t+1) = \omega \bm{v}_i(t) + \bm{x}_i'(t)$. We use both the standard and CF velocity updates in our algorithms. The standard PSO algorithm with each feature in this subsection including the CF velocity update is what \citet{clerc2011spso} calls SPSO 2011. 
+
+\subsubsection{When Personal Best = Group Best:}
+When a particle's personal best and group best locations coincide, it is often advantageous to allow the particle to explore more than usual. In the standard velocity update we do this by removing the social term so that $\bm{v}_i(t+1) = \omega \bm{v}_i(t) + \phi_1 \bm{r}_{1i}(t)\circ\{\bm{p}_i(t) - \bm{\theta}_i(t)\}$. In the CF velocity update we change the center of gravity to ignore the social term so that $\bm{c}_i(t) = \bm{\theta}_i(t) + \phi_2\{\bm{p}_i(t) - \bm{\theta}_i(t)\}/2$.
 
 \subsection{BBPSO}\label{subapp:bbpso}
-The standard BBPSO algorithm was introduced by \citet{kennedy2003bare} and updates from $t$ to $t+1$ via equation \eqref{eq:bbpso}. A commonly used variant of BBPSO also introduced by \citet{kennedy2003bare} is called BBPSOxp. In this variant, each coordinate of each particle has a 50\% chance of updating according to \eqref{eq:bbpso} and a 50\% chance of moving directly to that particle's personal best location on that coordinate. In other words
+The standard BBPSO algorithm was introduced by \citet{kennedy2003bare} and updates from $t$ to $t+1$ via equation \eqref{eq:bbpso}. We use each of the features in Section \ref{subapp:pso} in our BBPSO algorithms, though some of them need to be modified for the BBPSO setting. We list them below along with another modification of BBPSO which we employ. Each of these modications are combined with adaptively tuning a scale parameter as in equation \eqref{eq:at-bbpso} to create our AT-BBPSO algorithms.
+
+\subsubsection{BBPSOxp:}
+A commonly used variant of BBPSO also introduced by \citet{kennedy2003bare} is called BBPSOxp. In this variant, each coordinate of each particle has a 50\% chance of updating according to \eqref{eq:bbpso} and a 50\% chance of moving directly to that particle's personal best location on that coordinate. In other words
 \begin{align}\label{eq:bbpsoxp}
 \theta_{ij}(t+1) = \begin{cases} N\left(\frac{p_{ij}(t) + g_{ij}(t)}{2}, s^2_{ij}(t)\right) & \mbox{with probability }0.5\\
 p_{ij}(t) &\mbox{otherwise,}\end{cases}
 \end{align}
-where $s_{ij}(t) = |p_{ij}(t) - g_{ij}(t)|$.
+where $s_{ij}(t) = |p_{ij}(t) - g_{ij}(t)|$. We use both xp and non-xp versions of our BBPSO algorithms.
 
+\subsubsection{CF BBPSO:} 
+BBPSO's update also depends on the coordinate system since each coordinate of $\bm{\theta}$ gets a different standard deviation. We employ BBPSO algorithms using the default standard deviation, but also using a coordinate free standard deviation given by $s_{ij}(t) = ||\bm{p}_i(t) - \bm{g}_i(t)||$. 
+
+\subsubsection{When Personal Best = Group Best in BBPSO:}
 A downside of both BBPSO and BBPSOxp is that any particle whose personal best is currently its group best location does not move due to the definition of the standard deviation term. Several methods have been proposed to overcome this; e.g. \citet{hsieh2010modified} and \citet{zhang2011novel}. \citet{zhang2011novel} propose using mutation and crossover operations for the group best particle. To do this, each group best particle randomly selects three other distinct particles from the entire swarm, $i_1$, $i_2$, and $i_3$, and updates according to
 \begin{align}\label{eq:bbpsomc}
 \theta_{ij}(t+1) = p_{i_1j}(t) + 0.5\{p_{i_2j}(t) - p_{i_3j}(t)\}.
 \end{align}
-This combines easily with BBPSOxp to create BBPSOxp-MC by updating group best particles according to \eqref{eq:bbpsomc} and all other particles according to \eqref{eq:bbpsoxp}, but it does not completely solve the problem in BBPSOxp-MC. A particle which finds a personal best that is the same as its group best on some but not all coordinates due to the ``xp'' component of BBPSOxp-MC will have a standard deviation of zero for those coordinates during the next iteration. This is easily overcome by using the ``MC'' operation for those coordinates as well. So both BBPSOxp-MC and BBPSO-MC can be encapsulated into the following general BBPSO algorithm. For each particle $i$, sample three other particles $i_1$, $i_2$, $i_3$ from the swarm, and for each coordinate $j$ let $s_{ij}(t) = |p_{ij}(t) - g_{ij}(t)|$. Then the general updating equation is
-\begin{align}\label{eq:bbpsoall}
-\theta_{ij}(t+1) =
-  \begin{cases}
-    \begin{cases} N\left(\frac{p_{ij}(t) + g_{ij}(t)}{2}, s^2_{ij}(t)\right) & \mbox{with probability } \rho\\
-      p_{ij}(t) & \mbox{with probability } 1 - \rho,
-    \end{cases}
-    & \mbox{ if } s^2_{ij}(t) > 0\\
-    p_{i_1j}(t) + 0.5\{p_{i_2j}(t) - p_{i_3j}(t)\} & \mbox{ otherwise.}
-  \end{cases}
-\end{align}
-When $\rho = 0$ we have BBPSO-MC, and when $\rho = 0.5$ we have BBPSOxp-MC. These are the two BBPSO variants that we consider.
-
-Similarly, we can create adaptively tuned versions of BBPSO-MC and BBPSOxp-MC by analogy with \eqref{eq:at-bbpso} and \eqref{eq:bbpsoall}:
-\begin{align*}%\label{eq:at-bbpsoall}
-\theta_{ij}(t+1) &=
-  \begin{cases}
-    \begin{cases} t_{df}\left(\frac{p_{ij}(t) + g_{ij}(t)}{2}, \sigma^2(t)s^2_{ij}(t)\right) & \mbox{with probability } \rho\\
-      p_{ij}(t) & \mbox{with probability } 1 - \rho,
-    \end{cases}
-    & \mbox{ if } s^2_{ij}(t) > 0\\
-    p_{i_1j}(t) + 0.5\{p_{i_2j}(t) - p_{i_3j}(t)\} & \mbox{ otherwise.}
-  \end{cases}\\
-\log\sigma^2(t+1) &= \log\sigma^2(t) + c\times\{R(t+1) - R^*\},
-\end{align*}
-where $R(t)=\#\{i:Q(\bm{p}_i(t))> Q(\bm{p}_i(t-1))\}/n$, and $df$, $R^*$, and $c$ are defined in Section \ref{subsec:ATBBPSO}. Then AT-BBPSO-MC sets $\rho=0$ and AT-BBPSOxp-MC sets $\rho=0.5$.
+This combines easily with BBPSOxp to update each coordinate of each particle with $s_{ij}(t)=0$ according to \eqref{eq:bbpsomc} and the rest according to \eqref{eq:bbpsoxp}.
 
 \section{Comparing PSO and BBPSO algorithms}\label{app:psocompare}
 In order to compare AT-BBPSO to other PSO variants, we employ a subset of test functions used in \citet{hsieh2010modified}. Each function is listed in Table \ref{tab:testfuns} along with the global maximum and argmax, and the initialization range for the simulations. Further description of many of these functions can be found in \citet{clerc2010particle}. For each function, we set $D=20$ so the domain of each function is $\Re^{20}$. For each function, the PSO algorithms are initialized in a range that does not contain the true maximum.
