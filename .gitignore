@@ -52,6 +52,7 @@ vignettes/*.pdf
 *.knit.md
 
 ## Core latex/pdflatex auxiliary files:
+*.synctex.gz
 *.aux
 *.lof
 *.log
