@@ -103,7 +103,7 @@ nchrome <- 2
 nrun <- ndesign
 mutvars <- c(1,2)
 mutrates <- c(1/100, 1/10)
-nexnbors <- c(1, 3, 5)
+nexnbors <- c(10)
 ncand <- 2000
 gaout <- NULL
 exout <- NULL
