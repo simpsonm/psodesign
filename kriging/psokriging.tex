@@ -34,13 +34,14 @@
 {
   \runninghead{M Simpson}{AT-PSO for Spatial Design}
   \title{Adaptively-Tuned Particle Swarm Optimization with Application to Spatial Design}
-  \author{Matthew Simpson\affil{a}}
+  \author{Matthew Simpson\affil{a}\corrauth, Christopher K. Wikle\affil{a}, Scott H. Holan\affil{a}}
   \address{\affilnum{a}Department of Statistics, University of Missouri,\\
     146 Middlebush Hall, Columbia, MO 65211-6100}
   \corremail{themattsimpson@gmail.com}
   \received{00 Month Year}
   \accepted{00 Month Year}
 }\fi
+
 \if1\blind
 {
   \runninghead{}{AT-PSO for Spatial Design}
@@ -52,13 +53,13 @@
   \accepted{}
 }\fi
 \begin{abstract}
-<Text>
+Particle swarm optimization (PSO) algorithms are a class of heuristic optimization algorithms that are especially attractive for complex optimizations problems. We propose using PSO in order to solve spatial design problems, e.g. choosing new locations to add to an existing monitoring network. To this end, we introduce a new class of PSO algorithms, called adaptively-tuned PSO, that perform well in a wide variety of circumstances. In order to illustrate these algorithms, we apply them to a common spatial design problem: choosing new locations to add to an existing monitoring network. Specifically, we consider a network in the Houston, TX area for monitoring ambient ozone levels, which have been linked to out-of-hostpital cardiac arrest rates \citep{ensor2013case}.
 \end{abstract}
-\keywords{<Keywords>}
+\keywords{optimization; particle swarm; geostatistics; kriging; optimal design, spatial prediction}
 \maketitle
 
 \section{Introduction}
-Particle swarm optimization (PSO) refers to a large class of heuristic optimization algorithms that use an analogy with animal flocking behavior in order to construct more robust optimization algorithms than many alternatives \citep{clerc2002particle,blum2008swarm,clerc2010particle}. This robustness makes them attractive for more difficult optimization problems, especially when near optimal solutions are tolerable. We introduce a new class of PSO algorithms, called adaptively tuned PSO (AT-PSO), which exploit an analogy with a class of adaptive Markov chain Monte Carlo algorithms in order to tune a crucial parameter of the PSO algorithm adaptively based on the state of the particle swarm. We show that the resulting algorithms tend to be superior to many PSO alternatives. Additionally, we illustrate several PSO algorithms by applying them to choosing a set of new monitoring locations for ozone in Harris County, Texas, where Houston is located. Ambient ozone levels have been linked to cardiac arrest \citep{ensor2013case}, so ozone monitoring is an essential tool for determining which populations are at risk. Section \ref{sec:pso} introduces various PSO and AT-PSO algorithms, and briefly discusses the results of an extended simulation study comparing them. Section \ref{sec:spatialdesign} introduces the generic spatial design problem and the Houson area ozone problem as an instance of that problem, and compares several PSO algorithms and some alternatives to solving the problem. Finally, Section \ref{sec:discuss} discusses our results and concludes.
+PSO refers to a large class of heuristic optimization algorithms that use an analogy with animal flocking behavior in order to construct more robust optimization algorithms than many alternatives \citep{clerc2002particle,blum2008swarm,clerc2010particle}. This robustness makes them attractive for more difficult optimization problems, especially when near optimal solutions are tolerable. We introduce a new class of PSO algorithms, called adaptively tuned PSO (AT-PSO), which exploit an analogy with a class of adaptive Markov chain Monte Carlo algorithms in order to tune a crucial parameter of the PSO algorithm adaptively based on the state of the particle swarm. We show that the resulting algorithms tend to be superior to many PSO alternatives. Additionally, we illustrate several PSO algorithms by applying them to choosing a set of new monitoring locations for ozone in Harris County, Texas, where Houston is located. Ambient ozone levels have been linked to cardiac arrest \citep{ensor2013case}, so ozone monitoring is an essential tool for determining when and where populations are at risk. Section \ref{sec:pso} introduces various PSO and AT-PSO algorithms, and briefly discusses the results of an extended simulation study comparing them. Section \ref{sec:spatialdesign} introduces the generic spatial design problem and the Houson area ozone problem as an instance of that problem, and compares several PSO algorithms and some alternatives to solving the problem. Finally, Section \ref{sec:discuss} discusses our results and concludes.
 
 \section{Particle swarm optimization}\label{sec:pso}
 We briefly describe PSO here; refer to \citet{blum2008swarm} for a comprehensive introduction, \citet{clerc2010particle} for details, and \citet{clerc2011spso} for good default versions of the algorithm. Suppose that we wish to minimize some objective function $Q(\bm{\theta}):\Re^D\to\Re$. Let $i=1,2,\dots,n$ index a set of particles over time, $k=1,2,\dots,K$, where in every period each particle consists of a location $\bm{\theta}_i(k)\in \Re^D$, a velocity $\bm{v}_i(k) \in \Re^D$, a personal best location $\bm{p}_i(k)\in\Re^D$, and a group best location $\bm{g}_i(k)\in\Re^D$. Here we mean ``best'' in the sense of minimizing $Q$, so $Q(\bm{p}_i(k)) \geq Q(\bm{\theta}_i(l))$ for any $k\geq l$. The group best location is defined with respect to some neighborhood $\mathcal{N}_i$ of particle $i$; that is, $\bm{g}_i(k) = \arg\min_{\{\bm{p}_j(k)|j\in\mathcal{N}_i\}}Q(\bm{p}_j(k))$. In the simplest case where the entire swarm is the neighborhood of each particle, $\bm{g}_i(k)\equiv \bm{g}(k) = \arg\min_{\{\bm{p}_j(k)|j\in 1:n\}}Q(\bm{p}_j(k))$. The generic PSO algorithm updates each particle $i$ as follows:
