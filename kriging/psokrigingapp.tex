@@ -126,7 +126,7 @@ In order to compare AT-BBPSO to other PSO variants, we employ a subset of test f
 \label{tab:testfuns}
 \end{table}
 
-We use several PSO algorithms in the simulation study. The standard PSO algorithm uses the parameter values suggested by \cite{blum2008swarm} and \cite{clerc2002particle}. The AT-BBPSO variants are implemented a wide variety of parameter values, but all have the scale parameter initialized at $\sigma(0)=1$, and both set $c=0.1$. The AT-PSO variants are initialized at $\omega(0)=1$ and also set $c=0.1$. In addition, each algorithm is implemented using each of three neighborhood structures --- the global, ring-3, and ring-1 neighborhoods. Each algorithm was used to optimize each objective function for 500 iterations over 50 replications using 20 particles. Initializations were changed across replications but held constant across algorithms. The standard PSO, DI-PSO, and AT-PSO algorithms initialized their velocity terms using the same method as a function of the initial locations of the particles, which we will denote by $\bm{x}_i$ for particle $i$. Let $x_{max,j}$ be the maximum initial value of coordinate $j$ of $\bm{x}_i$ for each particle $i$, and let $x_{min,j}$ be the corresponding minimum. Then let $d_{max} = max_{j}x_{max,j} - x_{min,j}$. Then we initialize the velocities with $v_{ij}(0)\stackrel{iid}{\sim}U(-d_{max}/2,d_{max}/2)$. Tables \ref{tab:psosim1}-\ref{tab:psosim6} contain the simulation results for objective functions 1-6 respectively (OF1, OF2, etc.). We use several measures to quantify how well each algorithm finds the global maximum. First, each table includes the mean and standard deviation of the absolute difference between the true global maximum and the algorithm's estimated global maximum across all 50 replications, denoted by Mean and SD. Second, each table includes a convergence criterion --- the proportion of the replications that came within $0.01$ of the true global maximum, denoted by $\widehat{p}$. Finally, $\widehat{t}$ denotes the median number of iterations until the algorithm reaches the convergence criterion. When $\hat{p}<0.5$ then $\hat{t} = \infty$ since greater than 50\% of the replications did not converge in the maximum number of iterations allowed. Then Mean, $\hat{p}$, and $\hat{t}$ can be thought of how close the algorithm gets to the global maximum on average, what proportion of the time it converges, and long it takes to converge respectively.
+We use several PSO algorithms in the simulation study. The standard PSO algorithm uses the parameter values suggested by \cite{blum2008swarm} and \cite{clerc2002particle}. The AT-BBPSO variants are implemented a wide variety of parameter values, but all have the scale parameter initialized at $\sigma(0)=1$, and both set $c=0.1$. The AT-PSO variants are initialized at $\omega(0)=1$ and also set $c=0.1$. In addition, each algorithm is implemented using each of three neighborhood structures --- the global, ring-3, and ring-1 neighborhoods. Each algorithm was used to optimize each objective function for 500 iterations over 50 replications using 20 particles. Initializations were changed across replications but held constant across algorithms. The standard PSO, DI-PSO, and AT-PSO algorithms initialized their velocity terms using the same method as a function of the initial locations of the particles, which we will denote by $\bm{x}_i$ for particle $i$. Let $x_{max,j}$ be the maximum initial value of coordinate $j$ of $\bm{x}_i$ for each particle $i$, and let $x_{min,j}$ be the corresponding minimum. Then let $d_{max} = max_{j}x_{max,j} - x_{min,j}$. Then we initialize the velocities with $v_{ij}(0)\stackrel{iid}{\sim}U(-d_{max}/2,d_{max}/2)$. Tables \ref{tab:psosim1}-\ref{tab:psosim6} contain the simulation results for objective functions 1-6 respectively (OF1, OF2, etc.). We use several measures to quantify how well each algorithm finds the global maximum. First, each table includes the mean and standard deviation of the absolute difference between the true global maximum and the algorithm's estimated global maximum across all 50 replications, denoted by Mean and SD. Second, each table includes a convergence criterion --- the proportion of the replications that came within $0.01$ of the true global maximum, denoted by $\widehat{p}$. Finally, $\widehat{k}$ denotes the median number of iterations until the algorithm reaches the convergence criterion. When $\widehat{p}<0.5$ then $\widehat{k} = \infty$ since greater than 50\% of the replications did not converge in the maximum number of iterations allowed. Then Mean, $\widehat{p}$, and $\widehat{k}$ can be thought of how close the algorithm gets to the global maximum on average, what proportion of the time it converges, and long it takes to converge respectively.
 
 We highlight only some of the features of these tables. First and foremost, PSO, BBPSO-MC, and BBPSOxp-MC almost always do worse than their AT cousins. Adaptively tuning either the scale or inertia parameter leads to gains in all three of our measures, sometimes large. The comparison is starkest between BBPSO variants and AT-BBPSO variants, partially because BBPSO tends to be pretty bad but also because AT-BBPSO does very well. Second, for most non-AT algorithms the more restrictive neighborhoods appear to yield algorithms which do a better job of finding the global max. For the AT-PSO algorithms, it appears that the target improvement rate ($R^*$) and the neighborhood interact. When the rate is high a more restrictive neighborhood is preferable, while when the rate is low a less restrictive neighborhood is preferable. On the other hand, for the AT-BBPSO algorithms, the opposite appears to be true --- when the target improvement rate is high, a less restrictive neighborhood is desirable and vice versa. In addition, the best AT-BBPSO algorithms often use the global neighborhood while for the other classes of algorithms their best versions typically use the ring-1 or ring-3 neighborhood.
 
@@ -151,7 +151,7 @@ Based on these simulations, our default recommendation is to use AT-BBPSO-MC or 
 \begin{tabular}{r|rrrr|rrrr|rrrr}
 \multicolumn{1}{l}{OF1} & \multicolumn{4}{c}{Global nbhd} & \multicolumn{4}{c}{Ring-3 nbhd} & \multicolumn{4}{c}{Ring-1 nbhd}\\
 \hline
-Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}$ & $\widehat{t}$ \\
+Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{k}$ & Mean & SD & $\widehat{p}$ & $\widehat{k}$ & Mean & SD & $\widehat{p}$ & $\widehat{k}$ \\
   \hline
 \multicolumn{1}{l|}{PSO} & 4015.81 & 3124.33 & 0.00 & $\infty$ & 0.00 & 0.01 & 0.98 & 362.00 & 0.01 & 0.01 & 0.78 & 488.50 \\
   \multicolumn{1}{l|}{BBPSO-MC} & 84517.26 & 8944.33 & 0.00 & $\infty$ & 83674.80 & 9956.73 & 0.00 & $\infty$ & 84784.51 & 9451.47 & 0.00 & $\infty$ \\
@@ -223,7 +223,7 @@ Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}
 \begin{tabular}{r|rrrr|rrrr|rrrr}
 \multicolumn{1}{l}{OF2} & \multicolumn{4}{c}{Global nbhd} & \multicolumn{4}{c}{Ring-3 nbhd} & \multicolumn{4}{c}{Ring-1 nbhd}\\
   \hline
-Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}$ & $\widehat{t}$ \\
+Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{k}$ & Mean & SD & $\widehat{p}$ & $\widehat{k}$ & Mean & SD & $\widehat{p}$ & $\widehat{k}$ \\
   \hline
 \multicolumn{1}{l|}{PSO} & 10915.05 & 17201.47 & 0.00 & $\infty$ & 1246.38 & 1002.75 & 0.00 & $\infty$ & 5738.34 & 3835.37 & 0.00 & $\infty$ \\
   \multicolumn{1}{l|}{BBPSO-MC} & 9081909.83 & 1958288.73 & 0.00 & $\infty$ & 9194595.70 & 2157840.19 & 0.00 & $\infty$ & 8830368.63 & 2234188.42 & 0.00 & $\infty$ \\
@@ -295,7 +295,7 @@ Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}
 \begin{tabular}{r|rrrr|rrrr|rrrr}
 \multicolumn{1}{l}{OF3} & \multicolumn{4}{c}{Global nbhd} & \multicolumn{4}{c}{Ring-3 nbhd} & \multicolumn{4}{c}{Ring-1 nbhd}\\
   \hline
-Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}$ & $\widehat{t}$ \\
+Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{k}$ & Mean & SD & $\widehat{p}$ & $\widehat{k}$ & Mean & SD & $\widehat{p}$ & $\widehat{k}$ \\
   \hline
 \multicolumn{1}{l|}{PSO} & 1242764.67 & 2075592.00 & 0.00 & $\infty$ & 121.33 & 104.18 & 0.00 & $\infty$ & 241.45 & 255.69 & 0.00 & $\infty$ \\
   \multicolumn{1}{l|}{BBPSO-MC} & 232830400.95 & 37473167.09 & 0.00 & $\infty$ & 247662755.14 & 43820300.43 & 0.00 & $\infty$ & 247321508.63 & 39096259.33 & 0.00 & $\infty$ \\
@@ -367,7 +367,7 @@ Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}
 \begin{tabular}{r|rrrr|rrrr|rrrr}
 \multicolumn{1}{l}{OF4} & \multicolumn{4}{c}{Global nbhd} & \multicolumn{4}{c}{Ring-3 nbhd} & \multicolumn{4}{c}{Ring-1 nbhd}\\
   \hline
-Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}$ & $\widehat{t}$ \\
+Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{k}$ & Mean & SD & $\widehat{p}$ & $\widehat{k}$ & Mean & SD & $\widehat{p}$ & $\widehat{k}$ \\
   \hline
 \multicolumn{1}{l|}{PSO} & 29.94 & 15.21 & 0.00 & $\infty$ & 5.37 & 3.47 & 0.02 & $\infty$ & 3.24 & 1.44 & 0.00 & $\infty$ \\
   \multicolumn{1}{l|}{BBPSO-MC} & 237.31 & 18.67 & 0.00 & $\infty$ & 232.86 & 24.40 & 0.00 & $\infty$ & 232.69 & 21.86 & 0.00 & $\infty$ \\
@@ -439,7 +439,7 @@ Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}
 \begin{tabular}{r|rrrr|rrrr|rrrr}
 \multicolumn{1}{l}{OF5} & \multicolumn{4}{c}{Global nbhd} & \multicolumn{4}{c}{Ring-3 nbhd} & \multicolumn{4}{c}{Ring-1 nbhd}\\
   \hline
-Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}$ & $\widehat{t}$ \\
+Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{k}$ & Mean & SD & $\widehat{p}$ & $\widehat{k}$ & Mean & SD & $\widehat{p}$ & $\widehat{k}$ \\
   \hline
 \multicolumn{1}{l|}{PSO} & 27.55 & 20.12 & 0.00 & $\infty$ & 0.03 & 0.03 & 0.28 & $\infty$ & 0.08 & 0.07 & 0.04 & $\infty$ \\
   \multicolumn{1}{l|}{BBPSO-MC} & 762.36 & 82.36 & 0.00 & $\infty$ & 785.33 & 69.84 & 0.00 & $\infty$ & 751.88 & 80.37 & 0.00 & $\infty$ \\
@@ -511,7 +511,7 @@ Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}
 \begin{tabular}{r|rrrr|rrrr|rrrr}
 \multicolumn{1}{l}{OF6} & \multicolumn{4}{c}{Global nbhd} & \multicolumn{4}{c}{Ring-3 nbhd} & \multicolumn{4}{c}{Ring-1 nbhd}\\
   \hline
-Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}$ & $\widehat{t}$ & Mean & SD & $\widehat{p}$ & $\widehat{t}$ \\
+Algorithm & Mean & SD & $\widehat{p}$ & $\widehat{k}$ & Mean & SD & $\widehat{p}$ & $\widehat{k}$ & Mean & SD & $\widehat{p}$ & $\widehat{k}$ \\
   \hline
 \multicolumn{1}{l|}{PSO} & 19.66 & 0.56 & 0.00 & $\infty$ & 14.77 & 8.35 & 0.02 & $\infty$ & 19.48 & 2.63 & 0.00 & $\infty$ \\
   \multicolumn{1}{l|}{BBPSO-MC} & 20.72 & 0.23 & 0.00 & $\infty$ & 20.74 & 0.22 & 0.00 & $\infty$ & 20.74 & 0.21 & 0.00 & $\infty$ \\
