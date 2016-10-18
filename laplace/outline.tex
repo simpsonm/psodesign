@@ -127,12 +127,20 @@ There are three ways we can employ Laplace approximations here:
 \item Introduction
 \item Describe the problem for latent Gaussian process models.
 \item Describe Laplace approximations and introduce the ``Global conditional Laplace approximation'' (GCLA)
-\item Give some intuition for when the GCLA will be good vs. a GLA or a LCLA (global LA and local conditional LA). Maybe a theorem that explains why GCLA works about as well as LCLA.
+\item Give some intuition for when the GCLA will be good vs. a GLA or a LCLA (global LA and local conditional LA). Maybe a theorem that explains why GCLA works about as well as LCLA. Maybe another theorem that explains when no CLA should work well.
 \item 2-4 examples illustrating both good and bad, with some simulations. (It doesn't always work. In particular, when the data model is highly non-normal, it can be extremely poor).
 \end{enumerate}
 
 \subsection{PSO tie in?}
 It's possible that the best of our PSO algorithms is actually good at finding the posterior mode in some cases. Worth checking, and if so, we have another minor contribution (and a chance to cite the STAT paper we're pushing out).
+
+\section{The Examples}
+\subsection{County population model}
+This illustrates when the GLA is bad, but the GCLA is good rather nicely.
+\subsection{Election model}
+This expands the class of models somewhat; not sure if it illustrates anything very nicely. I'll have to think about this one a bit.
+\subsection{Unemployment Rates model}
+(County or tract or even state level). This was a model we jettisoned awhile ago, but basically it's a GLMM with a LGP where the data model is a Beta distribution. The GCLA doesn't work here because the data model is too non-normal - basically the uncertainties associated with the unemployment rates are too high and the rates are too close to zero, so the Beta distributions are U-shaped. But if we but a sufficiently tight prior on sufficiently high levels of certainty, I think we can get the GCLA to work. So it illustrates when  ANY conditional LA should work well and when it shouldn't.
 
 \clearpage\pagebreak\newpage\thispagestyle{empty}
 \bibliographystyle{jasa}
