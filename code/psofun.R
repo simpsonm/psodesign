@@ -69,6 +69,7 @@ ga <- function(niter, nbatch, nswarm, nchrome, nrun, mutvar, mutrate, lower, upp
   npar <- nchrome*nrun
   x <- replicate(nswarm, runif(npar, lower, upper))
   vals <- apply(x, 2, obj, ...)
+  vals <- vals[order(vals)]
   valsout <- matrix(0, ncol = nswarm, nrow = niter*nbatch+1)
   valsout[1,] <- vals
   for(bat in 1:nbatch){
@@ -94,7 +95,7 @@ ga <- function(niter, nbatch, nswarm, nchrome, nrun, mutvar, mutrate, lower, upp
       valsout[(bat-1)*niter + iter + 1,] <- vals
     }
   }
-  out <- list(par = x[,1], value = vals[1], parpop = x, valpops = valsout, values = vals)
+  out <- list(par = x[,1], value = vals[1], parpop = x, valpops = valsout, values = valsout[,1])
   return(out)
 }
 
