@@ -62,7 +62,7 @@ exch <- function(ncand, obj, poly, nnbor, npoints, start = "rand", ...){
     count <- count + 1
     improve <- vals[count] < vals[count - 1]
   }
-  return(list(par = Dbest, value = Qbest, vals = vals, count = count, objcount = objcount))
+  return(list(par = Dbest, value = Qbest, values = vals, count = count, objcount = objcount))
 }
 
 ga <- function(niter, nbatch, nswarm, nchrome, nrun, mutvar, mutrate, lower, upper, obj, ...){
@@ -94,7 +94,7 @@ ga <- function(niter, nbatch, nswarm, nchrome, nrun, mutvar, mutrate, lower, upp
       valsout[(bat-1)*niter + iter + 1,] <- vals
     }
   }
-  out <- list(par = x[,1], value = vals[1], parpop = x, valpops = valsout)
+  out <- list(par = x[,1], value = vals[1], parpop = x, valpops = valsout, values = vals)
   return(out)
 }
 
@@ -115,7 +115,7 @@ sbbpso <- function(niter, nswarm, nnbor, sig, pcut=0.5, CF=FALSE, AT=FALSE, rate
     nbhd <- lapply(1:nswarm, function(x) unique(c(which(inform == x, TRUE)[,2],x)))
   } else {
     nbhd <- lapply(1:nswarm, function(x) 1:nswarm)
-  }  
+  }
   ## initialize pbest, gbest, and nbest stuff
   pbest <- x
   nbest <- x
@@ -174,7 +174,7 @@ sbbpso <- function(niter, nswarm, nnbor, sig, pcut=0.5, CF=FALSE, AT=FALSE, rate
         better[idx] <- 1
       } else {
         better[idx] <- 0
-      }      
+      }
     }
     ## update global best
     gbest <- which.min(pbestval)
@@ -192,7 +192,7 @@ sbbpso <- function(niter, nswarm, nnbor, sig, pcut=0.5, CF=FALSE, AT=FALSE, rate
       sigs[iter + 1] <- sig
     }
   }
-  outlist <- list(par = pbest[,gbest], value = gbestvalue, pos = x, 
+  outlist <- list(par = pbest[,gbest], value = gbestvalue, pos = x,
                   values = gbestvals, pars = gbests, sigs = sigs)
   return(outlist)
 }
@@ -211,9 +211,9 @@ spso <- function(niter, nswarm, nnbor, inertia, cognitive, social, obj, lower, u
   } else if(AT){
     loginertia <- log(inertia)
   }
-  inertias <- rep(inertia, niter + 1)  
+  inertias <- rep(inertia, niter + 1)
   ## initialize positions, velocities, and nbhds
-  x <- replicate(nswarm, runif(npar, lower, upper)) 
+  x <- replicate(nswarm, runif(npar, lower, upper))
   v <- replicate(nswarm, runif(npar, lower, upper)) - x
   if(nnbor < nswarm){
     inform <- matrix(replicate(nswarm, sample(1:nswarm, nnbor, replace = TRUE)), nrow = nnbor)
@@ -282,12 +282,12 @@ spso <- function(niter, nswarm, nnbor, inertia, cognitive, social, obj, lower, u
       toosmall <- which(x[,idx] < lower)
       if(length(toosmall)>0){
         x[toosmall, idx] <- lower[toosmall]
-        v[toosmall, idx] <- -0.5*v[toosmall, idx] 
+        v[toosmall, idx] <- -0.5*v[toosmall, idx]
       }
       toolarge <- which(x[,idx] > upper)
       if(length(toolarge)>0){
         x[toolarge, idx] <- upper[toolarge]
-        v[toolarge, idx] <- -0.5*v[toolarge, idx] 
+        v[toolarge, idx] <- -0.5*v[toolarge, idx]
       }
       ## compute new value and update pbests if its an improvement
       newval <- obj(x[,idx], ...)
@@ -297,7 +297,7 @@ spso <- function(niter, nswarm, nnbor, inertia, cognitive, social, obj, lower, u
         better[idx] <- 1
       } else {
         better[idx] <- 0
-      }      
+      }
     }
     ## update global best
     gbest <- which.min(pbestval)
@@ -325,13 +325,13 @@ spso <- function(niter, nswarm, nnbor, inertia, cognitive, social, obj, lower, u
 
 ## rmt in mnormt library has a bug! use this instead
 rmtfixed <- function(n = 1, mean = rep(0, d), S, df = Inf, sqrt = NULL){
-  sqrt.S <- if (is.null(sqrt)) 
+  sqrt.S <- if (is.null(sqrt))
               chol(S)
             else sqrt
-  d <- if (is.matrix(sqrt.S)) 
+  d <- if (is.matrix(sqrt.S))
          ncol(sqrt.S)
        else 1
-  x <- if (df == Inf) 
+  x <- if (df == Inf)
          1
        else rchisq(n, df)/df
   z <- rmnorm(n, rep(0, d), sqrt = sqrt.S)
@@ -461,5 +461,5 @@ bbpso <- function(niter, nswarm, sig, rate, init, nbhd, obj, df, tune, pcut, ...
     lams[iter] <- lam
   }
   outlist <- list(argmax = gbest,  max = gbestval, pos = x, maxes = gbestvals, argmaxes = gbests, lambdas = lams)
-  return(outlist) 
+  return(outlist)
 }
