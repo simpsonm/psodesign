@@ -7,7 +7,7 @@ load("datlist.Rdata")
 
 nswarm <- 40
 niter <- 500
-nrep <- 5
+nrep <- 4
 inertias <- c(0.7298, 1/(log(2)*2))
 cognitives <- c(1.496, log(2) + 1/2)
 socials <- c(1.496, log(2) + 1/2)
@@ -27,76 +27,77 @@ upper <- rep(apply(datlist$poly@coords, 2, max), each = ndesign)
 
 time <- 0:niter
 
-set.seed(3453)
+## set.seed(3453)
+
+## psoout <- NULL
+## parout <- NULL
+## cat("\n")
+## for(repl in 1:nrep){
+##   for(nnbor in nnbors){
+##     for(CF in c(TRUE, FALSE)){
+##       for(parset in 1:2){
+##         for(objnum in 1:2){
+##           if(objnum == 1){
+##             obj <- sig2fuk.mean
+##             objname <- "sig2fuk.mean"
+##           } else {
+##             obj <- sig2fuk.max
+##             objname <- "sig2fuk.max"
+##           }
+##           cat("rep = "); cat(repl); cat("; obj = "); cat(objname); cat("; nnbor = "); cat(nnbor)
+##           cat("; CF = "); cat(CF); cat("; parset = "); cat(parset); cat("\n")
+##           for(style in c("AT1", "AT2")){
+##             rate <- ifelse(style=="AT1", rates[1], rates[2])
+##             pcut <- pcuts[parset]
+##             system.time({
+##             temp <- sbbpso(niter, nswarm, nnbor, sig0,
+##                            pcut = pcut, CF = CF, AT = TRUE, rate = rate, df = df, ccc = 0.1,
+##                            obj = obj, datlist = datlist)
+##             })
+##             algid <- paste("BBPSO", parset, ifelse(CF, "CF", "notCF"), style, sep = "-")
+##             tempdat <- data.frame(obj = objname, logpost = temp[["values"]],
+##                                   time = time, algid = algid,
+##                                   type = "BBPSO", parset = parset, CF = CF,
+##                                   style = style, nbhd = nnbor, rep = repl,
+##                                   inertias = temp$sigs)
+##             psoout <- rbind(psoout, tempdat)
+##             temppar <- data.frame(obj = objname, logpost = temp[["value"]],
+##                                   algid = algid, type = "BBPSO", parset = parset, CF = CF,
+##                                   style = style, nbhd = nnbor, rep = repl,
+##                                   parid = 1:(ndesign*2), par = temp[["par"]])
+##             parout <- rbind(parout, temppar)
+##           }
+##           for(style in c("CI", "DI", "AT1", "AT2")){
+##             rate <- ifelse(style=="AT1", rates[1], rates[2])
+##             c.in <- ifelse(style=="CI", inertias[parset], inertia0)
+##             c.co <- cognitives[parset]
+##             c.so <- socials[parset]
+##             temp <- spso(niter, nswarm, nnbor, c.in, c.co, c.so, obj, lower, upper,
+##                          style = substr(style, 1, 2), CF = CF, alpha = alpha, beta = beta,
+##                          rate = rate, ccc = ccc, datlist = datlist)
+##             algid <- paste("PSO", parset, ifelse(CF, "CF", "notCF"), style, sep = "-")
+##             tempdat <- data.frame(obj = objname, logpost = temp[["values"]],
+##                                   time = time, algid = algid,
+##                                   type = "PSO", parset = parset, CF = CF,
+##                                   style = style, nbhd = nnbor, rep = repl,
+##                                   inertias = temp$inertias)
+##             psoout <- rbind(psoout, tempdat)
+##             temppar <- data.frame(obj = objname, logpost = temp[["value"]],
+##                                   algid = algid, type = "PSO", parset = parset, CF = CF,
+##                                   style = style, nbhd = nnbor, rep = repl,
+##                                   parid = 1:(ndesign*2), par = temp[["par"]])
+##             parout <- rbind(parout, temppar)
+##           }
+##           write.csv(psoout, file = "psosimsout.csv", row.names=FALSE)
+##           write.csv(parout, file = "parsimsout.csv", row.names=FALSE)
+##         }
+##       }
+##     }
+##   }
+## }
 
 
-psoout <- NULL
-parout <- NULL
-cat("\n")
-for(repl in 1:nrep){
-  for(nnbor in nnbors){
-    for(CF in c(TRUE, FALSE)){
-      for(parset in 1:2){
-        for(objnum in 1:2){
-          if(objnum == 1){
-            obj <- sig2fuk.mean
-            objname <- "sig2fuk.mean"
-          } else {
-            obj <- sig2fuk.max
-            objname <- "sig2fuk.max"
-          }
-          cat("rep = "); cat(repl); cat("; obj = "); cat(objname); cat("; nnbor = "); cat(nnbor)
-          cat("; CF = "); cat(CF); cat("; parset = "); cat(parset); cat("\n")
-          for(style in c("AT1", "AT2")){
-            rate <- ifelse(style=="AT1", rates[1], rates[2])
-            pcut <- pcuts[parset]
-            system.time({
-            temp <- sbbpso(niter, nswarm, nnbor, sig0,
-                           pcut = pcut, CF = CF, AT = TRUE, rate = rate, df = df, ccc = 0.1,
-                           obj = obj, datlist = datlist)
-            })
-            algid <- paste("BBPSO", parset, ifelse(CF, "CF", "notCF"), style, sep = "-")
-            tempdat <- data.frame(obj = objname, logpost = temp[["values"]],
-                                  time = time, algid = algid,
-                                  type = "BBPSO", parset = parset, CF = CF,
-                                  style = style, nbhd = nnbor, rep = repl,
-                                  inertias = temp$sigs)
-            psoout <- rbind(psoout, tempdat)
-            temppar <- data.frame(obj = objname, logpost = temp[["value"]],
-                                  algid = algid, type = "BBPSO", parset = parset, CF = CF,
-                                  style = style, nbhd = nnbor, rep = repl,
-                                  parid = 1:(ndesign*2), par = temp[["par"]])
-            parout <- rbind(parout, temppar)
-          }
-          for(style in c("CI", "DI", "AT1", "AT2")){
-            rate <- ifelse(style=="AT1", rates[1], rates[2])
-            c.in <- ifelse(style=="CI", inertias[parset], inertia0)
-            c.co <- cognitives[parset]
-            c.so <- socials[parset]
-            temp <- spso(niter, nswarm, nnbor, c.in, c.co, c.so, obj, lower, upper,
-                         style = substr(style, 1, 2), CF = CF, alpha = alpha, beta = beta,
-                         rate = rate, ccc = ccc, datlist = datlist)
-            algid <- paste("PSO", parset, ifelse(CF, "CF", "notCF"), style, sep = "-")
-            tempdat <- data.frame(obj = objname, logpost = temp[["values"]],
-                                  time = time, algid = algid,
-                                  type = "PSO", parset = parset, CF = CF,
-                                  style = style, nbhd = nnbor, rep = repl,
-                                  inertias = temp$inertias)
-            psoout <- rbind(psoout, tempdat)
-            temppar <- data.frame(obj = objname, logpost = temp[["value"]],
-                                  algid = algid, type = "PSO", parset = parset, CF = CF,
-                                  style = style, nbhd = nnbor, rep = repl,
-                                  parid = 1:(ndesign*2), par = temp[["par"]])
-            parout <- rbind(parout, temppar)
-          }
-          write.csv(psoout, file = "psosimsout.csv", row.names=FALSE)
-          write.csv(parout, file = "parsimsout.csv", row.names=FALSE)
-        }
-      }
-    }
-  }
-}
-
+set.seed(324280)
 
 nbatches <- c(1,2)
 nchrome <- 2
@@ -105,6 +106,7 @@ mutvars <- c(1,2)
 mutrates <- c(1/100, 1/10)
 nexnbors <- c(10)
 ncand <- 2000
+parout2 <- NULL
 gaout <- NULL
 exout <- NULL
 for(repl in 1:nrep){
@@ -131,7 +133,7 @@ for(repl in 1:nrep){
                                 algid = algid, type = "GA", parset = NA, CF = NA,
                                 style = NA, nbhd = NA, rep = repl,
                                 parid = 1:(ndesign*2), par = temp[["par"]])
-          parout <- rbind(parout, temppar)
+          parout2 <- rbind(parout2, temppar)
         }
       }
     }
@@ -152,7 +154,7 @@ for(repl in 1:nrep){
     }
     write.csv(exout, file = "exsimsout.csv", row.names=FALSE)
     write.csv(gaout, file = "gasimsout.csv", row.names=FALSE)
-    write.csv(parout, file = "parsimsout.csv", row.names=FALSE)
+    write.csv(parout2, file = "parsimsout2.csv", row.names=FALSE)
   }
 }
 
