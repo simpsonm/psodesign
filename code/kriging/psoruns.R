@@ -110,7 +110,11 @@ parout2 <- NULL
 gaout <- NULL
 exout <- NULL
 for(repl in 1:nrep){
+  print("rep")
+  print(repl)
   for(objnum in 1:2){
+    print("obj")
+    print(objnum)
     if(objnum == 1){
       obj <- sig2fuk.mean
       objname <- "sig2fuk.mean"
@@ -121,6 +125,8 @@ for(repl in 1:nrep){
     for(nbatch in nbatches){
       for(mutvar in mutvars){
         for(mutrate in mutrates){
+          print("GA")
+          print(c(nbatch, mutvar, mutrate))
           temp <- ga(niter/nbatch, nbatch, floor(nswarm/2), nchrome, nrun, mutvar, mutrate,
                      lower, upper, obj, datlist=datlist)
           algid <- paste("GA", nbatch, mutrate, mutvar, sep="-")
@@ -138,6 +144,7 @@ for(repl in 1:nrep){
       }
     }
     for(nexnbor in nexnbors){
+      print("EX")
       ### this needs to be rewritten because of exch not having a fixed niter
       temp <- exch(ncand, obj, datlist$poly@coords, nexnbor, ndesign, datlist = datlist)
       algid <- paste("EX", nexnbor, sep="-")
