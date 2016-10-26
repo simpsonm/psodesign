@@ -23,7 +23,7 @@ inertia0 <- 1.2
 time <- 0:niter
 
 normvec <- function(x){
-  sqrt(mean(x^2))
+  sqrt(sum(x^2))
 }
 
 set.seed(342)
