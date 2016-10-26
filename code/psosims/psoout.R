@@ -1,42 +1,106 @@
-load("psoout.RData")
-
+library(plyr)
 library(dplyr)
 library(reshape2)
-library(plyr)
+library(xtable)
+
+psoout <- read.csv("psosimsout.csv")
 
 convpercent <- function(x, cutoff){
   return(mean(abs(x)<=cutoff))
 }
 
-psosum <- ddply(psoout, .(obj, type, nbhd, time), summarise, mean=mean(logpost),
+niter <- max(psoout$time)
+psoout$k1 <- abs(psoout$logpost)<=0.01
+psoout$k2 <- abs(psoout$logpost)<=0.0001
+psoout$obj[psoout$obj > 2] <- psoout$obj[psoout$obj > 2] - 1
+psoout$obj[psoout$obj > 5] <- psoout$obj[psoout$obj > 5] - 1
+
+
+psotimesum <- ddply(psoout, .(obj, algid, nbhd, time, type, parset, CF, style), summarise, mean=mean(logpost),
                 median=median(logpost), sd=sd(logpost), min=min(logpost),
                 q05=quantile(logpost, 0.05), q25=quantile(logpost, 0.25),
                 q75=quantile(logpost, 0.75), q95=quantile(logpost, 0.95),
                 max=max(logpost), con1=convpercent(logpost, 0.01),
                 con2=convpercent(logpost, 0.0001))
-posum$obj[psosum$obj > 2] <- psosum$obj[psosum$obj > 2] - 1
-psosum$obj[psosum$obj > 5] <- psosum$obj[psosum$obj > 5] - 1
 
+save(psotimesum, file = "psotimesum.Rdata")
 
-## psoargsum <- ddply(psoout, .(obj, type, nbhd, time), summarise, mean=mean(argnorm), median=median(argnorm), sd=sd(argnorm), min=min(argnorm), q05=quantile(argnorm, 0.05), q25=quantile(argnorm, 0.25), q75=quantile(argnorm, 0.75), q95=quantile(argnorm, 0.95), max=max(argnorm))
+psorepsum <- ddply(psoout, .(obj, algid, nbhd, rep, type, parset, CF, style), summarise,
+                 kk1=niter-sum(k1)+1, kk2=niter-sum(k2)+1)
+
+save(psorepsum, file = "psorepsum.Rdata")
+
+sumlast <- subset(psotimesum, time == niter)
+
+sumrep <- ddply(psorepsum, .(obj, algid, nbhd, type, parset, CF, style), summarise,
+                k1 = median(kk1), k2 = median(kk2))
+
+psosum <- merge(sumlast, sumrep, by=c("obj", "algid", "nbhd", "type", "parset", "CF", "style"))
+psosum$k1[psosum$k1 > niter] <- Inf
+psosum$k2[psosum$k2 > niter] <- Inf
 
 save(psosum, file = "psosum.Rdata")
-## save(psoargsum, file = "psoargsum.Rdata")
 
-load("psosum.Rdata")
-## load("psoargsum.Rdata")
+namefun <- function(x){
+  if(x$style == "AT1"){
+    style <- "AT3"
+  } else if(x$style == "AT2"){
+    style <- "AT5"
+  } else {
+    style <- x$style
+  }
+  style <- paste(style, "-", sep="")
+  if(x$type == "BBPSO"){
+    parset <- switch(x$parset, "", "xp")
+  } else {
+    parset <- x$parset
+  }
+  type <- paste(x$type, parset, sep = "")
+  cf <- switch(x$CF, "-CF")
+  out <- paste(style, type, cf, sep = "")
+  return(out)
+}
 
-psosum[,5:13] <- abs(psosum[,5:13])
+nbhdnamefun <- function(x){
+  nbhd <- paste("n", x$nbhd, sep="")
+  out <- switch(nbhd, n1 = "SS1", n3 = "SS3", n40 = "Global")
+  return(out)
+}
+
+namesfun <- function(x){
+  nbhd <- nbhdnamefun(x)
+  alg <- namefun(x)
+  return(c(alg, nbhd))
+}
+
+psosumsmol <- ddply(psosum, .(obj, algid, nbhd, mean, sd, con1, k1), namesfun)[,c(1,8,9,4,5,6,7)]
+colnames(psosumsmol) <- c("Obj", "Algorithm", "Nbhd", "Mean", "SD", "P", "K")
 
 
-library(xtable)
+algorder <- c("DI-PSO1", "DI-PSO2", "DI-PSO1-CF", "DI-PSO2-CF",
+              "CI-PSO1", "CI-PSO2", "CI-PSO1-CF", "CI-PSO2-CF",
+              "AT3-PSO1", "AT3-PSO2", "AT3-PSO1-CF", "AT3-PSO2-CF",
+              "AT5-PSO1", "AT5-PSO2", "AT5-PSO1-CF", "AT5-PSO2-CF",
+              "AT3-BBPSO", "AT3-BBPSO-CF", "AT3-BBPSOxp", "AT3-BBPSOxp-CF",
+              "AT5-BBPSO", "AT5-BBPSO-CF", "AT5-BBPSOxp",   "AT5-BBPSOxp-CF")
+nbhdorder <- c("Global", "SS3", "SS1")
 
-sumlast <- subset(psosum, time == niter)
-colnames(sumlast)[c(2,3,5,6,7)] <- c("Algorithm", "Nbhd", "Mean", "Median", "SD")
+psosumsmol$Algorithm <- factor(psosumsmol$Algorithm, levels = algorder)
 
-sumlast <- sumlast[,c(1:3, 5, 7, 14:15)]
+psosumsmol$Nbhd <- factor(psosumsmol$Nbhd, levels = nbhdorder)
 
-k <- 2
+psosumorder <- arrange(psosumsmol, Obj, Algorithm, Nbhd)
+
+## need to structure the table
+
+k <- 1
+ofk <- subset(psosumorder, Obj == k)[,-1]
+ofk1 <- subset(ofk, Nbhd == "Global")[,-2]
+ofk2 <- subset(ofk, Nbhd == "SS3")[,-2]
+ofk3 <- subset(ofk, Nbhd == "SS1")[,-2]
+ofkout <- cbind(ofk1, ofk2[,-1], ofk3[,-1])
+
+print(xtable(ofkout), include.rownames=FALSE, sanitize.text.function=identity)
 
 for(k in 1:6){
 tabout <- cbind(rbind(subset(sumlast, subset=(obj == k & Nbhd == "global" & Algorithm %in% c("PSO", "BBPSO-MC", "BBPSOxp-MC"))),
