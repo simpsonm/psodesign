@@ -104,7 +104,7 @@ nchrome <- 2
 nrun <- ndesign
 mutvars <- c(1,2)
 mutrates <- c(1/100, 1/10)
-nexnbors <- c(5)
+nexnbors <- c(5, 10)
 ncand <- 2000
 parout2 <- NULL
 gaout <- NULL
@@ -150,7 +150,7 @@ for(repl in 1:nrep){
       algid <- paste("EX", nexnbor, sep="-")
       tempdat <- data.frame(obj = objname, logpost = temp[["values"]],
                             objcount = temp$objcount,
-                            time = 1:temp$count, algid = algid,
+                            time = 1:length(temp$values), algid = algid,
                             type = "EX", nnbor = nexnbor, rep = repl)
       exout <- rbind(exout, tempdat)
       temppar <- data.frame(obj = objname, logpost = temp[["value"]],
