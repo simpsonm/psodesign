@@ -157,7 +157,7 @@ for(repl in 1:nrep){
                             algid = algid, type = "EX", parset = NA, CF = NA,
                             style = NA, nbhd = NA, rep = repl,
                             parid = 1:(ndesign*2), par = temp[["par"]])
-      parout <- rbind(parout, temppar)
+      parout2 <- rbind(parout2, temppar)
     }
     write.csv(exout, file = "exsimsout.csv", row.names=FALSE)
     write.csv(gaout, file = "gasimsout.csv", row.names=FALSE)
