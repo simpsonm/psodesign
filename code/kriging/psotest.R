@@ -1,0 +1,180 @@
+library(sp)
+library(maptools)
+source("../psofun.R")
+source("krigingfun.R")
+load("datlist.Rdata")
+
+
+nswarm <- 40
+niter <- 1000
+nrep <- 4
+inertias <- c(0.7298, 1/(log(2)*2))
+cognitives <- c(1.496, log(2) + 1/2)
+socials <- c(1.496, log(2) + 1/2)
+nnbors <- c(1, 3, 40)
+alpha <- 0.2*niter
+beta <- 2
+rates <- c(0.3, 0.5)
+ccc <- 0.1
+df <- 1
+pcuts <- c(0, 0.5)
+sig0 <- 1
+inertia0 <- 1.2
+
+ndesign <- 20
+min.d <- apply(datlist$poly@coords, 2, min)
+max.d <- apply(datlist$poly@coords, 2, max)
+min2.d <- min.d + (max.d-min.d)/3
+max2.d <- min.d + 2*(max.d-min.d)/3
+lower <- rep(min2.d, each = ndesign)
+upper <- rep(max2.d, each = ndesign)
+
+time <- 0:niter
+
+set.seed(3453)
+
+nnbor <- 3
+CF <- FALSE
+parset <- 2
+obj <- sig2fuk.mean
+style <- "AT1"
+rate <- ifelse(style=="AT1", rates[1], rates[2])
+pcut <- pcuts[parset]
+
+
+at3bbpso <- sbbpso(niter, nswarm, nnbor, sig0,
+                    pcut = pcut, CF = CF, AT = TRUE, rate = rate, df = df, ccc = 0.1,
+                    obj = obj, datlist = datlist)
+
+style <- "CI"
+parset <- 1
+c.in <- ifelse(style=="CI", inertias[parset], inertia0)
+c.co <- cognitives[parset]
+c.so <- socials[parset]
+
+
+cipso1 <- spso(niter, nswarm, nnbor, c.in, c.co, c.so, obj, lower, upper,
+               style = substr(style, 1, 2), CF = CF, alpha = alpha, beta = beta,
+               rate = rate, ccc = ccc, datlist = datlist)
+
+atpso1 <- spso(niter, nswarm, nnbor, inertia0, c.co, c.so, obj, lower, upper,
+               style = "AT", CF = CF, alpha = alpha, beta = beta,
+               rate = rate, ccc = ccc, datlist = datlist)
+
+
+c(at3bbpso$value, atpso1$value, cipso1$value)
+
+plot(ts(at3bbpso$values))
+lines(ts(atpso1$values), col = "red")
+lines(ts(cipso1$values), col = "blue")
+
+library(ggplot2)
+
+testdat <- rbind(lower[c(1,ndesign + 1)],upper[c(1,ndesign + 1)])
+testdat <- data.frame(cbind(rep(testdat[,1], each = 2), rep(testdat[,2], 2)))
+testdat <- data.frame(rbind(testdat[1:2,], testdat[4,], testdat[3,]))
+names(testdat) <- c("X", "Y")
+
+ggplot(data = testdat, aes(x=X, y=Y)) + geom_line() +
+  geom_point(data = data.frame(matrix(at3bbpso$par, ncol = 2)), aes(X1, X2), color = "red", size = I(4)) +
+  geom_point(data = data.frame(matrix(atpso1$par, ncol = 2)), aes(X1, X2), color = "blue", size = I(4)) +
+  geom_point(data = data.frame(matrix(cipso1$par, ncol = 2)), aes(X1, X2), color = "black", size = I(4))
+
+
+## see if bbpso does better after lots of repetitions!!!
+
+          for(style in c("CI", "DI", "AT1", "AT2")){
+            rate <- ifelse(style=="AT1", rates[1], rates[2])
+            algid <- paste("PSO", parset, ifelse(CF, "CF", "notCF"), style, sep = "-")
+            tempdat <- data.frame(obj = objname, logpost = temp[["values"]],
+                                  time = time, algid = algid,
+                                  type = "PSO", parset = parset, CF = CF,
+                                  style = style, nbhd = nnbor, rep = repl,
+                                  inertias = temp$inertias)
+            psoout <- rbind(psoout, tempdat)
+            temppar <- data.frame(obj = objname, logpost = temp[["value"]],
+                                  algid = algid, type = "PSO", parset = parset, CF = CF,
+                                  style = style, nbhd = nnbor, rep = repl,
+                                  parid = 1:(ndesign*2), par = temp[["par"]])
+            parout <- rbind(parout, temppar)
+          }
+          write.csv(psoout, file = "psosimsout.csv", row.names=FALSE)
+          write.csv(parout, file = "parsimsout.csv", row.names=FALSE)
+        }
+      }
+    }
+  }
+}
+
+
+set.seed(324280)
+
+nbatches <- c(1,2)
+nchrome <- 2
+nrun <- ndesign
+mutvars <- c(1,2)
+mutrates <- c(1/100, 1/10)
+nexnbors <- c(5, 10)
+ncand <- 2000
+parout2 <- NULL
+gaout <- NULL
+exout <- NULL
+for(repl in 1:nrep){
+  print("rep")
+  print(repl)
+  for(objnum in 1:2){
+    print("obj")
+    print(objnum)
+    if(objnum == 1){
+      obj <- sig2fuk.mean
+      objname <- "sig2fuk.mean"
+    } else {
+      obj <- sig2fuk.max
+      objname <- "sig2fuk.max"
+    }
+    for(nbatch in nbatches){
+      for(mutvar in mutvars){
+        for(mutrate in mutrates){
+          print("GA")
+          print(c(nbatch, mutvar, mutrate))
+          temp <- ga(niter/nbatch, nbatch, floor(nswarm/2), nchrome, nrun, mutvar, mutrate,
+                     lower, upper, obj, datlist=datlist)
+          algid <- paste("GA", nbatch, mutrate, mutvar, sep="-")
+          tempdat <- data.frame(obj = objname, logpost = temp[["values"]],
+                                time = time, algid = algid, type = "GA",
+                                nbatch = nbatch, mutrate = mutrate, mutvar = mutvar,
+                                rep = repl)
+          gaout <- rbind(gaout, tempdat)
+          temppar <- data.frame(obj = objname, logpost = temp[["value"]],
+                                algid = algid, type = "GA", parset = NA, CF = NA,
+                                style = NA, nbhd = NA, rep = repl,
+                                parid = 1:(ndesign*2), par = temp[["par"]])
+          parout2 <- rbind(parout2, temppar)
+        }
+      }
+    }
+    for(nexnbor in nexnbors){
+      print("EX")
+      ### this needs to be rewritten because of exch not having a fixed niter
+      temp <- exch(ncand, obj, datlist$poly@coords, nexnbor, ndesign, datlist = datlist)
+      algid <- paste("EX", nexnbor, sep="-")
+      tempdat <- data.frame(obj = objname, logpost = temp[["values"]],
+                            objcount = temp$objcount,
+                            time = 1:length(temp$values), algid = algid,
+                            type = "EX", nnbor = nexnbor, rep = repl)
+      exout <- rbind(exout, tempdat)
+      temppar <- data.frame(obj = objname, logpost = temp[["value"]],
+                            algid = algid, type = "EX", parset = NA, CF = NA,
+                            style = NA, nbhd = NA, rep = repl,
+                            parid = 1:(ndesign*2), par = temp[["par"]])
+      parout2 <- rbind(parout2, temppar)
+    }
+    write.csv(exout, file = "exsimsout.csv", row.names=FALSE)
+    write.csv(gaout, file = "gasimsout.csv", row.names=FALSE)
+    write.csv(parout2, file = "parsimsout2.csv", row.names=FALSE)
+  }
+}
+
+
+
+

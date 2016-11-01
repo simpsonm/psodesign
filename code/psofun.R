@@ -1,6 +1,14 @@
 library(mnormt)
 library(sp)  ## needed for points in polygon function
 
+logit <- function(x){
+  log(x/(1-x))
+}
+
+ilogit <- function(x){
+  1/(1 + exp(-x))
+}
+
 exch <- function(ncand, obj, poly, nnbor, npoints, start = "rand", ...){
   ndim <- ceiling(sqrt(ncand))
   ncand <- ndim^2
@@ -111,6 +119,7 @@ sbbpso <- function(niter, nswarm, nnbor, sig, pcut=0.5, CF=FALSE, AT=FALSE, rate
   }
   ## initialize positions, velocities, and nbhds
   x <- replicate(nswarm, runif(npar, lower, upper))
+  ##  xtrans <- logit((x-lower)/(upper - lower))
   if(nnbor < nswarm){
     inform <- matrix(replicate(nswarm, sample(1:nswarm, nnbor, replace = TRUE)), nrow = nnbor)
     nbhd <- lapply(1:nswarm, function(x) unique(c(which(inform == x, TRUE)[,2],x)))
@@ -137,38 +146,53 @@ sbbpso <- function(niter, nswarm, nnbor, sig, pcut=0.5, CF=FALSE, AT=FALSE, rate
       nbestval[idx] <- pbestval[nminidx]
       nbest[,idx] <- pbest[,nminidx]
       ## bbpso update
-      if(pbestval[idx] > nbestval[idx]){
-        ## if personal best is worse than nbhd best, compute SDs
-        if(CF){
-          ## coordinate-free way -> constant SD across coords
-          sds <- rep(sqrt(crossprod(pbest[,idx] - gbest))/npar, npar)*sig
+      newval <- Inf
+      ## Tries to find a location inside the target polygon... can be slow.
+      ## Need to think about better ways to do this.
+      while(newval == Inf){
+        if(pbestval[idx] > nbestval[idx]){
+          ## if personal best is worse than nbhd best, compute SDs
+          if(CF){
+            ## coordinate-free way -> constant SD across coords
+            sds <- rep(sqrt(crossprod(pbest[,idx] - gbest))/npar, npar)*sig
+          } else {
+            ## standard BBPSO SD -> different SD across coords
+            sds <- abs(pbest[,idx] - gbest)*sig
+          }
+          sd0 <- which(sds == 0)
+          sd1 <- which(sds > 0)
+          if(length(sd1) > 0){
+            ## for SDs which are positive, do the usual bbpso draw
+            temp <- rmtfixed(1, (pbest[sd1,idx] + nbest[sd1,idx])/2, diag(sds[sd1]), df)
+            u <- runif(length(sd1))
+            ## include a 1 - pcut chance of just going to the personal best coordinate
+            x[sd1,idx] <- ifelse(u > pcut, temp, pbest[sd1,idx])
+          }
+          if(length(sd0) > 0){
+            ## for SDs which are negative, do a mutation from the entire swarm
+            id0s <- sample(2:nswarm, 3)
+            id0s[id0s <= idx] <- id0s[id0s <= idx] - 1
+            x[sd0,idx] <- pbest[sd0,id0s[1]] + (pbest[sd0,id0s[2]] - pbest[sd0,id0s[3]])/2
+          }
         } else {
-          ## standard BBPSO SD -> different SD across coords
-          sds <- abs(pbest[,idx] - gbest)*sig
-        }
-        sd0 <- which(sds == 0)
-        sd1 <- which(sds > 0)
-        if(length(sd1) > 0){
-          ## for SDs which are positive, do the usual bbpso draw
-          temp <- rmtfixed(1, (pbest[sd1,idx] + nbest[sd1,idx])/2, diag(sds[sd1]), df)
-          u <- runif(length(sd1))
-          ## include a 1 - pcut chance of just going to the personal best coordinate
-          x[sd1,idx] <- ifelse(u > pcut, temp, pbest[sd1,idx])
-        }
-        if(length(sd0) > 0){
-          ## for SDs which are negative, do a mutation from the entire swarm
+          ## if personal best is the same as nbhd best, do a mutation from the entire swarm
           id0s <- sample(2:nswarm, 3)
           id0s[id0s <= idx] <- id0s[id0s <= idx] - 1
-          x[sd0,idx] <- pbest[sd0,id0s[1]] + (pbest[sd0,id0s[2]] - pbest[sd0,id0s[3]])/2
+          x[,idx] <- pbest[,id0s[1]] + (pbest[,id0s[2]] - pbest[,id0s[3]])/2
         }
-      } else {
-        ## if personal best is the same as nbhd best, do a mutation from the entire swarm
-        id0s <- sample(2:nswarm, 3)
-        id0s[id0s <= idx] <- id0s[id0s <= idx] - 1
-        x[,idx] <- pbest[,id0s[1]] + (pbest[,id0s[2]] - pbest[,id0s[3]])/2
+        ## ## if position invalid, put it on the boundary and set velocity to 0
+        ## toosmall <- which(x[,idx] < lower)
+        ## if(length(toosmall)>0){
+        ##   x[toosmall, idx] <- lower[toosmall]
+        ## }
+        ## toolarge <- which(x[,idx] > upper)
+        ## if(length(toolarge)>0){
+        ##   x[toolarge, idx] <- upper[toolarge]
+        ## }
+        ## compute new value and update pbests if its an improvement
+        ##x[,idx] <- ilogit(xtrans[,idx])*(upper - lower) + lower
+        newval <- obj(x[,idx], ...)
       }
-      ## compute new value and update pbests if its an improvement
-      newval <- obj(x[,idx], ...)
       if(newval < pbestval[idx]){
         pbestval[idx] <- newval
         pbest[,idx] <- x[,idx]

@@ -134,16 +134,15 @@ atplotout$Algorithm <- mapvalues(atplotout$algid, algidstr, "AT5-PSO2-CF")
 atplotout$Algorithm <- paste(atplotout$Algorithm, ", Obj = ", atplotout$obj, sep = "")
 atplotout$Algorithm <- mapvalues(atplotout$Algorithm, "DI-PSO, Obj = 1", "DI-PSO")
 atplotout$Algorithm <- factor(atplotout$Algorithm, unique(atplotout$Algorithm)[c(3,1,2)])
-inertiaplot <- qplot(time, inertias, data = atplotout, geom = "line", linetype = Algorithm) +
+inertiaplot <- qplot(time, inertias, data = atplotout, geom = "line", color = Algorithm) +
   xlab("iteration") + ylab("inertia")
 
 algidstr2 <- "BBPSO-1-CF-AT1"
 atplotout2 <- subset(psoout, (obj %in% 1:6 & nbhd == 3 & algid == algidstr2 &
                              time > 0 & rep == rr))[,c(1,4,5,12)]
 atplotout2$Obj <- paste("OF", atplotout2$obj, sep="")
-scaleplot <- qplot(time, inertias, data = atplotout2, geom = "line", linetype = Obj) +
+scaleplot <- qplot(time, inertias, data = atplotout2, geom = "line", color = Obj) +
   xlab("iteration") + ylab("scale")
-scaleplot
 
 ht <- 4
 wd <- 8
