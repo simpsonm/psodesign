@@ -1,13 +1,5 @@
 library(mnormt)
-library(sp)  ## needed for points in polygon function
-
-logit <- function(x){
-  log(x/(1-x))
-}
-
-ilogit <- function(x){
-  1/(1 + exp(-x))
-}
+library(sp)  ## needed for points in polygon function in exchange algorithm
 
 exch <- function(ncand, obj, poly, nnbor, npoints, start = "rand", ...){
   ndim <- ceiling(sqrt(ncand))
@@ -73,9 +65,15 @@ exch <- function(ncand, obj, poly, nnbor, npoints, start = "rand", ...){
   return(list(par = c(Dbest), value = Qbest, values = vals, count = count, objcount = objcount))
 }
 
-ga <- function(niter, nbatch, nswarm, nchrome, nrun, mutvar, mutrate, lower, upper, obj, ...){
+ga <- function(niter, nbatch, nswarm, nchrome, nrun, mutvar, mutrate, lower, upper, obj,
+               init = NULL, boundaryfun = NULL, ...){
   npar <- nchrome*nrun
-  x <- replicate(nswarm, runif(npar, lower, upper))
+  if(is.null(init)){
+    x <- replicate(nswarm, runif(npar, lower, upper))
+  } else {
+    x <- init
+  }
+  nobfun <- is.null(boundaryfun)   ## check to see if boundary function is supplied.
   vals <- apply(x, 2, obj, ...)
   vals <- vals[order(vals)]
   valsout <- matrix(0, ncol = nswarm, nrow = niter*nbatch+1)
@@ -93,6 +91,11 @@ ga <- function(niter, nbatch, nswarm, nchrome, nrun, mutvar, mutrate, lower, upp
       d <- log(z/(1-z)) + mutvar*exp(-mutrate*iter)*runif(npar*nswarm, -0.5, 0.5)
       u <- lower + (upper - lower)/(1 + exp(-d))
       xmut <- x*(1-mutate) + u*mutate
+      ## polygon correction, only needed if given a boundary function
+      if(!nobfun){
+        xcross <- apply(xcross, 2, boundaryfun, ...)
+        xmut <- apply(xmut, 2, boundaryfun, ...)
+      }
       crossvals <- apply(xcross, 2, obj, ...)
       mutvals <- apply(xmut, 2, obj, ...)
       fullvals <- c(vals, crossvals, mutvals)
@@ -107,8 +110,8 @@ ga <- function(niter, nbatch, nswarm, nchrome, nrun, mutvar, mutrate, lower, upp
   return(out)
 }
 
-sbbpso <- function(niter, nswarm, nnbor, sig, pcut=0.5, CF=FALSE, AT=FALSE, rate=0.3, df=1,
-                   ccc = 0.1, obj, ...){
+sbbpso <- function(niter, nswarm, nnbor, sig, obj, lower, upper, pcut=0.5, CF=FALSE, AT=FALSE, rate=0.3, df=1,
+                   ccc = 0.1, init = NULL, boundaryfun = NULL, ...){
   npar <- length(lower) ## dimension of search space
   if(nswarm < 1){
     nswarm <- 40  ## automatic setting of nswarm
@@ -118,8 +121,12 @@ sbbpso <- function(niter, nswarm, nnbor, sig, pcut=0.5, CF=FALSE, AT=FALSE, rate
     logsig <- log(sig)
   }
   ## initialize positions, velocities, and nbhds
-  x <- replicate(nswarm, runif(npar, lower, upper))
-  ##  xtrans <- logit((x-lower)/(upper - lower))
+  if(is.null(init)){
+    x <- replicate(nswarm, runif(npar, lower, upper))
+  } else {
+    x <- init
+  }
+  nobfun <- is.null(boundaryfun)   ## check to see if boundary function is supplied.
   if(nnbor < nswarm){
     inform <- matrix(replicate(nswarm, sample(1:nswarm, nnbor, replace = TRUE)), nrow = nnbor)
     nbhd <- lapply(1:nswarm, function(x) unique(c(which(inform == x, TRUE)[,2],x)))
@@ -149,50 +156,53 @@ sbbpso <- function(niter, nswarm, nnbor, sig, pcut=0.5, CF=FALSE, AT=FALSE, rate
       newval <- Inf
       ## Tries to find a location inside the target polygon... can be slow.
       ## Need to think about better ways to do this.
-      while(newval == Inf){
-        if(pbestval[idx] > nbestval[idx]){
-          ## if personal best is worse than nbhd best, compute SDs
-          if(CF){
-            ## coordinate-free way -> constant SD across coords
-            sds <- rep(sqrt(crossprod(pbest[,idx] - gbest))/npar, npar)*sig
-          } else {
-            ## standard BBPSO SD -> different SD across coords
-            sds <- abs(pbest[,idx] - gbest)*sig
-          }
-          sd0 <- which(sds == 0)
-          sd1 <- which(sds > 0)
-          if(length(sd1) > 0){
-            ## for SDs which are positive, do the usual bbpso draw
-            temp <- rmtfixed(1, (pbest[sd1,idx] + nbest[sd1,idx])/2, diag(sds[sd1]), df)
-            u <- runif(length(sd1))
-            ## include a 1 - pcut chance of just going to the personal best coordinate
-            x[sd1,idx] <- ifelse(u > pcut, temp, pbest[sd1,idx])
-          }
-          if(length(sd0) > 0){
-            ## for SDs which are negative, do a mutation from the entire swarm
-            id0s <- sample(2:nswarm, 3)
-            id0s[id0s <= idx] <- id0s[id0s <= idx] - 1
-            x[sd0,idx] <- pbest[sd0,id0s[1]] + (pbest[sd0,id0s[2]] - pbest[sd0,id0s[3]])/2
-          }
+      ## while(newval == Inf){
+      if(pbestval[idx] > nbestval[idx]){
+        ## if personal best is worse than nbhd best, compute SDs
+        if(CF){
+          ## coordinate-free way -> constant SD across coords
+          sds <- rep(sqrt(crossprod(pbest[,idx] - gbest))/npar, npar)*sig
         } else {
-          ## if personal best is the same as nbhd best, do a mutation from the entire swarm
+          ## standard BBPSO SD -> different SD across coords
+          sds <- abs(pbest[,idx] - gbest)*sig
+        }
+        sd0 <- which(sds == 0)
+        sd1 <- which(sds > 0)
+        if(length(sd0) > 0){
+          ## for SDs which are negative, do a mutation from the entire swarm
           id0s <- sample(2:nswarm, 3)
           id0s[id0s <= idx] <- id0s[id0s <= idx] - 1
-          x[,idx] <- pbest[,id0s[1]] + (pbest[,id0s[2]] - pbest[,id0s[3]])/2
+          x[sd0,idx] <- pbest[sd0,id0s[1]] + (pbest[sd0,id0s[2]] - pbest[sd0,id0s[3]])/2
         }
-        ## ## if position invalid, put it on the boundary and set velocity to 0
-        ## toosmall <- which(x[,idx] < lower)
-        ## if(length(toosmall)>0){
-        ##   x[toosmall, idx] <- lower[toosmall]
-        ## }
-        ## toolarge <- which(x[,idx] > upper)
-        ## if(length(toolarge)>0){
-        ##   x[toolarge, idx] <- upper[toolarge]
-        ## }
-        ## compute new value and update pbests if its an improvement
-        ##x[,idx] <- ilogit(xtrans[,idx])*(upper - lower) + lower
-        newval <- obj(x[,idx], ...)
+        if(length(sd1) > 0){
+          ## for SDs which are positive, do the usual bbpso draw
+          temp <- rmtfixed(1, (pbest[sd1,idx] + nbest[sd1,idx])/2, diag(sds[sd1]), df)
+          u <- runif(length(sd1))
+          ## include a 1 - pcut chance of just going to the personal best coordinate
+          x[sd1,idx] <- ifelse(u > pcut, temp, pbest[sd1,idx])
+        }
+      } else {
+        ## if personal best is the same as nbhd best, do a mutation from the entire swarm
+        id0s <- sample(2:nswarm, 3)
+        id0s[id0s <= idx] <- id0s[id0s <= idx] - 1
+        x[,idx] <- pbest[,id0s[1]] + (pbest[,id0s[2]] - pbest[,id0s[3]])/2
       }
+      ## move particle to the boundary of the space, if necessary
+      if(nobfun){
+        ## if no boundary function, use the given bounding box
+        toosmall <- which(x[,idx] < lower)
+        if(length(toosmall)>0){
+          x[toosmall, idx] <- lower[toosmall]
+        }
+        toolarge <- which(x[,idx] > upper)
+        if(length(toolarge)>0){
+          x[toolarge, idx] <- upper[toolarge]
+        }
+      } else {
+        ## if boundary function exists, use it to move outliers to the boundary
+        x[,idx] <- boundaryfun(x[,idx], ...)
+      }
+      newval <- obj(x[,idx], ...)
       if(newval < pbestval[idx]){
         pbestval[idx] <- newval
         pbest[,idx] <- x[,idx]
@@ -223,7 +233,8 @@ sbbpso <- function(niter, nswarm, nnbor, sig, pcut=0.5, CF=FALSE, AT=FALSE, rate
 }
 
 spso <- function(niter, nswarm, nnbor, inertia, cognitive, social, obj, lower, upper,
-                 style = "CI", CF = FALSE, alpha = .2*niter, beta = 2, rate = 0.3, ccc = 0.1, ...){
+                 style = "CI", CF = FALSE, alpha = .2*niter, beta = 2, rate = 0.3, ccc = 0.1,
+                 init = NULL, boundaryfun = NULL, ...){
   npar <- length(lower) ## dimension of search space
   if(nswarm < 1){
     nswarm <- 10 + 2*sqrt(npar)  ## automatic setting of nswarm
@@ -238,7 +249,12 @@ spso <- function(niter, nswarm, nnbor, inertia, cognitive, social, obj, lower, u
   }
   inertias <- rep(inertia, niter + 1)
   ## initialize positions, velocities, and nbhds
-  x <- replicate(nswarm, runif(npar, lower, upper))
+  if(is.null(init)){
+    x <- replicate(nswarm, runif(npar, lower, upper))
+  } else {
+    x <- init
+  }
+  nobfun <- is.null(boundaryfun)   ## check to see if boundary function is supplied.
   v <- replicate(nswarm, runif(npar, lower, upper)) - x
   if(nnbor < nswarm){
     inform <- matrix(replicate(nswarm, sample(1:nswarm, nnbor, replace = TRUE)), nrow = nnbor)
@@ -303,16 +319,27 @@ spso <- function(niter, nswarm, nnbor, inertia, cognitive, social, obj, lower, u
       }
       ## udpate position
       x[,idx] <- x[,idx] + v[,idx]
-      ## if position invalid, put it on the boundary and set velocity to 0
-      toosmall <- which(x[,idx] < lower)
-      if(length(toosmall)>0){
-        x[toosmall, idx] <- lower[toosmall]
-        v[toosmall, idx] <- -0.5*v[toosmall, idx]
-      }
-      toolarge <- which(x[,idx] > upper)
-      if(length(toolarge)>0){
-        x[toolarge, idx] <- upper[toolarge]
-        v[toolarge, idx] <- -0.5*v[toolarge, idx]
+      if(nobfun){
+        ## if no boundary function, use the given bounding box
+        ## if position invalid, put it on the boundary and set velocity to -0.5*velocity
+        toosmall <- which(x[,idx] < lower)
+        if(length(toosmall)>0){
+          x[toosmall, idx] <- lower[toosmall]
+          v[toosmall, idx] <- -0.5*v[toosmall, idx]
+        }
+        toolarge <- which(x[,idx] > upper)
+        if(length(toolarge)>0){
+          x[toolarge, idx] <- upper[toolarge]
+          v[toolarge, idx] <- -0.5*v[toolarge, idx]
+        }
+      } else {
+        ## if boundary function exists, use it to move outliers to the boundary
+        newx <- boundaryfun(x[,idx], ...)
+        moved <- which(x[,idx] != newx)
+        if(length(moved)>0){
+          x[,idx] <- newx
+          v[moved, idx] <- -0.5*v[moved, idx]
+        }
       }
       ## compute new value and update pbests if its an improvement
       newval <- obj(x[,idx], ...)

@@ -1,3 +1,25 @@
+library(rgeos) ## needed for movetoboundary function
+
+movetoboundary <- function(design, datlist){
+  design <- matrix(design, ncol = 2)
+  checks <- point.in.polygon(design[,1], design[,2], datlist$poly@coords[,1], datlist$poly@coords[,2])
+  idx <- which(checks == 0)
+  nidx <- length(idx)
+  if(nidx > 0){
+    if(nidx == 1){
+      dinput <- matrix(design[idx,], ncol = 2)
+    } else {
+      dinput <- design[idx,]
+    }
+    design[idx,] <- t(apply(dinput, 1,
+                            function(x, p1){
+                              gNearestPoints(SpatialPoints(matrix(x, ncol=2)), p1)@coords[2,]
+                            },
+                            p1 = datlist$sppoly))
+  }
+  return(c(design))
+}
+
 mylikefit <- function(pars, trendtype, houston, maxit = 500, reltol = .Machine$double.eps){
   u <- houston$u
   v <- houston$v

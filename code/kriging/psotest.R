@@ -1,9 +1,10 @@
 library(sp)
 library(maptools)
+library(rgeos)
 source("../psofun.R")
 source("krigingfun.R")
 load("datlist.Rdata")
-
+datlist$sppoly <- SpatialPolygons(list(b=Polygons(list(a=datlist$poly), "a")))
 
 nswarm <- 40
 niter <- 1000
@@ -21,13 +22,12 @@ pcuts <- c(0, 0.5)
 sig0 <- 1
 inertia0 <- 1.2
 
-ndesign <- 20
+ndesign <- 21
 min.d <- apply(datlist$poly@coords, 2, min)
 max.d <- apply(datlist$poly@coords, 2, max)
-min2.d <- min.d + (max.d-min.d)/3
-max2.d <- min.d + 2*(max.d-min.d)/3
-lower <- rep(min2.d, each = ndesign)
-upper <- rep(max2.d, each = ndesign)
+lower <- rep(min.d, each = ndesign)
+upper <- rep(max.d, each = ndesign)
+
 
 time <- 0:niter
 
@@ -42,9 +42,11 @@ rate <- ifelse(style=="AT1", rates[1], rates[2])
 pcut <- pcuts[parset]
 
 
-at3bbpso <- sbbpso(niter, nswarm, nnbor, sig0,
-                    pcut = pcut, CF = CF, AT = TRUE, rate = rate, df = df, ccc = 0.1,
-                    obj = obj, datlist = datlist)
+
+init <- replicate(nswarm, c(spsample(datlist$poly, ndesign, "random")@coords))
+at3bbpso <- sbbpso(niter, nswarm, nnbor, sig0, obj, lower, upper,
+                   pcut = pcut, CF = CF, AT = TRUE, rate = rate, df = df, ccc = 0.1,
+                   init = init, boundaryfun = movetoboundary, datlist = datlist)
 
 style <- "CI"
 parset <- 1
@@ -52,19 +54,23 @@ c.in <- ifelse(style=="CI", inertias[parset], inertia0)
 c.co <- cognitives[parset]
 c.so <- socials[parset]
 
-
+init <- replicate(nswarm, c(spsample(datlist$poly, ndesign, "random")@coords))
 cipso1 <- spso(niter, nswarm, nnbor, c.in, c.co, c.so, obj, lower, upper,
                style = substr(style, 1, 2), CF = CF, alpha = alpha, beta = beta,
-               rate = rate, ccc = ccc, datlist = datlist)
+               rate = rate, ccc = ccc,
+               init = init, boundaryfun = movetoboundary, datlist = datlist)
 
+init <- replicate(nswarm, c(spsample(datlist$poly, ndesign, "random")@coords))
 atpso1 <- spso(niter, nswarm, nnbor, inertia0, c.co, c.so, obj, lower, upper,
                style = "AT", CF = CF, alpha = alpha, beta = beta,
-               rate = rate, ccc = ccc, datlist = datlist)
+               rate = rate, ccc = ccc,
+               init = init, boundaryfun = movetoboundary, datlist = datlist)
 
 
 c(at3bbpso$value, atpso1$value, cipso1$value)
 
-plot(ts(at3bbpso$values))
+plot(ts(at3bbpso$values), ylim = c(min(c(at3bbpso$values, atpso1$values, cipso1$values)),
+                                   max(c(at3bbpso$values, atpso1$values, cipso1$values))))
 lines(ts(atpso1$values), col = "red")
 lines(ts(cipso1$values), col = "blue")
 
