@@ -153,10 +153,6 @@ sbbpso <- function(niter, nswarm, nnbor, sig, obj, lower, upper, pcut=0.5, CF=FA
       nbestval[idx] <- pbestval[nminidx]
       nbest[,idx] <- pbest[,nminidx]
       ## bbpso update
-      newval <- Inf
-      ## Tries to find a location inside the target polygon... can be slow.
-      ## Need to think about better ways to do this.
-      ## while(newval == Inf){
       if(pbestval[idx] > nbestval[idx]){
         ## if personal best is worse than nbhd best, compute SDs
         if(CF){
