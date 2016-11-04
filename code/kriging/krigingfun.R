@@ -69,6 +69,7 @@ sig2fuk.mean <- function(dd, datlist){
   dd <- matrix(dd, ncol = 2)
   ## remove duplicates (since nugget is 0)
   dd <- dd[!duplicated(dd, MARGIN = 1),]
+  dd <- matrix(dd, ncol = 2)
   N.d <- nrow(dd)
   ss <- datlist$ss ## fixed points in the design
   tt <- datlist$tt ## target points
@@ -89,10 +90,12 @@ sig2fuk.mean <- function(dd, datlist){
   X <- rbind(X.s, X.d)
   ## first, finish creating Cz and Czinv
   D.d <- matrix(0, N.d, N.d)
-  for(i in 2:N.d){
-    for(j in 1:(i-1)){
-      D.d[i,j] <- sqrt(sum((dd[i,] - dd[j,])^2))
-      D.d[j,i] <- D.d[i,j]
+  if(N.d > 1){
+    for(i in 2:N.d){
+      for(j in 1:(i-1)){
+        D.d[i,j] <- sqrt(sum((dd[i,] - dd[j,])^2))
+        D.d[j,i] <- D.d[i,j]
+      }
     }
   }
   D.d.s <- matrix(0, N.d, N.s)
@@ -167,6 +170,7 @@ sig2fuk.max <- function(dd, datlist){
   dd <- matrix(dd, ncol = 2)
   ## remove duplicates (since nugget is 0)
   dd <- dd[!duplicated(dd, MARGIN = 1),]
+  dd <- matrix(dd, ncol = 2)
   N.d <- nrow(dd)
   ss <- datlist$ss ## fixed points in the design
   tt <- datlist$tt ## target points
@@ -187,10 +191,12 @@ sig2fuk.max <- function(dd, datlist){
   X <- rbind(X.s, X.d)
   ## first, finish creating Cz and Czinv
   D.d <- matrix(0, N.d, N.d)
-  for(i in 2:N.d){
-    for(j in 1:(i-1)){
-      D.d[i,j] <- sqrt(sum((dd[i,] - dd[j,])^2))
-      D.d[j,i] <- D.d[i,j]
+  if(N.d > 1){
+    for(i in 2:N.d){
+      for(j in 1:(i-1)){
+        D.d[i,j] <- sqrt(sum((dd[i,] - dd[j,])^2))
+        D.d[j,i] <- D.d[i,j]
+      }
     }
   }
   D.d.s <- matrix(0, N.d, N.s)
