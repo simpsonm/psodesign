@@ -1,7 +1,7 @@
 #! /bin/bash
 
 #SBATCH -A stsn
-#SBATCH -p Lewis
+#SBATCH -p General
 #SBATCH -J psorunskriging
 #SBATCH -o psoruns.o
 #SBATCH -e psoruns.e
