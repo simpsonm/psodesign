@@ -11,4 +11,7 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=themattsimpson@gmail.com
 
+VERSION="3.2.3"
+module load R/R-${VERSION}
+
 R --no-restore --no-save CMD BATCH psoruns.R
