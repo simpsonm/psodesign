@@ -1,12 +1,12 @@
 #! /bin/bash
 
 #SBATCH -A stsn
-#SBATCH -p general
+#SBATCH -p General
 #SBATCH -J psorunskriging
 #SBATCH -o psoruns.o
 #SBATCH -e psoruns.e
 #SBATCH --mem 10000
-#SBATCH -t 14-00:00
+#SBATCH -t 10-00:00
 #SBATCH -n 20
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=themattsimpson@gmail.com
