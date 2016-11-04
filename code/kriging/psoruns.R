@@ -1,3 +1,4 @@
+#! /usr/bin/env Rscript
 library(parallel)
 library(doParallel)
 library(foreach)
