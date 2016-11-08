@@ -1,5 +1,3 @@
-
-
 #! /bin/bash
 
 #SBATCH --qos long
