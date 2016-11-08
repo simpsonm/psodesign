@@ -1,13 +1,17 @@
+
+
 #! /bin/bash
 
+#SBATCH --qos long
 #SBATCH -A stsn
-#SBATCH -p General
+#SBATCH -p Lewis
 #SBATCH -J psorunskriging
 #SBATCH -o psoruns.o
 #SBATCH -e psoruns.e
-#SBATCH --mem 10000
+#SBATCH -mem-per-cpu=3G
 #SBATCH -t 7-00:00
-#SBATCH -n 20
+#SBATCH -n 28  # cores
+#SBATCH -N 1  # nodes
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=themattsimpson@gmail.com
 
