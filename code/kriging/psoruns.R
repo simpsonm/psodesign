@@ -4,12 +4,14 @@ library(doParallel)
 library(foreach)
 library(sp)
 library(maptools)
+library(rgeos)
+library(mnormt)
 source("../psofun.R")
 source("krigingfun.R")
 load("datlist.Rdata")
 datlist$sppoly <- SpatialPolygons(list(b=Polygons(list(a=datlist$poly), "a")))
 
-ncores <- 20  ## how many cores do we want to request
+ncores <- 28  ## how many cores do we want to request
 registerDoParallel(ncores)
 
 nswarm <- 40
