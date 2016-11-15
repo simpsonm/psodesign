@@ -30,13 +30,14 @@ pcuts <- c(0, 0.5)
 sig0 <- 1
 inertia0 <- 1.2
 
-ndesign <- 20
+ndesign <- 40
 lower <- rep(apply(datlist$poly@coords, 2, min), each = ndesign)
 upper <- rep(apply(datlist$poly@coords, 2, max), each = ndesign)
 
 time <- 0:niter
 
 parsets <- 1:2
+CFs <- c("CF", "nCF")
 objnames <- c("sig2fuk.mean", "sig2fuk.max")
 
 specs <- c(outer(c(outer(c(outer(paste(c("CI", "DI", "AT1", "AT2"), "PSO", sep="-"), parsets, paste, sep = "-")),
@@ -46,17 +47,18 @@ specs <- c(outer(c(outer(c(outer(paste(c("CI", "DI", "AT1", "AT2"), "PSO", sep="
 
 
 CFs <- c("nCF")
-nnbors <- 3
+nnbors <- c(3, 40)
 parsets <- 1
 specs2 <- c(outer(c(outer(c(outer(paste(c("CI", "AT1", "AT2"), "PSO", sep="-"), parsets, paste, sep = "-")),
                         c(outer(CFs, nnbors, paste, sep="-")), paste, sep="-"),
                   c(outer(c(outer(paste(c("AT1", "AT2"), "BBPSO", sep="-"), parsets, paste, sep = "-")),
                           c(outer(CFs, nnbors, paste, sep="-")), paste, sep="-"))), objnames, paste, sep="-"))
 niter <- 1500
-
+time <- 0:niter
 
 set.seed(234132)
 seeds <- rnorm(length(specs))
+
 
 psowrap <- function(i, datlist, specs, seeds){
   spec <- specs[i]
@@ -114,10 +116,8 @@ psowrap <- function(i, datlist, specs, seeds){
   return(out)
 }
 
-homepsoouts <- foreach(i=1:length(specs2), .packages = c("sp", "maptools", "rgeos", "mnormt")) %dopar%
+homepsooutstest <- foreach(i=1:length(specs2), .packages = c("sp", "maptools", "rgeos", "mnormt")) %dopar%
   psowrap(i, datlist, specs2, seeds)
 
-homepsooutstest <- homepsoouts
-save(homepsooutstest, file = "homepsooutstest.RData")
-
 stopImplicitCluster()
+save(homepsooutstest, file = "homepsooutstest.RData")

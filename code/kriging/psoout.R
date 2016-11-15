@@ -31,6 +31,15 @@ for(i in 1:length(noelpsoouts)){
 save(valueout, file = "valueout.RData")
 save(parout, file = "parout.RData")
 
+load("homepsooutstest.RData")
+valueout <- homepsooutstest[[1]][[1]]
+parout <- homepsooutstest[[1]][[2]]
+for(i in 2:length(homepsooutstest)){
+  valueout <- rbind(valueout, homepsooutstest[[i]][[1]])
+  parout <- rbind(parout, homepsooutstest[[i]][[2]])
+}
+
+
 
 namefun <- function(x){
   if(x$style == "AT1"){
@@ -86,7 +95,7 @@ valueclean$Nbhd <- factor(valueclean$Nbhd, levels = nbhdorder)
 valueorder <- arrange(valueclean, Obj, Algorithm, Nbhd, Time)
 
 
-nlook <- floor(max(valueorder$Time)/2)
+nlook <- floor(max(valueorder$Time))
 valuelast <- filter(valueorder, Time == nlook)
 ## this prints the tables, however it's missing the first header.
 ## paste the following line (without the ##) just after the \begin{tabular} line
@@ -137,6 +146,16 @@ qplot(Time, logpost, color = Algorithm, geom = "line", facets = Nbhd~., size = I
                        "AT5-PSO1", "AT5-PSO2",
                        "AT3-BBPSO", "AT3-BBPSOxp",
                        "AT5-BBPSO", "AT5-BBPSOxp")))
+
+objname <- "sig2puk.mean"
+p1 <- qplot(Time, logpost, color = Algorithm, geom = "line", size = I(1),
+            data = filter(valueorder, Obj == objname))
+
+objname <- "sig2puk.max"
+p2 <- qplot(Time, logpost, color = Algorithm, geom = "line", size = I(1),
+            data = filter(valueorder, Obj == objname))
+
+grid.arrange(p1, p2, ncol = 2)
 
 
 objname <- "sig2puk.max"
