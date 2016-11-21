@@ -407,3 +407,15 @@ for(repl in 1:nrep){
 
 
 
+
+
+
+
+datlist2 <- datlist
+
+dd0 <- spsample(datlist$sppoly, 10, "random")@coords
+ss <- datlist$ss
+dd2 <- c(rbind(dd0, ss))
+dd1 <- c(dd0)
+sig2fuk.mean(dd1, datlist)
+sig2fuk.new.mean(dd2, datlist)

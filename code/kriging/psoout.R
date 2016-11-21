@@ -2,7 +2,6 @@ library(plyr)
 library(dplyr)
 library(ggplot2)
 library(xtable)
-
 library(gridExtra)
 
 library(reshape2)
@@ -148,13 +147,11 @@ qplot(Time, logpost, color = Algorithm, geom = "line", facets = Nbhd~., size = I
                        "AT5-BBPSO", "AT5-BBPSOxp")))
 
 objname <- "sig2puk.mean"
-p1 <- qplot(Time, logpost, color = Algorithm, geom = "line", size = I(1),
+p1 <- qplot(Time, logpost, color = Algorithm, geom = "line", size = I(1), facets = Nbhd ~.,
             data = filter(valueorder, Obj == objname))
-
 objname <- "sig2puk.max"
-p2 <- qplot(Time, logpost, color = Algorithm, geom = "line", size = I(1),
+p2 <- qplot(Time, logpost, color = Algorithm, geom = "line", size = I(1), facets = Nbhd ~.,
             data = filter(valueorder, Obj == objname))
-
 grid.arrange(p1, p2, ncol = 2)
 
 
@@ -171,9 +168,35 @@ p2 <- qplot(Time, logpost, color = Algorithm, geom = "line", facets = Nbhd~., si
 
 grid.arrange(p1, p2, ncol = 2)
 
+init <- c(spsample(datlist$sppoly, ndesign, "random")@coords)
+
+optimtest <- optim(init, sig2fuk.mean2, datlist = datlist, method = "BFGS",
+                   control = list(reltol = .Machine$double.eps, maxit = 1000))
 
 
 
+
+sig2fuk.mean2 <- function(dd, datlist){
+  dd2 <- matrix(dd, ncol = 2)
+  poly <- datlist$sppoly@polygons$b@Polygons$a@coords
+  check <- all(point.in.polygon(dd2[,1], dd2[,2], poly[,1], poly[,2]))
+  if(check)
+    out <- sig2fuk.mean(dd, datlist)
+  else
+    out <- Inf
+  return(out)
+}
+
+sig2fuk.max2 <- function(dd, datlist){
+  dd2 <- matrix(dd, ncol = 2)
+  poly <- datlist$sppoly@polygons$b@Polygons$a@coords
+  check <- all(point.in.polygon(dd2[,1], dd2[,2], poly[,1], poly[,2]))
+  if(check)
+    out <- sig2fuk.max(dd, datlist)
+  else
+    out <- Inf
+  return(out)
+}
 ##########################################################################
 
 psoout <- read.csv("psosimsout.csv")

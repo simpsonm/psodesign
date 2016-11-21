@@ -30,7 +30,7 @@ pcuts <- c(0, 0.5)
 sig0 <- 1
 inertia0 <- 1.2
 
-ndesign <- 40
+ndesign <- 100
 lower <- rep(apply(datlist$poly@coords, 2, min), each = ndesign)
 upper <- rep(apply(datlist$poly@coords, 2, max), each = ndesign)
 
@@ -38,7 +38,7 @@ time <- 0:niter
 
 parsets <- 1:2
 CFs <- c("CF", "nCF")
-objnames <- c("sig2fuk.mean", "sig2fuk.max")
+objnames <- c("sig2fuk.new.mean", "sig2fuk.new.max")
 
 specs <- c(outer(c(outer(c(outer(paste(c("CI", "DI", "AT1", "AT2"), "PSO", sep="-"), parsets, paste, sep = "-")),
                         c(outer(CFs, nnbors, paste, sep="-")), paste, sep="-"),
@@ -53,7 +53,7 @@ specs2 <- c(outer(c(outer(c(outer(paste(c("CI", "AT1", "AT2"), "PSO", sep="-"), 
                         c(outer(CFs, nnbors, paste, sep="-")), paste, sep="-"),
                   c(outer(c(outer(paste(c("AT1", "AT2"), "BBPSO", sep="-"), parsets, paste, sep = "-")),
                           c(outer(CFs, nnbors, paste, sep="-")), paste, sep="-"))), objnames, paste, sep="-"))
-niter <- 1500
+niter <- 2000
 time <- 0:niter
 
 set.seed(234132)
@@ -70,7 +70,7 @@ psowrap <- function(i, datlist, specs, seeds){
   CF <- splt[4]=="CF"
   nnbor <- as.numeric(splt[5])
   objname <- splt[6]
-  obj <- switch(objname, sig2fuk.mean = sig2fuk.mean, sig2fuk.max = sig2fuk.max)
+  obj <- switch(objname, sig2fuk.new.mean = sig2fuk.new.mean, sig2fuk.new.max = sig2fuk.new.max)
   repl <- 1
   if(alg == "BBPSO"){
     rate <- ifelse(style=="AT1", rates[1], rates[2])
