@@ -14,7 +14,7 @@ ncores <- detectCores() - 4
 registerDoParallel(ncores)
 
 nswarm <- 40
-niter <- 1000
+niter <- 2000
 nrep <- 1
 inertias <- c(0.7298, 1/(log(2)*2))
 cognitives <- c(1.496, log(2) + 1/2)
@@ -29,7 +29,7 @@ pcuts <- c(0, 0.5)
 sig0 <- 1
 inertia0 <- 1.2
 
-ndesign <- 20
+ndesign <- 100
 lower <- rep(apply(datlist$poly@coords, 2, min), each = ndesign)
 upper <- rep(apply(datlist$poly@coords, 2, max), each = ndesign)
 

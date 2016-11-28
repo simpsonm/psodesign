@@ -78,7 +78,8 @@ namesfun <- function(x){
 valueclean <- ddply(valueout, .(obj, algid, nbhd, time, logpost, inertias), namesfun)[, c(1, 7, 8, 4, 5, 6)]
 names(valueclean) <- c("Obj", "Algorithm", "Nbhd", "Time", "logpost", "inertia")
 
-valueclean$Obj <- mapvalues(valueclean$Obj, c("sig2fuk.max", "sig2fuk.mean"), c("sig2puk.max", "sig2puk.mean"))
+valueclean$Obj <- mapvalues(valueclean$Obj, c("sig2fuk.new.max", "sig2fuk.new.mean"),
+                            c("sig2puk.new.max", "sig2puk.new.mean"))
 
 
 algorder <- c("PSO1", "PSO2", "PSO1-CF", "PSO2-CF",
@@ -146,10 +147,10 @@ qplot(Time, logpost, color = Algorithm, geom = "line", facets = Nbhd~., size = I
                        "AT3-BBPSO", "AT3-BBPSOxp",
                        "AT5-BBPSO", "AT5-BBPSOxp")))
 
-objname <- "sig2puk.mean"
+objname <- "sig2puk.new.mean"
 p1 <- qplot(Time, logpost, color = Algorithm, geom = "line", size = I(1), facets = Nbhd ~.,
             data = filter(valueorder, Obj == objname))
-objname <- "sig2puk.max"
+objname <- "sig2puk.new.max"
 p2 <- qplot(Time, logpost, color = Algorithm, geom = "line", size = I(1), facets = Nbhd ~.,
             data = filter(valueorder, Obj == objname))
 grid.arrange(p1, p2, ncol = 2)
