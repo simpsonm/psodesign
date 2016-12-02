@@ -10,7 +10,7 @@ source("krigingfun.R")
 load("datlist.Rdata")
 datlist$sppoly <- SpatialPolygons(list(b=Polygons(list(a=datlist$poly), "a")))
 
-ncores <- detectCores()
+ncores <- detectCores() - 4
 registerDoParallel(ncores)
 
 nswarm <- 40
