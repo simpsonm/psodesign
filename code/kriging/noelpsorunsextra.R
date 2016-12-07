@@ -10,7 +10,7 @@ source("krigingfun.R")
 load("datlist.Rdata")
 datlist$sppoly <- SpatialPolygons(list(b=Polygons(list(a=datlist$poly), "a")))
 
-ncores <- 8
+ncores <- 10
 registerDoParallel(ncores)
 
 nswarm <- 40
@@ -102,9 +102,9 @@ psowrap <- function(i, datlist, specs, seeds){
   return(out)
 }
 
-noelpsoouts <- foreach(i=40 + 20 + 20 + 1:16, .packages = c("sp", "maptools", "rgeos", "mnormt")) %dopar%
+noelpsooutsextra <- foreach(i=40 + 20 + 1:20, .packages = c("sp", "maptools", "rgeos", "mnormt")) %dopar%
   psowrap(i, datlist, specs, seeds)
 
-save(noelpsoouts, file = "noelpsoouts.RData")
+save(noelpsooutsextra, file = "noelpsooutsextra.RData")
 
 stopImplicitCluster()
