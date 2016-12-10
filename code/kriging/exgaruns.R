@@ -14,11 +14,11 @@ datlist$sppoly <- SpatialPolygons(list(b=Polygons(list(a=datlist$poly), "a")))
 ncores <- 4
 registerDoParallel(ncores)
 
-niter <- 5
+niter <- 2000
 time <- 0:niter
 
 nswarm <- 40
-ndesign <- 2
+ndesign <- 100
 lower <- rep(apply(datlist$poly@coords, 2, min), each = ndesign)
 upper <- rep(apply(datlist$poly@coords, 2, max), each = ndesign)
 
