@@ -11,14 +11,14 @@ source("krigingfun.R")
 load("datlist.Rdata")
 datlist$sppoly <- SpatialPolygons(list(b=Polygons(list(a=datlist$poly), "a")))
 
-ncores <- detectCores() - 4
+ncores <- 4
 registerDoParallel(ncores)
 
+niter <- 5
 time <- 0:niter
 
 nswarm <- 40
-niter <- 2000
-ndesign <- 100
+ndesign <- 2
 lower <- rep(apply(datlist$poly@coords, 2, min), each = ndesign)
 upper <- rep(apply(datlist$poly@coords, 2, max), each = ndesign)
 
@@ -36,63 +36,75 @@ exout <- NULL
 objnames <- c("sig2fuk.mean", "sig2fuk.max")
 
 ## define specs
+gaspecs <- c(outer(c(outer(objnames, nbatches, paste, sep="-")),
+                 c(outer(mutvars, mutrates, paste, sep="-")), paste, sep = "-"))
+exspecs <- c(outer(objnames, nexnbors, paste, sep = "-"))
 set.seed(324280)
-seeds <- rnorm(length(specs))
+gaseeds <- rnorm(length(gaspecs))
+exseeds <- rnorm(length(exspecs))
 
-for(objnum in 1:2){
-  print("obj")
-  print(objnum)
-  if(objnum == 1){
-    obj <- sig2fuk.mean
-    objname <- "sig2fuk.mean"
-  } else {
-    obj <- sig2fuk.max
-    objname <- "sig2fuk.max"
-  }
-  for(nbatch in nbatches){
-    for(mutvar in mutvars){
-      for(mutrate in mutrates){
-        print("GA")
-        print(c(nbatch, mutvar, mutrate))
-        init <- replicate(nswarm, c(spsample(datlist$poly, ndesign, "random")@coords))
-        temp <- ga(niter/nbatch, nbatch, floor(nswarm/2), nchrome, nrun, mutvar, mutrate,
-                   lower, upper, obj,
-                   init = init, boundaryfun = movetoboundary, datlist = datlist)
-        algid <- paste("GA", nbatch, mutrate, mutvar, sep="-")
-        tempdat <- data.frame(obj = objname, logpost = temp[["values"]],
-                              time = time, algid = algid, type = "GA",
-                              nbatch = nbatch, mutrate = mutrate, mutvar = mutvar,
-                              rep = repl)
-        gaout <- rbind(gaout, tempdat)
-        temppar <- data.frame(obj = objname, logpost = temp[["value"]],
-                              algid = algid, type = "GA", parset = NA, CF = NA,
-                              style = NA, nbhd = NA, rep = repl,
-                              parid = 1:(ndesign*2), par = temp[["par"]])
-        parout2 <- rbind(parout2, temppar)
-      }
-    }
-  }
-  for(nexnbor in nexnbors){
-    print("EX")
-### this needs to be rewritten because of exch not having a fixed niter
-    temp <- exch(ncand, obj, datlist$poly@coords, nexnbor, ndesign, datlist = datlist)
-    algid <- paste("EX", nexnbor, sep="-")
-    tempdat <- data.frame(obj = objname, logpost = temp[["values"]],
-                          objcount = temp$objcount,
-                          time = 1:length(temp$values), algid = algid,
-                          type = "EX", nnbor = nexnbor, rep = repl)
-    exout <- rbind(exout, tempdat)
-    temppar <- data.frame(obj = objname, logpost = temp[["value"]],
-                          algid = algid, type = "EX", parset = NA, CF = NA,
-                          style = NA, nbhd = NA, rep = repl,
-                          parid = 1:(ndesign*2), par = temp[["par"]])
-    parout2 <- rbind(parout2, temppar)
-  }
-  write.csv(exout, file = "exsimsout.csv", row.names=FALSE)
-  write.csv(gaout, file = "gasimsout.csv", row.names=FALSE)
-  write.csv(parout2, file = "parsimsout2.csv", row.names=FALSE)
+gawrap <- function(i, datlist, specs, seeds){
+  spec <- specs[i]
+  set.seed(seeds[i])
+  splt <- strsplit(spec, "-")[[1]]
+  objname <- splt[1]
+  obj <- switch(objname, sig2fuk.mean = sig2fuk.mean, sig2fuk.max = sig2fuk.max)
+  nbatch <- as.numeric(splt[2])
+  mutvar <- as.numeric(splt[3])
+  mutrate <- as.numeric(splt[4])
+  repl <- 1
+  init <- replicate(floor(nswarm/2), c(spsample(datlist$poly, ndesign, "random")@coords))
+  temp <- ga(niter/nbatch, nbatch, floor(nswarm/2), nchrome, nrun, mutvar, mutrate,
+             lower, upper, obj,
+             init = init, boundaryfun = movetoboundary, datlist = datlist)
+  algid <- paste("GA", nbatch, mutrate, mutvar, sep="-")
+  tempdat <- data.frame(obj = objname, logpost = temp[["values"]],
+                        time = time, algid = algid, type = "GA",
+                        nbatch = nbatch, mutrate = mutrate, mutvar = mutvar,
+                        rep = repl)
+  temppar <- data.frame(obj = objname, logpost = temp[["value"]],
+                        algid = algid, type = "GA", parset = NA, CF = NA,
+                        style = NA, nbhd = NA, rep = repl,
+                        parid = 1:(ndesign*2), par = temp[["par"]])
+  out <- list(values = tempdat, pars = temppar)
+  save(out, file = paste("GA-", spec, ".RData", sep = ""))
+  print(paste("Spec ", i, " finished. Spec: GA-", spec, sep=""))
+  return(out)
 }
 
+exwrap <- function(i, datlist, specs, seeds){
+  spec <- specs[i]
+  set.seed(seeds[i])
+  splt <- strsplit(spec, "-")[[1]]
+  objname <- splt[1]
+  obj <- switch(objname, sig2fuk.mean = sig2fuk.mean, sig2fuk.max = sig2fuk.max)
+  nexnbor <- splt[2]
+  temp <- exch(ncand, obj, datlist$poly@coords, nexnbor, ndesign, datlist = datlist)
+  algid <- paste("EX", nexnbor, sep="-")
+  repl <- 1
+  tempdat <- data.frame(obj = objname, logpost = temp[["values"]],
+                        objcount = temp$objcount,
+                        time = 1:length(temp$values), algid = algid,
+                        type = "EX", nnbor = nexnbor, rep = repl)
+  temppar <- data.frame(obj = objname, logpost = temp[["value"]],
+                        algid = algid, type = "EX", parset = NA, CF = NA,
+                        style = NA, nbhd = NA, rep = repl,
+                        parid = 1:(ndesign*2), par = temp[["par"]])
+  out <- list(values = tempdat, pars = temppar)
+  save(out, file = paste("EX-", spec, ".RData", sep = ""))
+  print(paste("Spec ", i, " finished. Spec: EX-", spec, sep=""))
+  return(out)
+}
+
+gaouts <- foreach(i=1:length(gaspecs), .packages = c("sp", "maptools", "rgeos", "mnormt")) %dopar%
+  gawrap(i, datlist, gaspecs, gaseeds)
+
+save(gaouts, file = "gaouts.RData")
+
+exouts <- foreach(i=1:length(exspecs), .packages = c("sp", "maptools", "rgeos", "mnormt")) %dopar%
+  exwrap(i, datlist, exspecs, exseeds)
+
+save(exouts, file = "exouts.RData")
 
 
-
+stopImplicitCluster()
