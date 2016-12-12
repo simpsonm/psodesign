@@ -22,7 +22,7 @@
 
 # Session Data files
 *.RData
-*.Rdata 
+*.Rdata
 
 # Example code in package build process
 *-Ex.R
@@ -52,6 +52,7 @@ vignettes/*.pdf
 *.knit.md
 
 ## Core latex/pdflatex auxiliary files:
+*.cpt
 *.synctex.gz
 *.aux
 *.lof

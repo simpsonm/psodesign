@@ -5,6 +5,7 @@
 \usepackage{natbib,color}
 \usepackage{bm, bbm,epstopdf}
 \usepackage{xr, zref, hyperref}
+\usepackage{cprotect}
 
 \newcommand{\var}{\mathrm{var}}
 \newcommand{\cov}{\mathrm{cov}}
@@ -112,7 +113,7 @@ Another similar algorithm comes from \citet{zhang2003adaptive}. In their algorit
 \section{The Spatial Design Problem}\label{sec:spatialdesign}
 Suppose we are interested predicting some spatially indexed response variable $Y(\bm{u})$, $\bm{u}\in \mathcal{D}\subseteq \Re^2$ at a set of target locations $\bm{t}_1, \bm{t}_2, \dots, \bm{t}_{N_t}\in\mathcal{D}$. Let $\bm{s}_1, \bm{s}_2, \dots, \bm{s}_{N_s}\in\mathcal{D}$ denote a set of $N_s$ fixed sampling locations within the spatial domain. The design problem is to add $N_d$ new sampling locations in order to optimize the amount we learn about $Y(\bm{u})$ at the target locations. Let $\bm{d}_1, \bm{d}_2, \dots, \bm{d}_{N_d}\in\mathcal{D}$ denote a set of candidate design points and suppose that $Y(\bm{u})$ is a geostatistical process with mean function $\mu(\bm{u})=\bm{x}(\bm{u})'\bm{\beta}$ for some covariate $\bm{x}(\bm{u})$ known at every point in $\mathcal{D}$ and some covariance function $C(\bm{u}, \bm{v})$ for $\bm{u},\bm{v}\in\mathcal{D}$. Not all covariates can be known a priori at every point in the spatial domain; however, covariates that are known functions of the location satisfy this constraint. Once the design points are selected, we observe $Z(\bm{d}_i)$ for $i=1,2,\dots,N_d$ and $Z(\bm{s}_i)$ for $i=1,2,\dots,N_s$ where $Z(\bm{u}) = Y(\bm{u}) + \varepsilon(\bm{u})$ and $\varepsilon(\bm{u})$ is mean zero white noise with variance $\tau^2$, representing measurement error. Typically $\bm{\beta}$, $\tau^2$, and $C(.,.)$ are unknown and must be estimated, though for now we will treat them as known.
 
-To completely specify the problem we need to define an informative design criterion. Intuitively, the larger the mean square prediction error (MSPE), i.e. the kriging variance, is at each of the target locations, the less information we have about $Y(\bm{u})$ at those locations. A common design criterion is to optimize function of these variances, e.g. to minimize the mean kriging variance or the maximum kriging variance over all target locations. These criteria are somewhat naive since they they ignore parameter uncertainty, and taking that into account will often change the optimal design \citep{zimmerman2006optimal}.
+To completely specify the problem we need to define an informative design criterion. Intuitively, the larger the mean square prediction error (MSPE), i.e. the kriging variance, is at each of the target locations, the less information we have about $Y(\bm{u})$ at those locations. A common design criterion is to optimize is some function of these variances, e.g. to minimize the mean kriging variance or the maximum kriging variance over all target locations. These criteria are somewhat naive since they they ignore parameter uncertainty, and taking that into account will often change the optimal design \citep{zimmerman2006optimal}.
 
 \subsection{Universal Kriging}
 In universal kriging, $C(.,.)$ and $\tau^2$ are treated as known while $\bm{\beta}$ is treated as a parameter that neeeds to be estimated. Let $\bm{Z}$ be the vector of $Z(\bm{s}_i)$s and $Z(\bm{d}_i)$s, $\bm{X}$ denote the corresponding stacked $\bm{x}(\bm{s}_i)'$s and $\bm{x}(\bm{d}_i)'$s, $\bm{C}_Z = \cov(\bm{Z})$ where $\cov[Z(\bm{u}), Z(\bm{v})] = C(\bm{u},\bm{v}) + \sigma^2_\varepsilon 1(\bm{u} = \bm{v})$, and $\bm{c}_Y(\bm{t}_i) = \cov[Y(\bm{t}_i), \bm{Z}]$ where $\cov[Y(\bm{t}_i), Z(\bm{u})] = C(\bm{t}_i, \bm{u})$. The universal kriging predictor of $Y(\bm{t}_i)$ is $\widehat{Y}_{uk}(\bm{t}_i;\bm{d}) = \bm{x}(\bm{t}_i)'\widehat{\bm{\beta}}_{gls} + \bm{c}_Y(\bm{t}_i)'\bm{C}_Z^{-1}(\bm{Z} - \bm{X}\widehat{\bm{\beta}}_{gls})$ and the MSPE of $\widehat{Y}_{uk}(\bm{t}_i)$ is
@@ -151,16 +152,16 @@ In August 2016 there were 44 active monitoring locations in the Houston-Galvesto
 
 The hypothetical design problem we consider is the addition of 100 new ozone monitoring locations to the Houston-Galveston-Brazoria monitoring network in Harris County, where Houston is located, with the goal of predicting ozone concentrations within Harris County. Of the 44 existing locations, 33 are already in Harris County, though the locations outside of the county are still useful for spatial prediction within Harris County.
 
-Let $Z(\bm{u})$ denote the measured average DM8 as location $\bm{u}$ and let $Y(\bm{u})$ denote the true DM8. We assume that $Z(\bm{u})$ is a noisy Gaussian measurement of $Y(\bm{u})$; i.e., the data model is $Z(\bm{u}) \sim N[Y(\bm{u}), \tau^2]$. The parameter $\tau^2$ represents variability added due to both measurement error from the instruments and potentially sampling error from measuring DM8 on less than the full 31 days in August. At the process level, we assume that $Y(\bm{u})$ is a geostatistical process with mean function $\mu(\bm{u}) = \bm{x}(\bm{u})'\bm{\beta}$ and exponential covariance function $C(\bm{u},\bm{v}) = \sigma^2\exp(-||\bm{u} - \bm{v}||/\psi)$. We assume that any fine scale variability is measurement error and captured in the data model. We considered several possible mean functions: constant in $\bm{u}$, linear in $\bm{u}$, and quadratic in $\bm{u}$. We fit each model using maximum likelihood and found that quadratic terms were unnecessary, but linear terms did significantly help explain variation in $Y(\bm{u})$.
+Let $Z(\bm{u})$ denote the measured average DM8 at location $\bm{u}$ and let $Y(\bm{u})$ denote the true DM8. We assume that $Z(\bm{u})$ is a noisy Gaussian measurement of $Y(\bm{u})$; i.e., the data model is $Z(\bm{u}) \sim N[Y(\bm{u}), \tau^2]$. The parameter $\tau^2$ represents variability added due to both measurement error from the instruments and potentially sampling error from measuring DM8 on less than the full 31 days in August. At the process level, we assume that $Y(\bm{u})$ is a geostatistical process with mean function $\mu(\bm{u}) = \bm{x}(\bm{u})'\bm{\beta}$ and exponential covariance function $C(\bm{u},\bm{v}) = \sigma^2\exp(-||\bm{u} - \bm{v}||/\psi)$. We assume that any fine scale variability is measurement error and captured in the data model. We considered several possible mean functions: constant in $\bm{u}$, linear in $\bm{u}$, and quadratic in $\bm{u}$. We fit each model using maximum likelihood and found that quadratic terms were unnecessary, but linear terms did significantly help explain variation in $Y(\bm{u})$.
 
-We use both PUK design criteria in order to choose the five new locations in Harris County: $\overline{Q}_{puk}(\bm{d})$ and $Q^*_{puk}(\bm{d})$, both defined in Section \ref{sec:spatialdesign}. We assume that the goal is the predict average DM8 in all of Harris County, so we approximate the continuous versions of $\overline{Q}_{puk}(\bm{d})$ and $Q^*_{puk}(\bm{d})$ with the finite sample versions using a grid of 1229 points, obtained by gridding up the smallest rectangle containing Harris County and throwing away all points outside of hte county. We try a variety of PSO algorithms in order to select the new locations. Since the design space only allows new monitoring locations within Harris County, we define $\overline{Q}_{puk}(\bm{d})=Q^*_{puk}(\bm{d})=\infty$ when any of the proposed locations are outside of Harris County. Existing sampling locations outside of Harris County are still used in the estimation of the model and in the construction of the PUK variances.
+We use both PUK design criteria in order to choose the five new locations in Harris County: $\overline{Q}_{puk}(\bm{d})$ and $Q^*_{puk}(\bm{d})$, both defined in Section \ref{sec:spatialdesign}. We assume that the goal is the predict average DM8 in all of Harris County, so we approximate the continuous versions of $\overline{Q}_{puk}(\bm{d})$ and $Q^*_{puk}(\bm{d})$ with the finite sample versions using a grid of 1229 points, obtained by gridding up the smallest rectangle containing Harris County and throwing away all points outside of the county. We try a variety of PSO algorithms in order to select the new locations. Since the design space only allows new monitoring locations within Harris County, we modify each of the PSO algorithms we use so that any particle outside of the design space is forced to moved to the nearest point on the edge of the design space using as described in Appendix \ref{app:psodetail}. Existing sampling locations outside of Harris County are still used in the estimation of the model and in the construction of the PUK variances.
 
-[THIS PARAGRAPH WILL BE PART OF EXPLAINING THE HOUSTON TABLE]
-In Table <ref> PSO refers to the standard PSO algorithm with the usual velocity update and all of the other modifications listed in Appendix \ref{subapp:pso}. The CF modifier indicates that the velocity update is coordinate-free -- see Appendix \ref{subapp:pso} for details. The DI modifier indicates that $\omega(k)$ is deterministically evolved with $\alpha = 0.2 K$ and $\beta = 2$ as in Section \ref{sec:AT-PSO}, where recall $K$ is the total number of PSO iterations. In simulations not reported here, we found those parameter values tended to yield the best DI-PSO algorithms. The AT modified indicates that $\omega(k)$ is adaptively tuned as described in Section \ref{sec:AT-PSO}. AT1 uses $R^*=0.3$ and $AT2$ uses $R^*=0.5$, while both use $c=0.1$ and $\omega(0) = 1.2$. We use two sets of parameter values for all of the PSO algorithms: $\phi_1^{(1)}=\phi_2^{(1)}=1.496$ and $\phi_1^{(2)}=\phi_2^{(2)}=\ln(2) + 1/2$, and when applicable the corresponding inertias are $\omega^{(1)}=0.7298$ and $\omega^{(2)}=1/(2\ln 2)$. All of the BBPSO algorithms we consider are AT, with AT1-BBPSO and AT2-BBPSO using the same parameter values as AT1-PSO and AT2-PSO. All PSO algorithms also use $df=1$, and each of the modications detailed in Appendix \ref{subapp:bbpso}. Further, the modifier CF indicates that the BBPSO algorithm uses the coordinate-free variance update and xp indicates it has a 0.5 probability of moving any given coordinate of a particle to its personal best location on that coordinate, both described in Appendix \ref{subapp:bbpso}. All of the PSO and BBPSO algorithms use either the global neighborhood topology, or the variant of the stochastic star neighborhood topology discussed is Section \ref{sec:pso} with either one or three informants. Further, each PSO algorithm has a swarm size of 40 and is run for $K=500$ iterations. Additionally, we employ two other classes of alternative algorithms to compare to PSO. First, we use the genetic algorithm described in \citet{hamada2001finding}, with either one or two batches ($B$), and with two possible mutation rates ($\lambda$) and two possible mutation variances ($\mu$). The genetic algorithms also use a population of 40, though they are only allowed to run for 250 iterations so that after the initialization, the genetic algorithms use the same number of objective function evaluations as each of the PSO algorithms. Finally, we use an exchange algorithm \citep{miller1994algorithm,nychka1998design}. The exchange algorithm is commonly used in spatial and spatio-temporal design problems \citep{nychka1998design,wikle1999space,wikle2005dynamic}, and uses a discrete grid as the search space and operates by considering the neighbors of the current point. We use the target grid, $\bm{t}$, as the search space and consider tenth-order neighbors. Each algorithm was implemented in the \verb0R0 programming language \citep{R2016}.
+Table \ref{tab:psokriging} contains the results of applying optimization algorithm to choosing the 100 new monitoring location. In the table, PSO refers to the standard PSO algorithm with the usual velocity update and all of the other modifications listed in Appendix \ref{subapp:pso}. The CF modifier indicates that the velocity update is coordinate-free -- see Appendix \ref{subapp:pso} for details. The AT modifier indicates that $\omega(k)$ is adaptively tuned as described in Section \ref{sec:AT-PSO}. AT1 uses $R^*=0.3$ and $AT2$ uses $R^*=0.5$, while both use $c=0.1$ and $\omega(0) = 1.2$. We use two sets of parameter values for all of the PSO algorithms: $\phi_1^{(1)}=\phi_2^{(1)}=1.496$ and $\phi_1^{(2)}=\phi_2^{(2)}=\ln(2) + 1/2$, and when applicable the corresponding inertias are $\omega^{(1)}=0.7298$ and $\omega^{(2)}=1/(2\ln 2)$. We do not list any DI algorithms since the performed extremely poorly on this problem. All of the BBPSO algorithms we consider are AT, with AT1-BBPSO and AT2-BBPSO using the same parameter values of $R^*$, and $c$ as AT1-PSO and AT2-PSO. All BBPSO algorithms also use $df=1$, and each of the modications detailed in Appendix \ref{subapp:bbpso}. Further, the modifier CF indicates that the BBPSO algorithm uses the coordinate-free variance update and xp indicates it has a 0.5 probability of moving any given coordinate of a particle to its personal best location on that coordinate, both described in Appendix \ref{subapp:bbpso}. All of the PSO and BBPSO algorithms use either the global neighborhood topology, or the variant of the stochastic star neighborhood topology discussed is Section \ref{sec:pso} with either three informants. Further, each PSO algorithm has a swarm size of 40 and is run for $K=2000$ iterations. Additionally, we employ two other classes of alternative algorithms to compare to PSO. First, we use the genetic algorithm described in \citet{hamada2001finding}, with either one or two batches ($B$), and with two possible mutation rates ($\lambda$) and two possible mutation variances ($\mu$). The genetic algorithms also use a population of 40, though they are only allowed to run for 1000 iterations so that after the initialization, the genetic algorithms use the same number of objective function evaluations as each of the PSO algorithms. Finally, we use an exchange algorithm \citep{miller1994algorithm,nychka1998design}. The exchange algorithm is commonly used in spatial and spatio-temporal design problems \citep{nychka1998design,wikle1999space,wikle2005dynamic}, and uses a discrete grid as the search space and operates by considering the neighbors of the current point. We use the target grid, $\bm{t}$, as the search space and consider fifth-order and tenth-order neighbors. Each algorithm was implemented in the \verb0R0 programming language \citep{R2016}.
 
-[INSERT PSO RESULTS HERE... CURRENTLY RUNNING/PENDING TO BE RUN ON THE SERVER]
+[WAITING ON GENETIC AND EXCHANGE ALGORITHMS TO FINISH TO ADD TO THE TABLE]
 
-
+% latex table generated in R 3.3.2 by xtable 1.8-2 package
+% Mon Dec 12 12:38:19 2016
 \begin{table}[ht]
 \centering
 \begingroup\scriptsize
@@ -169,142 +170,81 @@ In Table <ref> PSO refers to the standard PSO algorithm with the usual velocity 
   \hline
 Algorithm & logpost & logpost \\
   \hline
-PSO1 & 19.54 & 19.86 \\
-  PSO2 & 19.60 & 19.79 \\
-  PSO1-CF & 19.82 & 19.80 \\
-  PSO2-CF & 19.80 & 19.91 \\
+PSO1 & 14.40 & 15.62 \\
+  PSO2 & 14.45 & 14.87 \\
+  PSO1-CF & 15.53 & 15.94 \\
+  PSO2-CF & 15.77 & 15.56 \\
    \hline
-AT3-PSO1 & 19.53 & 19.66 \\
-  AT3-PSO2 & 19.60 & 19.60 \\
-  AT3-PSO1-CF & 19.83 & 19.90 \\
-  AT3-PSO2-CF & 19.79 & 19.95 \\
+AT3-PSO1 & 14.38 & 15.25 \\
+  AT3-PSO2 & 14.56 & 15.88 \\
+  AT3-PSO1-CF & 15.96 & 15.98 \\
+  AT3-PSO2-CF & 15.60 & 15.86 \\
    \hline
-AT5-PSO1 & 19.61 & 19.70 \\
-  AT5-PSO2 & 19.61 & 19.63 \\
-  AT5-PSO1-CF & 19.98 & 20.05 \\
-  AT5-PSO2-CF & 19.77 & 20.03 \\
+AT5-PSO1 & 14.42 & 15.70 \\
+  AT5-PSO2 & 14.32 & 15.70 \\
+  AT5-PSO1-CF & 15.85 & 15.96 \\
+  AT5-PSO2-CF & 15.95 & 15.87 \\
    \hline
-AT3-BBPSO & 19.71 & 19.88 \\
-  AT3-BBPSOxp & 19.82 & 19.97 \\
-  AT3-BBPSO-CF & 19.60 & 19.64 \\
-  AT3-BBPSOxp-CF & 19.66 & 19.97 \\
+AT3-BBPSO & 14.53 & 15.72 \\
+  AT3-BBPSOxp & 15.87 & 15.96 \\
+  AT3-BBPSO-CF & 14.65 & 14.82 \\
+  AT3-BBPSOxp-CF & 14.84 & 15.74 \\
    \hline
-AT5-BBPSO & 19.57 & 19.66 \\
-  AT5-BBPSOxp & 19.64 & 19.87 \\
-  AT5-BBPSO-CF & 19.58 & 19.59 \\
-  AT5-BBPSOxp-CF & 19.61 & 19.92 \\
+AT5-BBPSO & 14.65 & 15.74 \\
+  AT5-BBPSOxp & 15.21 & 15.32 \\
+  AT5-BBPSO-CF & 14.63 & 15.32 \\
+  AT5-BBPSOxp-CF & 14.52 & 15.71 \\
    \hline
 \end{tabular}
+\hspace{.5cm}
 \begin{tabular}{l|r|r}
 \multicolumn{1}{l}{\begin{tabular}{lr} $Q^*_{puk}$; & Nbhd: \end{tabular}} & \multicolumn{1}{c}{Global} & \multicolumn{1}{c}{SS3} \\
   \hline
 Algorithm & logpost & logpost \\
   \hline
-PSO1 & 24.35 & 24.87 \\
-  PSO2 & 24.39 & 25.41 \\
-  PSO1-CF & 25.70 & 25.66 \\
-  PSO2-CF & 25.92 & 25.51 \\
+PSO1 & 20.63 & 22.32 \\
+  PSO2 & 21.03 & 22.63 \\
+  PSO1-CF & 23.54 & 23.69 \\
+  PSO2-CF & 23.16 & 23.96 \\
    \hline
-AT3-PSO1 & 24.50 & 24.72 \\
-  AT3-PSO2 & 24.30 & 25.55 \\
-  AT3-PSO1-CF & 25.32 & 25.68 \\
-  AT3-PSO2-CF & 25.84 & 25.87 \\
+AT3-PSO1 & 20.57 & 22.54 \\
+  AT3-PSO2 & 23.18 & 23.14 \\
+  AT3-PSO1-CF & 23.33 & 23.68 \\
+  AT3-PSO2-CF & 24.02 & 23.53 \\
    \hline
-AT5-PSO1 & 24.88 & 25.14 \\
-  AT5-PSO2 & 24.52 & 25.57 \\
-  AT5-PSO1-CF & 25.72 & 25.71 \\
-  AT5-PSO2-CF & 25.44 & 25.74 \\
+AT5-PSO1 & 21.13 & 22.63 \\
+  AT5-PSO2 & 22.11 & 23.28 \\
+  AT5-PSO1-CF & 24.00 & 23.97 \\
+  AT5-PSO2-CF & 23.63 & 23.58 \\
    \hline
-AT3-BBPSO & 25.32 & 25.32 \\
-  AT3-BBPSOxp & 25.51 & 25.49 \\
-  AT3-BBPSO-CF & 25.02 & 25.40 \\
-  AT3-BBPSOxp-CF & 25.51 & 25.53 \\
+AT3-BBPSO & 22.28 & 23.31 \\
+  AT3-BBPSOxp & 22.19 & 23.39 \\
+  AT3-BBPSO-CF & 21.33 & 23.20 \\
+  AT3-BBPSOxp-CF & 22.34 & 23.44 \\
    \hline
-AT5-BBPSO & 25.04 & 25.46 \\
-  AT5-BBPSOxp & 25.02 & 25.26 \\
-  AT5-BBPSO-CF & 25.49 & 25.40 \\
-  AT5-BBPSOxp-CF & 25.03 & 25.50 \\
+AT5-BBPSO & 23.49 & 23.51 \\
+  AT5-BBPSOxp & 23.25 & 23.15 \\
+  AT5-BBPSO-CF & 21.92 & 23.33 \\
+  AT5-BBPSOxp-CF & 22.76 & 23.25 \\
    \hline
 \end{tabular}
 \endgroup
-\caption{Simulation results for sig2puk.max. See text for description}
-\label{tab:psosimsig2puk.max}
+\caption{Simulation results for $\overline{Q}_{puk}$ and $Q^*_{puk}$. See text for description.}
+\label{tab:psokriging}
 \end{table}
 
+From Table \ref{tab:psokriging} we immediately see that the best performing PSO algorithms tend to use the global neighborhood topology and tend not to use the coordinate free velocity/variance update. Further, in the PSO algorithms the first set of parameter values tends to work the best (i.e. $\phi_1^{(1)}=\phi_2^{(1)}=1.496$ and when applicable $\omega^{(1)}=0.7298$), while in the BBPSO algorithms the non-xp variants tend to outperform the xp variants. Neither of these is universally true, however. For both objective functions the PSO1 algorithm with the global neighborhood topology performs the best of the non AT variants and is outperformed by a few of the AT variants. The best performing algorithms for $\overline{Q}_{puk}$ are, in order, AT5-PSO2, AT3-PSO1, PSO1, AT5-PSO1, and PSO2, all with the global neighborhood topology. Similarly, the best performing algorithms for $Q^*_{puk}$ are, in order, AT3-PSO1, PSO1, PSO2, and AT5-PSO, again all with the global neighborhood topology. In Appendix \ref{app:psocompare} we found that the AT-BBPSO and AT-BBPSO-CF variants were competitive with the other PSO algorithms and in the case of the hardest problems seemed to be the best. The key seems to be that the AT-BBPSO variants are more robust to complicated objective surfaces with many local minima. When the objective surface is simpler, PSO and AT-PSO variants are more attractive and appear to converge faster. Our spatial design problem is apparently not complex enough for the advantages of AT-BBPSO to kick in. A similar dynamic seems to exist between the standard PSO and AT-PSO variants, namely that for problems that are simple enough PSO outperforms AT-PSO, but for hard enough problems AT-PSO becomes advantageous. In simulations not reported here, PSO1 outperforms all other algorithms when adding significantly less monitoring locations to the network, e.g. 20 or 50.
 
-% latex table generated in R 3.3.1 by xtable 1.8-2 package
-% Tue Nov 01 10:37:02 2016
-\begin{table}[ht]
+\begin{figure}
 \centering
-\begingroup\scriptsize
-\begin{tabular}{l|rr|rr}
-\multicolumn{1}{l}{\begin{tabular}{lr} $Q^*_{puk}$; & Nbhd: \end{tabular}} & \multicolumn{2}{c}{Global} & \multicolumn{2}{c}{SS3} \\
-  \hline
-Algorithm & Mean & SD & Mean & SD \\
-  \hline
-PSO1 & 26.17* & 0.03 & 26.50 & 0.37 \\
-  PSO2 & 26.62 & 0.32 & 26.16* & 0.00 \\
-  PSO1-CF & 27.14 & 0.65 & 27.20 & 0.30 \\
-  PSO2-CF & 27.19 & 0.34 & 27.14 & 0.66 \\
-   \hline
-AT3-PSO1 & 26.62 & 0.31 & 26.16* & 0.01 \\
-  AT3-PSO2 & 26.89 & 0.60 & 26.69 & 0.37 \\
-  AT3-PSO1-CF & 27.45 & 0.41 & 27.30 & 0.49 \\
-  AT3-PSO2-CF & 27.64 & 0.56 & 27.49 & 0.28 \\
-   \hline
-AT5-PSO1 & 26.83 & 0.10 & 26.30 & 0.27 \\
-  AT5-PSO2 & 27.09 & 0.30 & 27.04 & 0.19 \\
-  AT5-PSO1-CF & 27.52 & 0.62 & 27.84 & 0.32 \\
-  AT5-PSO2-CF & 27.70 & 0.08 & 27.66 & 0.03 \\
-   \hline
-AT3-BBPSO & 27.06 & 0.42 & 27.11 & 0.28 \\
-  AT3-BBPSOxp & 26.50 & 0.25 & 26.84 & 0.13 \\
-  AT3-BBPSO-CF & 26.99 & 0.12 & 26.42 & 0.29 \\
-  AT3-BBPSOxp-CF & 26.23* & 0.03 & 26.55 & 0.11 \\
-   \hline
-AT5-BBPSO & 27.12 & 0.36 & 26.82 & 0.05 \\
-  AT5-BBPSOxp & 26.32 & 0.30 & 26.35 & 0.33 \\
-  AT5-BBPSO-CF & 27.09 & 0.35 & 26.95 & 0.10 \\
-  AT5-BBPSOxp-CF & 26.32 & 0.31 & 26.24 & 0.13 \\
-   \hline
-\end{tabular}
-\begin{tabular}{l|rr|rr}
-\multicolumn{1}{l}{\begin{tabular}{lr} $\overline{Q}_{puk}$; & Nbhd: \end{tabular}} & \multicolumn{2}{c}{Global} & \multicolumn{2}{c}{SS3} \\
-  \hline
-Algorithm & Mean & SD & Mean & SD \\
-  \hline
-PSO1 & 21.39* & 0.01 & 21.38* & 0.01 \\
-  PSO2 & 21.39* & 0.01 & 21.38* & 0.01 \\
-  PSO1-CF & 21.44 & 0.03 & 21.43 & 0.01 \\
-  PSO2-CF & 21.44 & 0.03 & 21.44 & 0.05 \\
-   \hline
-AT3-PSO1 & 21.39* & 0.01 & 21.38* & 0.01 \\
-  AT3-PSO2 & 21.40* & 0.02 & 21.39* & 0.01 \\
-  AT3-PSO1-CF & 21.46 & 0.04 & 21.44 & 0.03 \\
-  AT3-PSO2-CF & 21.41 & 0.01 & 21.44 & 0.01 \\
-   \hline
-AT5-PSO1 & 21.40* & 0.01 & 21.39* & 0.01 \\
-  AT5-PSO2 & 21.40* & 0.02 & 21.41* & 0.01 \\
-  AT5-PSO1-CF & 21.48 & 0.03 & 21.43* & 0.02 \\
-  AT5-PSO2-CF & 21.48 & 0.05 & 21.46* & 0.03 \\
-   \hline
-AT3-BBPSO & 21.41* & 0.00 & 21.41* & 0.01 \\
-  AT3-BBPSOxp & 21.40* & 0.01 & 21.41* & 0.00 \\
-  AT3-BBPSO-CF & 21.41* & 0.02 & 21.41* & 0.01 \\
-  AT3-BBPSOxp-CF & 21.40* & 0.01 & 21.41* & 0.00 \\
-   \hline
-AT5-BBPSO & 21.39* & 0.01 & 21.40* & 0.01 \\
-  AT5-BBPSOxp & 21.39* & 0.00 & 21.40* & 0.01 \\
-  AT5-BBPSO-CF & 21.40* & 0.03 & 21.40* & 0.01 \\
-  AT5-BBPSOxp-CF & 21.38* & 0.00 & 21.40* & 0.01 \\
-   \hline
-\end{tabular}
-\endgroup
-\caption{Simulation results. See text for description}
-\label{tab:psokrigsims}
-\end{table}
+%\includegraphics[scale=.3]{../code/kriging/sig2pukboth.png}
+\includegraphics[scale=.35]{../code/kriging/sig2pukmean.png}
+\includegraphics[scale=.35]{../code/kriging/sig2pukmax.png}
+\cprotect\caption{Best designs found according to $\overline{Q}_{puk}$ (left) and $Q^*_{puk}$ (right). Original network points are grey, new points are red. Harris County is outlined in black. Map courtesy of Google Maps via \verb0ggmap0 \citep{ggmap2013}.}
+\label{fig:designout}
+\end{figure}
 
-
+Figure \ref{fig:designout} contains the best designs found using both objective functions. When using the mean kriging variance ($\overline{Q}_{puk}$), the best design spreads nodes of the network fairly evenly throughout the spatial domain. With the maximum kriging variance ($Q^*_{puk}$), the best design is more erratic. Notably, there are many more nodes directly on or very close to the border of the spatial domain. Further, interior areas have a tendency to be more sparsely populated with nodes. This is unsurprising since $Q^*$ is worried about worst case kriging variance. Consider a location on the Western edge of the county. There are no monitoring stations to the West of that location, while a location in the center of the county will have monitoring stations relatively nearby in all directions. So to compensate, the optimization algorithms puts more of the new monitoring stations near the boundary of the county. Furthermore, by pushing more of the design locations closer to the boundary, the uncertainty associated with $\bm{\beta}$ is lowered. This helps decrease the kriging variance everywhere, but in particular it helps in locations where there are relatively few monitoring locations nearby. Sometimes this logic an even dominate when using the mean kriging variance as the objective function, depending on the behavior of the spatial process \citep{zimmerman2006optimal}.
 
 \section{Discussion}\label{sec:discuss}
 [TO BE WRITTEN]

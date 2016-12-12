@@ -3,13 +3,16 @@ library(dplyr)
 library(ggplot2)
 library(xtable)
 library(gridExtra)
-
+library(ggmap)
 library(reshape2)
-
-
+library(geoR)
+library(shapefiles)
+library(maptools)
+library(rgdal)
 
 load("chrispsoouts.RData")
 load("noelpsoouts.RData")
+load("noelpsooutsextra.RData")
 load("homepsoouts.RData")
 
 valueout <- homepsoouts[[1]][[1]]
@@ -26,19 +29,14 @@ for(i in 1:length(noelpsoouts)){
   valueout <- rbind(valueout, noelpsoouts[[i]][[1]])
   parout <- rbind(parout, noelpsoouts[[i]][[2]])
 }
-
-save(valueout, file = "valueout.RData")
-save(parout, file = "parout.RData")
-
-load("homepsooutstest.RData")
-valueout <- homepsooutstest[[1]][[1]]
-parout <- homepsooutstest[[1]][[2]]
-for(i in 2:length(homepsooutstest)){
-  valueout <- rbind(valueout, homepsooutstest[[i]][[1]])
-  parout <- rbind(parout, homepsooutstest[[i]][[2]])
+for(i in 1:length(noelpsooutsextra)){
+  valueout <- rbind(valueout, noelpsooutsextra[[i]][[1]])
+  parout <- rbind(parout, noelpsooutsextra[[i]][[2]])
 }
 
 
+save(valueout, file = "valueout.RData")
+save(parout, file = "parout.RData")
 
 namefun <- function(x){
   if(x$style == "AT1"){
@@ -76,10 +74,11 @@ namesfun <- function(x){
 
 
 valueclean <- ddply(valueout, .(obj, algid, nbhd, time, logpost, inertias), namesfun)[, c(1, 7, 8, 4, 5, 6)]
+
 names(valueclean) <- c("Obj", "Algorithm", "Nbhd", "Time", "logpost", "inertia")
 
-valueclean$Obj <- mapvalues(valueclean$Obj, c("sig2fuk.new.max", "sig2fuk.new.mean"),
-                            c("sig2puk.new.max", "sig2puk.new.mean"))
+valueclean$Obj <- mapvalues(valueclean$Obj, c("sig2fuk.max", "sig2fuk.mean"),
+                            c("sig2puk.max", "sig2puk.mean"))
 
 
 algorder <- c("PSO1", "PSO2", "PSO1-CF", "PSO2-CF",
@@ -122,6 +121,65 @@ for(k in unique(valuelast$Obj)){
 
 
 
+
+
+
+## map initialization
+houston <- read.csv("houstonout.csv")
+coshape <- readOGR(dsn="shape", layer="05000")
+names(coshape)[1] <- "ID"
+cogeom <- fortify(coshape)
+ids <- sapply(coshape@polygons, function(x){x@ID})
+housgeom <- filter(cogeom, id == ids[117])
+
+d <- data.frame( x = housgeom$long, y = housgeom$lat)
+coordinates(d) <- c("x", "y")
+proj4string(d) <- proj4string(coshape)
+CRS.new <- CRS("+init=epsg:4326") # WGS 84, i.e. world
+d2 <- spTransform(d, CRS.new)
+housgeom$longitude <- d2@coords[,1]
+housgeom$latitude <- d2@coords[,2]
+
+basemap <- get_map(location = "houston", zoom = 9, maptype = 'terrain')
+p <- ggmap(basemap) + geom_point(aes(Longitude, Latitude), data = houston, size = I(3), alpha=0.6)
+
+## prediction locations map
+load("datlist.RData")
+
+p + geom_polygon(aes(longitude, latitude, group = id), data = housgeom, fill = NA, colour = "black") +
+  geom_point(aes(u, v), data = data.frame(u = datlist$tt[,1]/(pi/180*6371),
+                                          v = datlist$tt[,2]/(pi/180*6371)),
+             colour = "blue", alpha = 0.6, shape="+", size = I(3))
+
+
+### now use fits too
+meandat <- filter(parout, obj == "sig2fuk.mean" & algid == "PSO-2-notCF-AT2" & nbhd > 3)
+meanout <- data.frame(matrix(meandat$par, ncol = 2)/(pi/180*6371))
+colnames(meanout) <- c("x", "y")
+
+p.mean <- p + geom_polygon(aes(longitude, latitude, group = id), data = housgeom, fill = NA, colour = "black") +
+  geom_point(aes(x, y), data = meanout, size = I(3), alpha = 0.6, colour = "red") +
+  xlab("longitude") + ylab("latitude")
+
+maxdat <- filter(parout, obj == "sig2fuk.max" & algid == "PSO-1-notCF-AT1" & nbhd > 3)
+maxout <- data.frame(matrix(maxdat$par, ncol = 2)/(pi/180*6371))
+colnames(maxout) <- c("x", "y")
+
+p.max <- p + geom_polygon(aes(longitude, latitude, group = id), data = housgeom, fill = NA, colour = "black") +
+  geom_point(aes(x, y), data = maxout, size = I(3), alpha = 0.6, colour = "red") +
+  xlab("longitude") + ylab("latitude")
+
+w <- 7
+h <- 7
+ggsave(filename = "sig2pukmean.png", plot = p.mean, width = w, height = h)
+ggsave(filename = "sig2pukmax.png", plot = p.max, width = w, height = h)
+
+
+
+
+
+
+
 objname <- "sig2puk.mean"
 q1 <- qplot(Time, logpost, color = Algorithm, geom = "line", facets = Nbhd~., size = I(1),
             data = filter(valueorder, Obj == objname & Nbhd %in% c("Global", "SS3") &
@@ -156,7 +214,7 @@ p2 <- qplot(Time, logpost, color = Algorithm, geom = "line", size = I(1), facets
 grid.arrange(p1, p2, ncol = 2)
 
 
-objname <- "sig2puk.max"
+objname <- "sig2puk.mean"
 p1 <- qplot(Time, logpost, color = Algorithm, geom = "line", facets = Nbhd~., size = I(1),
       data = subset(valueorder, Obj == objname & Nbhd %in% c("Global", "SS3") &
       Algorithm %in% c("PSO1", "AT3-PSO1", "AT5-PSO1")))
