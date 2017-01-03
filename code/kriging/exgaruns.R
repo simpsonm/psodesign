@@ -11,7 +11,7 @@ source("krigingfun.R")
 load("datlist.Rdata")
 datlist$sppoly <- SpatialPolygons(list(b=Polygons(list(a=datlist$poly), "a")))
 
-ncores <- 4
+ncores <- 12
 registerDoParallel(ncores)
 
 niter <- 2000
