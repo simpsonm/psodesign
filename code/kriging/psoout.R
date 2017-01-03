@@ -14,6 +14,14 @@ load("chrispsoouts.RData")
 load("noelpsoouts.RData")
 load("noelpsooutsextra.RData")
 load("homepsoouts.RData")
+load("gaouts.RData")
+load("EX-sig2fuk.max-10.RData")
+exmaxout <- out
+load("EX-sig2fuk.mean-10.RData")
+exmeanout <- out
+
+exvalueout <- rbind(exmaxout[[1]], exmeanout[[1]])
+exparout <- rbind(exmaxout[[2]], exmeanout[[2]])
 
 valueout <- homepsoouts[[1]][[1]]
 parout <- homepsoouts[[1]][[2]]
@@ -34,34 +42,59 @@ for(i in 1:length(noelpsooutsextra)){
   parout <- rbind(parout, noelpsooutsextra[[i]][[2]])
 }
 
+gavalueout <- gaouts[[1]][[1]]
+gaparout <- gaouts[[1]][[2]]
+for(i in 2:length(gaouts)){
+  gavalueout <- rbind(gavalueout, gaouts[[i]][[1]])
+  gaparout <- rbind(gaparout, gaouts[[i]][[2]])
+}
 
 save(valueout, file = "valueout.RData")
 save(parout, file = "parout.RData")
+save(gavalueout, file = "gavalueout.RData")
+save(gaparout, file = "gaparout.RData")
+save(exvalueout, file = "exvalueout.RData")
+save(exparout, file = "exparout.RData")
 
 namefun <- function(x){
-  if(x$style == "AT1"){
-    style <- "AT3-"
-  } else if(x$style == "AT2"){
-    style <- "AT5-"
-  } else if(x$style == "CI"){
-    style <- ""
+  if(!is.null(x$nbhd)){
+    if(x$style == "AT1"){
+      style <- "AT3-"
+    } else if(x$style == "AT2"){
+      style <- "AT5-"
+    } else if(x$style == "CI"){
+      style <- ""
+    } else {
+      style <- paste(x$style, "-", sep="")
+    }
+    if(x$type == "BBPSO"){
+      parset <- switch(x$parset, "", "xp")
+    } else {
+      parset <- x$parset
+    }
+    type <- paste(x$type, parset, sep = "")
+    cf <- switch(x$CF, "-CF")
+    out <- paste(style, type, cf, sep = "")
   } else {
-    style <- paste(x$style, "-", sep="")
+    if(x$type == "GA"){
+      type <- "GA-"
+      mutvar <- x$mutvar
+      mutrate <- ifelse(x$mutrate == 0.01, 1, 2)
+      out <- paste(type, mutrate, mutvar, sep = "")
+    } else {
+      out <- x$algid
+    }
   }
-  if(x$type == "BBPSO"){
-    parset <- switch(x$parset, "", "xp")
-  } else {
-    parset <- x$parset
-  }
-  type <- paste(x$type, parset, sep = "")
-  cf <- switch(x$CF, "-CF")
-  out <- paste(style, type, cf, sep = "")
   return(out)
 }
 
 nbhdnamefun <- function(x){
-  nbhd <- paste("n", x$nbhd, sep="")
-  out <- switch(nbhd, n1 = "SS1", n3 = "SS3", n40 = "Global")
+  if(is.null(x$nbhd)){
+    out <- x$nbatch
+  } else {
+    nbhd <- paste("n", x$nbhd, sep="")
+    out <- switch(nbhd, n1 = "SS1", n3 = "SS3", n40 = "Global")
+  }
   return(out)
 }
 
@@ -75,10 +108,20 @@ namesfun <- function(x){
 
 valueclean <- ddply(valueout, .(obj, algid, nbhd, time, logpost, inertias), namesfun)[, c(1, 7, 8, 4, 5, 6)]
 
-names(valueclean) <- c("Obj", "Algorithm", "Nbhd", "Time", "logpost", "inertia")
+gavalueclean <- ddply(gavalueout, .(obj, algid, time, logpost), namesfun)[,c(1, 5, 6, 3, 4)]
+exvalueclean <- ddply(exvalueout, .(obj, algid, time, logpost), namesfun)[,c(1, 2, 3, 4)]
+
+names(valueclean) <- c("Obj", "Algorithm", "Nbhd", "Time", "value", "inertia")
+names(gavalueclean) <- c("Obj", "Algorithm", "Nbatch", "Time", "value")
+names(exvalueclean) <- c("Obj", "Algorithm", "Time", "value")
+
 
 valueclean$Obj <- mapvalues(valueclean$Obj, c("sig2fuk.max", "sig2fuk.mean"),
                             c("sig2puk.max", "sig2puk.mean"))
+exvalueclean$Obj <- mapvalues(exvalueclean$Obj, c("sig2fuk.max", "sig2fuk.mean"),
+                              c("sig2puk.max", "sig2puk.mean"))
+gavalueclean$Obj <- mapvalues(gavalueclean$Obj, c("sig2fuk.max", "sig2fuk.mean"),
+                              c("sig2puk.max", "sig2puk.mean"))
 
 
 algorder <- c("PSO1", "PSO2", "PSO1-CF", "PSO2-CF",
@@ -86,33 +129,50 @@ algorder <- c("PSO1", "PSO2", "PSO1-CF", "PSO2-CF",
               "AT3-PSO1", "AT3-PSO2", "AT3-PSO1-CF", "AT3-PSO2-CF",
               "AT5-PSO1", "AT5-PSO2", "AT5-PSO1-CF", "AT5-PSO2-CF",
               "AT3-BBPSO", "AT3-BBPSOxp", "AT3-BBPSO-CF", "AT3-BBPSOxp-CF",
-              "AT5-BBPSO", "AT5-BBPSOxp", "AT5-BBPSO-CF", "AT5-BBPSOxp-CF")
+              "AT5-BBPSO", "AT5-BBPSOxp", "AT5-BBPSO-CF", "AT5-BBPSOxp-CF",
+              paste("GA", apply(expand.grid(1:2, 1:2), 1, paste, sep = "", collapse = ""), sep = "-"),
+              "EX-10")
 nbhdorder <- c("Global", "SS3", "SS1")
 
 valueclean$Algorithm <- factor(valueclean$Algorithm, levels = algorder)
 valueclean$Nbhd <- factor(valueclean$Nbhd, levels = nbhdorder)
 valueorder <- arrange(valueclean, Obj, Algorithm, Nbhd, Time)
 
+exvalueclean$Algorithm <- factor(exvalueclean$Algorithm, levels = algorder)
+exvalueorder <- arrange(exvalueclean, Obj, Algorithm, Time)
+
+gavalueclean$Algorithm <- factor(gavalueclean$Algorithm, levels = algorder)
+gavalueorder <- arrange(gavalueclean, Obj, Algorithm, Nbatch, Time)
+
 
 nlook <- floor(max(valueorder$Time))
 valuelast <- filter(valueorder, Time == nlook)
-## this prints the tables, however it's missing the first header.
-## paste the following line (without the ##) just after the \begin{tabular} line
-## \multicolumn{1}{l}{\begin{tabular}{lr} ; & Nbhd: \end{tabular}} & \multicolumn{2}{1}{Global} & \multicolumn{1}{c}{SS3}\\
+ganlook <- floor(max(gavalueorder$Time))
+gavaluelast <- filter(gavalueorder, Time == ganlook)
+exids <- c(28, 36) ## if anything changes, change these!
+exvaluelast <- exvalueorder[exids,]
+
+## this prints the tables, however there aresome manual tweaks made
 
 for(k in unique(valuelast$Obj)){
+  ## first do PSO algorithms
   ofk <- filter(valuelast, Obj == k & !(Algorithm %in% c("DI-PSO1", "DI-PSO2", "DI-PSO1-CF", "DI-PSO2-CF")))[,-1]
   ## remove large values from table
-  bigidx <- which(ofk$logpost > 10000)
-  ofk$logpost[bigidx] <- NA
+  bigidx <- which(ofk$value > 10000)
+  ofk$value[bigidx] <- NA
   ## pull out each type of nbhd and combine
   ofk1 <- filter(ofk, Nbhd == "Global")[,-c(2,3,5)]
   ofk2 <- filter(ofk, Nbhd == "SS3")[,-c(2,3,5)]
   ofkout <- cbind(ofk1, ofk2[,-1])
-  colnames(ofkout)[3] <- "logpost"
-  ##iidd <- c(3:4, 7:8, 11:12, 15:16, 19:20, 23:24)
-  ##ofprint <- ofkout[-iidd,-c(3,5,7)]
-  print(xtable(ofkout, digits = c(0,0,rep(c(2),2)), align = "ll|r|r",
+  colnames(ofkout)[3] <- "value"
+  ## now do genetic algorithms
+  ofkga <- filter(gavaluelast, Obj == k)
+  ##ofkex <- filter(exvaluelast, Obj == k)
+  ofkga1 <- filter(ofkga, Nbatch == 1)[,c(2,5)]
+  ofkga2 <- filter(ofkga, Nbatch == 2)[,c(2,5)]
+  ofkgaout <- cbind(ofkga1, ofkga2[,-1])
+  colnames(ofkgaout)[3] <- "value"
+  print(xtable(rbind(ofkout, ofkgaout), digits = c(0,0,rep(c(2),2)), align = "ll|r|r",
                caption = paste("Simulation results for ", k, ". See text for description", sep = ""),
                label = paste("tab:psosim", k, sep="")),
         include.rownames=FALSE, sanitize.text.function=identity, hline.after=c(-1,seq(0, 20, 4)),
@@ -181,16 +241,16 @@ ggsave(filename = "sig2pukmax.png", plot = p.max, width = w, height = h)
 
 
 objname <- "sig2puk.mean"
-q1 <- qplot(Time, logpost, color = Algorithm, geom = "line", facets = Nbhd~., size = I(1),
+q1 <- qplot(Time, value, color = Algorithm, geom = "line", facets = Nbhd~., size = I(1),
             data = filter(valueorder, Obj == objname & Nbhd %in% c("Global", "SS3") &
                                        Algorithm %in% c("PSO1", "PSO2", "AT3-PSO1", "AT3-PSO2")))
-q2 <- qplot(Time, logpost, color = Algorithm, geom = "line", facets = Nbhd~., size = I(1),
+q2 <- qplot(Time, value, color = Algorithm, geom = "line", facets = Nbhd~., size = I(1),
             data = filter(valueorder, Obj == objname & Nbhd %in% c("Global", "SS3") &
                                        Algorithm %in% c("AT3-BBPSO", "AT3-BBPSOxp", "AT5-BBPSO", "AT5-BBPSOxp")))
 grid.arrange(q1, q2, ncol = 2)
 
 objname <- "sig2puk.max"
-qplot(Time, logpost, color = Algorithm, geom = "line", facets = Nbhd~., size = I(1),
+qplot(Time, value, color = Algorithm, geom = "line", facets = Nbhd~., size = I(1),
       data = filter(valueorder, Obj ==objname & Nbhd %in% c("Global", "SS3") &
       Algorithm %in% c("PSO1-CF", "PSO2-CF", "AT3-PSO1-CF", "AT3-PSO2-CF",
                        "AT5-PSO1-CF", "AT5-PSO2-CF",
@@ -198,7 +258,7 @@ qplot(Time, logpost, color = Algorithm, geom = "line", facets = Nbhd~., size = I
                        "AT5-BBPSO-CF", "AT5-BBPSOxp-CF")))
 
 objname <- "sig2puk.mean"
-qplot(Time, logpost, color = Algorithm, geom = "line", facets = Nbhd~., size = I(1),
+qplot(Time, value, color = Algorithm, geom = "line", facets = Nbhd~., size = I(1),
       data = filter(valueorder, Obj ==objname & Nbhd %in% c("Global", "SS3") &
       Algorithm %in% c("PSO1", "PSO2", "AT3-PSO1", "AT3-PSO2",
                        "AT5-PSO1", "AT5-PSO2",
@@ -206,21 +266,21 @@ qplot(Time, logpost, color = Algorithm, geom = "line", facets = Nbhd~., size = I
                        "AT5-BBPSO", "AT5-BBPSOxp")))
 
 objname <- "sig2puk.new.mean"
-p1 <- qplot(Time, logpost, color = Algorithm, geom = "line", size = I(1), facets = Nbhd ~.,
+p1 <- qplot(Time, value, color = Algorithm, geom = "line", size = I(1), facets = Nbhd ~.,
             data = filter(valueorder, Obj == objname))
 objname <- "sig2puk.new.max"
-p2 <- qplot(Time, logpost, color = Algorithm, geom = "line", size = I(1), facets = Nbhd ~.,
+p2 <- qplot(Time, value, color = Algorithm, geom = "line", size = I(1), facets = Nbhd ~.,
             data = filter(valueorder, Obj == objname))
 grid.arrange(p1, p2, ncol = 2)
 
 
 objname <- "sig2puk.mean"
-p1 <- qplot(Time, logpost, color = Algorithm, geom = "line", facets = Nbhd~., size = I(1),
+p1 <- qplot(Time, value, color = Algorithm, geom = "line", facets = Nbhd~., size = I(1),
       data = subset(valueorder, Obj == objname & Nbhd %in% c("Global", "SS3") &
       Algorithm %in% c("PSO1", "AT3-PSO1", "AT5-PSO1")))
 
 
-p2 <- qplot(Time, logpost, color = Algorithm, geom = "line", facets = Nbhd~., size = I(1),
+p2 <- qplot(Time, value, color = Algorithm, geom = "line", facets = Nbhd~., size = I(1),
       data = subset(valueorder, Obj == objname & Nbhd %in% c("Global", "SS3") &
       Algorithm %in% c("PSO2", "AT3-PSO2", "AT5-PSO2")))
 
