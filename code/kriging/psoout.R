@@ -236,6 +236,28 @@ ggsave(filename = "sig2pukmax.png", plot = p.max, width = w, height = h)
 
 
 
+## uniformly random simulations
+nsam <- 10000
+source("krigingfun.R")
+
+draws <- spsample(datlist$poly, 100*nsam, "random")
+
+values <- apply(matrix(1:nsam, ncol = 1), 1,
+                function(x, draws, datlist){
+                  ids <- (x - 1)*100 + 1:100
+                  dd <- draws@coords[ids,]
+                  out.mean <- sig2fuk.mean(dd, datlist)
+                  out.max <- sig2fuk.max(dd, datlist)
+                  return(list(sig2fuk.mean = out.mean, sig2fuk.max = out.max))
+                }, draws = draws, datlist = datlist)
+
+randvalues <- values
+save(randvalues, file = "randvalues.RData")
+
+val.mean <- apply(values, 2, mean)
+val.sd <- apply(values, 2, sd)
+val.se <- val.sd/sqrt(nsam)
+
 
 
 
@@ -248,6 +270,22 @@ q2 <- qplot(Time, value, color = Algorithm, geom = "line", facets = Nbhd~., size
             data = filter(valueorder, Obj == objname & Nbhd %in% c("Global", "SS3") &
                                        Algorithm %in% c("AT3-BBPSO", "AT3-BBPSOxp", "AT5-BBPSO", "AT5-BBPSOxp")))
 grid.arrange(q1, q2, ncol = 2)
+
+
+objname <- "sig2puk.mean"
+q1 <- qplot(Time, value, color = Algorithm, geom = "line", facets = Nbhd~., size = I(1),
+            data = filter(valueorder, Obj == objname & Nbhd %in% c("Global", "SS3") &
+                                      Algorithm %in% c("PSO1", "PSO2", "AT3-PSO1", "AT3-PSO2")))
+q2 <- qplot(Time, value, color = Algorithm, geom = "line", facets = Nbatch~., size = I(1),
+            data = filter(gavalueorder, Obj == objname))
+grid.arrange(q1, q2, ncol = 2)
+
+q2 <- qplot(Time, value, color = Algorithm, geom = "line", facets = Nbhd~., size = I(1),
+            data = filter(valueorder, Obj == objname & Nbhd %in% c("Global", "SS3") &
+                                       Algorithm %in% c("AT3-BBPSO", "AT3-BBPSOxp", "AT5-BBPSO", "AT5-BBPSOxp")))
+
+
+
 
 objname <- "sig2puk.max"
 qplot(Time, value, color = Algorithm, geom = "line", facets = Nbhd~., size = I(1),
