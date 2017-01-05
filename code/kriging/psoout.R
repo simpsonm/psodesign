@@ -254,8 +254,11 @@ values <- apply(matrix(1:nsam, ncol = 1), 1,
 randvalues <- values
 save(randvalues, file = "randvalues.RData")
 
-val.mean <- apply(values, 2, mean)
-val.sd <- apply(values, 2, sd)
+randvalues <- t(sapply(randvalues, function(x){matrix(unlist(x))}))
+colnames(randvalues) <- c("sig2puk.mean", "sig2puk.max")
+
+val.mean <- apply(randvalues, 2, mean)
+val.sd <- apply(randvalues, 2, sd)
 val.se <- val.sd/sqrt(nsam)
 
 
