@@ -1,0 +1,33 @@
+10 page limit including appendices, but excluding references, figures, tables and other forms of exhibit
+but also excluding supporting information
+
+
+< 200 word abstract
+
+
+5-6 keywords (alphetical order)
+
+
+Tables at the end.
+
+
+Illustrations separate. Some notes:
+
+1) "Upload each figure as a separate file in either .tiff or .eps format, with the lead author's name, the figure number and the top of the figure indicated. Compound figures e.g. 1a, b, c should be uploaded as one figure. Tints are not acceptable. Lettering must be of a reasonable size that would still be clearly legible upon reduction, and consistent within each figure and set of figures."
+
+2) "All illustrations must be supplied at the correct resolution:
+
+Black and white and colour photos - 300 dpi
+Graphs, drawings, etc - 800 dpi preferred; 600 dpi minimum
+Combinations of photos and drawings (black and white and colour) - 500 dpi"
+
+
+In text citations should always use Author (Year).
+
+
+References should include the DOI where possible.
+
+
+Supporting information:
+
+"Supporting Information. Supporting Information that is referred to in the text of the article may be made available alongside the article and so is in addition to the 10 page allowance. This might include detailed proofs, additional tables and figures, appendices, computer code, software scripts (e.g. R scripts, MATLAB, FAS scripts, etc.), datasets and movie files. Guidelines for the preparation of Supporting Information are available here. Any supporting information should be listed after the references, with the opening statement: 'Supporting Information: Additional information for this article is available' followed by brief captions for the Appendices/Figs/Tables that are included. These should be numbered Appendix S1, Fig. S1, Table S1, etc. Supporting Information should include a list of references for any literature referred to therein, to make it a self-contained piece of work. This may mean duplicating references if any literature is cited in both the main text and the Supporting Information."
