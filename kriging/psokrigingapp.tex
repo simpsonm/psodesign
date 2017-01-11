@@ -9,6 +9,8 @@
 
 \usepackage{bibentry}
 
+\numberwithin{table}{section}
+
 % if variable blind is undefined, assume it is 0
 \makeatletter
 \@ifundefined{blind}{\def\blind{0}}{}
@@ -25,6 +27,7 @@
 {
   \externaldocument{psokrigingblind}
 }\fi
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
@@ -55,9 +58,11 @@
 \maketitle
 
 \appendix
+\renewcommand*{\thesection}{S\arabic{section}}
+
 \section{PSO and BBPSO details}\label{app:psodetail}
 
-In Section \ref{sec:pso} we introduced PSO, BBPSO, and our adaptively tuned variants of both. Here we describe in detail several modifications to both PSO and BBPSO.
+In Section \ref{sec:pso} we introduced PSO, BBPSO, and our adaptively tuned variants of both. Here we describe in detail several modifications to both PSO and BBPSO. Most of these are so-called standard modifications from \cite{clerc2011spso}.
 
 \subsection{PSO}\label{subapp:pso}
 The standard PSO algorithm is given by equation \eqref{eq:pso}. We consider several additions and modifications to this algorithm below. Each of these modifications is combined with adaptively tuned inertia as in equation \eqref{eq:atpso} to create the AT-PSO algorithms we employ.
@@ -65,10 +70,10 @@ The standard PSO algorithm is given by equation \eqref{eq:pso}. We consider seve
 \subsubsection{Initialization:}
 In order to initialize the swarm, the number of particles, their initial locations, and their initial velocities have to be chosen. \cite{clerc2011spso} suggests making the swarm size a function of the dimension of the search space, but notes that this is known to be suboptimal. We use their alternative suggest to use a default swarm size of 40. We assume the search space is a $D$-dimensional hypercube given by $\bigtimes_{j=1}^D[min_j, max_j]$. Then each particle's initial location is randomly generated uniformly on the cube, i.e. $\theta_{ij}(0)\stackrel{ind}{\sim}U(min_j, max_j)$ for $i=1,2,\dots,n$ and $j=1,2,\dots,D$. Each particle's velocity is initialized based on its location via  $v_{ij}(0)\stackrel{ind}{\sim}U(min_j - x_{ij}(0), max_j - x_{ij}(0))$ for $i=1,2,\dots,n$ and $j=1,2,\dots,D$.
 
-In Section \ref{sec:houston} each design point is constrained to be in Harris County, TX, which is not a rectangle. We initialize the swarm by placing initial design points on the smallest rectangle containing Harris County. Design points outside of Harris County will quickly move back into the county due to the confinement strategy.
+In Section \ref{sec:houston} each design point is constrained to be in Harris County, TX, which is not a rectangle. We initialize the swarm by placing initial design points on the smallest rectangle containing Harris County. Design points outside of Harris County will quickly move back into the county due to the confinement strategy discussed next.
 
 \subsubsection{Confinement:}
-Even though the initialization of the swarm is confined to a hypercube, nothing prevents any given particle from leaving the search space. There are a number of things that can be done in order to solve this problem and each has advantages and disadvantages depending on the situation. We focus on two approaches. One is to move any particle that leaves the search space to the nearest point still inside the search space and then adjust its velocity, e.g. \cite{clerc2011spso} suggests that whenever $x_{ij}(k) > max_j$, it should be set to $x_{ij}(k) = max_j$ and similarly when $x_{ij}(k) < min_j$ it should be set to $x_{ij}(k) = min_j$, and in both cases the velocity along that dimension should be reversed and halved, i.e. $v_{ij}(k) = -0.5 v_{ij}(k)$. This causes particles to bounce off the boundary and move back toward the middle of the search space. This is the default strategy we use. This strategy can also be used for more complex search spaces. In Section \ref{sec:houston} when a particle leaves Harris County, we move it back to the nearest point in the county and reset the particle's velocity as in the previous paragraph. In order to move the particle we use the \verb0gNearestPoint0 function from the \verb0rgeos0 \verb0R0 package; \cite{rgeos2016, R2016}.
+Even though the initialization of the swarm is confined to a hypercube, nothing prevents any given particle from leaving the search space. There are a number of things that can be done in order to solve this problem and each has advantages and disadvantages depending on the situation. We focus on two approaches. One is to move any particle that leaves the search space to the nearest point still inside the search space and then adjust its velocity, e.g. \cite{clerc2011spso} suggests that whenever $x_{ij}(k) > max_j$, it should be set to $x_{ij}(k) = max_j$ and similarly when $x_{ij}(k) < min_j$ it should be set to $x_{ij}(k) = min_j$, and in both cases the velocity along that dimension should be reversed and halved, i.e. $v_{ij}(k) = -0.5 v_{ij}(k)$. This causes particles to bounce off the boundary and move back toward the middle of the search space. This is the default strategy we use. This strategy can also be used for more complex search spaces, and in Section \ref{sec:houston} when a particle leaves Harris County, we move it back to the nearest point in the county and reset the particle's velocity as in the previous paragraph. In order to move the particle we use the \verb0gNearestPoint0 function from the \verb0rgeos0 \verb0R0 package; \cite{rgeos2016, R2016}.
 
 \subsubsection{Redraw Neighborhoods:}
 In Section \ref{sec:pso} we briefly described a variant of the stochastic star neighborhood which we use. This neighborhood is stochastic, meaning that each particle's neighbors are randomly drawn when the algorithm is initialized. After an iteration in which the best known value of the objective function is unchanged, each particle's neighbors are randomly redrawn according to the same distribution.
@@ -105,7 +110,7 @@ This combines easily with BBPSOxp to update each coordinate of each particle wit
 
 \section{Tables for Comparing PSO and BBPSO algorithms}\label{app:psotabs}
 
-Tables \ref{tab:psosim1}-\ref{tab:psosim6} contain the simulation results for objective functions 1-6 respectively (OF1, OF2, etc.). We use several measures to quantify how well each algorithm finds the global minimum. First, each table includes the mean and standard deviation of the absolute difference between the true global minimum and the algorithm's estimated global minimum across all 40 replications, denoted by Mean and SD. Second, each table includes a convergence criterion --- the proportion of the replications that came within $0.01$ of the true global minimum, denoted by $\widehat{P}$. Finally, $\widehat{K}$ denotes the median number of iterations until the algorithm reaches the convergence criterion; $\widehat{K} > 1000$ indicates that the algorithm did not converge in the allotted 1,000 iterations in at least of $50\%$ of replications. Mean, $\widehat{P}$, and $\widehat{K}$ can be thought of how close on average the algorithm gets to the global minimum, what proportion of the time it converges, and long it takes to converge respectively. Values for the Mean and SD that are greater than 10,000 are omitted to keep the size of the tables manageable.
+Tables \ref{tab:psosim1}-\ref{tab:psosim6} contain the simulation results for objective functions 1-6 respectively (OF1, OF2, etc.). We use several measures to quantify how well each algorithm finds the global minimum. First, each table includes the mean and standard deviation of the absolute difference between the true global minimum and the algorithm's estimated global minimum across all 40 replications, denoted by Mean and SD. Second, each table includes a convergence criterion --- the proportion of the replications that came within $0.01$ of the true global minimum, denoted by $\widehat{P}$. Finally, $\widehat{K}$ denotes the median number of iterations until the algorithm reaches the convergence criterion; $\widehat{K} > 1000$ indicates that the algorithm did not converge in the allotted 1,000 iterations in at least of $50\%$ of replications. Mean, $\widehat{P}$, and $\widehat{K}$ can be thought of as how close on average the algorithm gets to the global minimum, what proportion of the time it converges, and long it takes to converge respectively. Values for the Mean and SD that are greater than 10,000 are omitted to keep the size of the tables manageable.
 
 
 % latex table generated in R 3.3.1 by xtable 1.8-2 package
@@ -150,7 +155,7 @@ AT2-BBPSO & 0.00 & 0.00 & 1.00 & 445.5 & 0.00 & 0.00 & 1.00 & 465 & 0.00 & 0.00 
    \hline
 \end{tabular}
 \endgroup
-\caption{Simulation results for OF1. See text for description}
+\caption{Simulation results for OF1. Each algorithm was run for 1,000 iterations over 40 replications. Mean and SD denote the mean and standard deviation of minimum objective function values found over all replications, while $\widehat{P}$ is a denotes the proportion of all replicatons that came within $0.01$ of the true global minimum (equal to zero), and $\widehat{K}$ denotes the median number of iterations until the algorithm came within $0.01$ og the global minimum.}
 \label{tab:psosim1}
 \end{table}
 % latex table generated in R 3.3.1 by xtable 1.8-2 package
@@ -195,7 +200,7 @@ AT2-BBPSO & 0.00 & 0.00 & 1.00 & 852 & 0.00 & 0.00 & 0.92 & 846.5 & 0.00 & 0.00 
    \hline
 \end{tabular}
 \endgroup
-\caption{Simulation results for OF2. See text for description}
+\caption{Simulation results for OF2. Each algorithm was run for 1,000 iterations over 40 replications. Mean and SD denote the mean and standard deviation of minimum objective function values found over all replications, while $\widehat{P}$ is a denotes the proportion of all replicatons that came within $0.01$ of the true global minimum (equal to zero), and $\widehat{K}$ denotes the median number of iterations until the algorithm came within $0.01$ og the global minimum.}
 \label{tab:psosim2}
 \end{table}
 % latex table generated in R 3.3.1 by xtable 1.8-2 package
@@ -240,7 +245,7 @@ AT2-BBPSO & 192.88 & 490.38 & 0.00 & $> 1000$ & 63.77 & 83.78 & 0.00 & $> 1000$ 
    \hline
 \end{tabular}
 \endgroup
-\caption{Simulation results for OF3. See text for description}
+\caption{Simulation results for OF3. Each algorithm was run for 1,000 iterations over 40 replications. Mean and SD denote the mean and standard deviation of minimum objective function values found over all replications, while $\widehat{P}$ is a denotes the proportion of all replicatons that came within $0.01$ of the true global minimum (equal to zero), and $\widehat{K}$ denotes the median number of iterations until the algorithm came within $0.01$ og the global minimum.}
 \label{tab:psosim3}
 \end{table}
 % latex table generated in R 3.3.1 by xtable 1.8-2 package
@@ -285,7 +290,7 @@ AT2-BBPSO & 4.59 & 1.93 & 0.00 & $> 1000$ & 0.62 & 0.79 & 0.52 & 633.5 & 1.14 & 
    \hline
 \end{tabular}
 \endgroup
-\caption{Simulation results for OF4. See text for description}
+\caption{Simulation results for OF4. Each algorithm was run for 1,000 iterations over 40 replications. Mean and SD denote the mean and standard deviation of minimum objective function values found over all replications, while $\widehat{P}$ is a denotes the proportion of all replicatons that came within $0.01$ of the true global minimum (equal to zero), and $\widehat{K}$ denotes the median number of iterations until the algorithm came within $0.01$ og the global minimum.}
 \label{tab:psosim4}
 \end{table}
 % latex table generated in R 3.3.1 by xtable 1.8-2 package
@@ -330,7 +335,7 @@ AT2-BBPSO & 0.02 & 0.02 & 0.40 & $> 1000$ & 0.00 & 0.01 & 0.92 & 366.5 & 0.01 & 
    \hline
 \end{tabular}
 \endgroup
-\caption{Simulation results for OF5. See text for description}
+\caption{Simulation results for OF5. Each algorithm was run for 1,000 iterations over 40 replications. Mean and SD denote the mean and standard deviation of minimum objective function values found over all replications, while $\widehat{P}$ is a denotes the proportion of all replicatons that came within $0.01$ of the true global minimum (equal to zero), and $\widehat{K}$ denotes the median number of iterations until the algorithm came within $0.01$ og the global minimum.}
 \label{tab:psosim5}
 \end{table}
 % latex table generated in R 3.3.1 by xtable 1.8-2 package
@@ -375,10 +380,35 @@ AT2-BBPSO & 17.76 & 7.56 & 0.15 & $> 1000$ & 5.95 & 8.70 & 0.65 & 684.5 & 19.04 
    \hline
 \end{tabular}
 \endgroup
-\caption{Simulation results for OF6. See text for description}
+\caption{Simulation results for OF6. Each algorithm was run for 1,000 iterations over 40 replications. Mean and SD denote the mean and standard deviation of minimum objective function values found over all replications, while $\widehat{P}$ is a denotes the proportion of all replicatons that came within $0.01$ of the true global minimum (equal to zero), and $\widehat{K}$ denotes the median number of iterations until the algorithm came within $0.01$ og the global minimum.}
 \label{tab:psosim6}
 \end{table}
 
-
+\bibliographystyle{wb_stat}
 \nobibliography{../pso}
 \end{document}
+
+
+Tables \ref{tab:psosim1}-\ref{tab:psosim6} in the supporting materials contain the simulation results for objective functions 1-6 respectively (OF1, OF2, etc.). We highlight only some of the features of these tables here. The first is that the CF versions of the PSO algorithms do much worse than their corresponding non-CF versions. This is unsurprising since non-CF PSO variants tend to be biased toward finding solutions at the origin and along coordinate axes and each of our objective functions were designed to have a global minimum at the origin. However, for BBPSO variants whether the scale parameter update is CF or not often makes little difference. Often the standard PSO algorithm with either parameter setting, PSO1 or PSO2, and either the Global or SS3 neighborhood performs the best or near the best. Since non-CF PSO algorithms are known to be biased toward the origin and since it is unclear if the DI-PSO and AT-PSO variants are biased to a greater, lesser, or the same degree, PSO1 and PSO2 are not good baselines for comparing to AT variants. Instead we focus on the CF versions of all algorithms. The difference between the CF and non-CF version of each algorithm does serve as a possible measure of the origin-seeking bias of the non-CF version of the algorithm, however.
+
+Narrowing in on the CF algorithms, the AT variants of the PSO-CF algorithms are a mixed bag relative to their pure PSO counterparts. Sometimes the AT version performs better, sometimes not, and often they are essentially indistinguishable. Both classes of algorithms tend to perform better than their DI-PSO-CF counterparts, however, and it is clear for all PSO algorithms that the Global and SS3 neighborhoods both tend to be significantly superior than the SS1 neighborhood. The real story, however, is the performance of the AT-BBPSO-CF variants. Typically they are the best performing CF variant, and often they are even competitive with the best non-CF PSO variants. \emph{Which} AT-BBPSO-CF algorithm performs best depends on the situation. For relatively easy problems such as for OF1 and OF2, AT2 tends to be better than AT1, BBPSO tends to be better than BBPSOxp, and the Global or SS1 neighborhoods tend to be the best across all three measures, so AT2-BBPSO-CF with the Global or SS1 neighborhoods appear attractive. For more complex objective functions such as OF4-OF6, any of the AT-BBPSO-CF variants could perform the best, and whether e.g. AT1 or AT2 is better often interacts with whether the BBPSO or BBPSOxp kernel is used. There does not appear to be a hard an fast rule to abide by, so in more complex optimization problems we recommend trying several AT-BBPSO-CF variants, and perhaps even non-CF variants. Our default recommendation is to try AT2-BBPSO-CF with the global neighborhood. In the case where trying multiple algorithms is worthwhile, e.g. for particularly difficult optimization problems, we recommend experimenting with the neighborhood before experimenting with any of the other knobs on these algorithms. Changing the neighborhood often yields the largest differences between algorithms in our simulations, though sometimes changing the kernel (BBPSO vs. BBPSOxp) or $R^*$ (e.g. AT1 vs. AT2) can also sometimes yield large gains.
+
+The DI-PSO and AT-PSO algorithms are similar conceptually, but often yield very different results. DI-PSO deterministically reduces the inertia parameter over time in the same manner given a fixed set of parameter values ($\alpha$ and $\beta$), while AT-PSO dynamically adjusts the inertia parameter to hit a target improvement rate. Figure \ref{fig:inertia} plots the inertia over time for the DI-PSO algorithm with $\alpha=200$ and $\beta=1$, and observed inertia over time for one replication of the AT2-PSO2-CF algorithm with the SS3 neighborhood for OF1 and one replication for OF6. DI-PSO smoothly decreases its inertia with a slowly decreasing rate, while AT2-PSO2-CF behaves very differently depending on the objective function. For OF1 it drops the inertia to about to about 0.7 then bounces back up to about 0.8 and fluctuates around that point. This is pretty typical behavior for the inertia parameter of AT-PSO --- it tends to bounce around a level which is approximately the average over time of the DI-PSO's inertia, though lower values of $R^*$ will result in higher inertias. In this way, AT-PSO alternates periods of exploration (relatively high inertia) and periods of exploitation (relatively low inertia). The main exception to this pattern is when AT-PSO converges around a local minimum. In this case, inertia plummets to zero as the particles settle down. This is precisely what happens for OF6 in Figure \ref{fig:inertia}, though in this case the minimum is not global --- Table \ref{tab:psosim6} indicates the algorithm never converged to the global min. In optimization problems with multiple local optima, both AT-PSO can exhibit this behavior and prematurely converge to a local minima, so they may not be advantageous for those problems. In theory we expect this behavior for AT-BBPSO as well, but as Table \ref{tab:psosim6} indicates, some variants of the AT-BBPSO algorithms were able to get significantly closer to the global minimum.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.95\textwidth]{../code/psosims/inertiaplot.png}
+\caption{Inertia over time for the DI-PSO algorithm with $\alpha=200$ and $\beta=1$, and for one replication of the AT-PSO-0.5 algorithm with the SS3 neighborhood for each of OFs 1 and 6.}
+\label{fig:inertia}
+\end{figure}
+
+Figure \ref{fig:scale} displays the scale parameter over time for one replication of the AT2-BBPSO-CF algorithm for each of the objective functions we considered with the SS3 neighborhood. Notably, they all result in similar scale parameter dynamics. This holds up remarkably well across replications, BBPSO vs. BBPSOxp, and CF vs. not, such that it may be possible to pick a one-size-fits-all deterministic progression of the scale parameter that matches the algorithm to an AT algorithm with a specific target improvement rate, $R^*$. One key source of variation that is sometimes more pronounced than in Figure \ref{fig:scale} is that for some objective functions the AT algorithms first increase the scale parameter before following the exponentially decreasing progression. This flexibility to adapt to the objective function may not be worth sacrificing for the one-size-fits all approach. Rather, we highlight this possibility as a possible avenue for further understanding the AT-BBPSO algorithms. 
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.95\textwidth]{../code/psosims/scaleplot.png}
+\caption{Scale parameter over time for one replication of the the AT2-BBPSO-CF algorithm with the SS3 neighborhood for each of OF1--OF6.}
+\label{fig:scale}
+\end{figure}
+
+AT-PSO and AT-BBPSO clearly improve on PSO in at least some contexts based on the results of this section. Notably for more difficult problems with, for example, many local optima, the AT algorithms are attractive. In the next section, we turn to applying these algorithms to the practical problem of spatial network design.

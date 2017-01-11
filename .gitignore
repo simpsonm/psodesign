@@ -86,7 +86,11 @@ vignettes/*.pdf
 *.brf
 *.run.xml
 
-# beamer
+## beamer
 *.nav
 *.snm
 *.vrb
+
+## other occasional tex things:
+*.ttt
+*.fff
