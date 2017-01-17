@@ -385,8 +385,11 @@ AT2-BBPSO & 17.76 & 7.56 & 0.15 & $> 1000$ & 5.95 & 8.70 & 0.65 & 684.5 & 19.04 
 \end{table}
 
 \bibliographystyle{wb_stat}
-\nobibliography{../pso}
+\nobibliography{pso}
 \end{document}
+
+
+
 
 
 Tables \ref{tab:psosim1}-\ref{tab:psosim6} in the supporting materials contain the simulation results for objective functions 1-6 respectively (OF1, OF2, etc.). We highlight only some of the features of these tables here. The first is that the CF versions of the PSO algorithms do much worse than their corresponding non-CF versions. This is unsurprising since non-CF PSO variants tend to be biased toward finding solutions at the origin and along coordinate axes and each of our objective functions were designed to have a global minimum at the origin. However, for BBPSO variants whether the scale parameter update is CF or not often makes little difference. Often the standard PSO algorithm with either parameter setting, PSO1 or PSO2, and either the Global or SS3 neighborhood performs the best or near the best. Since non-CF PSO algorithms are known to be biased toward the origin and since it is unclear if the DI-PSO and AT-PSO variants are biased to a greater, lesser, or the same degree, PSO1 and PSO2 are not good baselines for comparing to AT variants. Instead we focus on the CF versions of all algorithms. The difference between the CF and non-CF version of each algorithm does serve as a possible measure of the origin-seeking bias of the non-CF version of the algorithm, however.
