@@ -7,7 +7,7 @@
 \usepackage{xr, zref, hyperref}
 \usepackage{cprotect}
 
-\usepackage[nomarkers]{endfloat}
+%\usepackage[nomarkers]{endfloat}
 
 \newcommand{\var}{\mathrm{var}}
 \newcommand{\cov}{\mathrm{cov}}
@@ -119,7 +119,7 @@ DI-PSO tends to improve on standard PSO if $\omega(k)$'s progression is set appr
 
 In order to compare AT-BBPSO to other PSO variants, we employ a subset of test functions used in \cite{hsieh2010modified}. Each function is listed in Table \ref{tab:testfuns} along with the global minimum and argmin. Further description of many of these functions can be found in \cite{clerc2010particle}. For each function, we set $D=20$ so the domain of each function is $\Re^{20}$. Each function was constrained to the hypercube $[-100, 100]^D$.
 
-\begin{table}[h]
+\begin{table}[p]
 \centering
 \begin{tabular}{llll}
  Equation & ArgMin & Minimum \\\hline
@@ -142,7 +142,7 @@ Tables \ref{tab:psosim1}-\ref{tab:psosim6} in the supporting materials contain t
 
 The DI-PSO and AT-PSO algorithms are similar conceptually, but often yield very different results. DI-PSO deterministically reduces the inertia parameter over time in the same manner given a fixed set of parameter values ($\alpha$ and $\beta$), while AT-PSO dynamically adjusts the inertia parameter to hit a target improvement rate. Figure \ref{fig:inertia} plots the inertia over time for the DI-PSO algorithm with $\alpha=200$ and $\beta=1$, and observed inertia over time for one replication of the AT2-PSO2-CF algorithm with the SS3 neighborhood for OF1 and one replication for OF6. DI-PSO smoothly decreases its inertia with a slowly decreasing rate, while AT2-PSO2-CF behaves very differently depending on the objective function. For OF1 it drops the inertia to about to about 0.7 then bounces back up to about 0.8 and fluctuates around that point. This is pretty typical behavior for the inertia parameter of AT-PSO --- it tends to bounce around a level which is approximately the average over time of the DI-PSO's inertia, though lower values of $R^*$ will result in higher inertias. In this way, AT-PSO alternates periods of exploration (relatively high inertia) and periods of exploitation (relatively low inertia). The main exception to this pattern is when AT-PSO converges around a local minimum. In this case, inertia plummets to zero as the particles settle down. This is precisely what happens for OF6 in Figure \ref{fig:inertia}, though in this case the minimum is not global --- Table \ref{tab:psosim6} indicates the algorithm never converged to the global min. In optimization problems with multiple local optima, both AT-PSO can exhibit this behavior and prematurely converge to a local minima, so they may not be advantageous for those problems. In theory we expect this behavior for AT-BBPSO as well, but it turns out that some variants of the AT-BBPSO algorithms were able to get significantly closer to the global minimum for OF6, which has many local optima.
 
-\begin{figure}[!ht]
+\begin{figure}[p]
 \centering
 \includegraphics[width=0.95\textwidth]{../code/psosims/inertiaplot.png}
 \caption{Inertia over time for the DI-PSO algorithm with $\alpha=200$ and $\beta=1$, and for one replication of the AT-PSO-0.5 algorithm with the SS3 neighborhood for each of OFs 1 and 6.}
@@ -153,7 +153,7 @@ The AT-BBPSO algorithms are fairly competitive for most of the objective functio
 
 Figure \ref{fig:scale} displays the scale parameter over time for one replication of the AT2-BBPSO-CF algorithm for each of the objective functions we considered with the SS3 neighborhood. Notably, they all result in similar scale parameter dynamics. This holds up remarkably well across replications, BBPSO vs. BBPSOxp, and CF vs. not, such that it may be possible to pick a one-size-fits-all deterministic progression of the scale parameter that matches the algorithm to an AT algorithm with a specific target improvement rate, $R^*$. One key source of variation that is sometimes more pronounced than in Figure \ref{fig:scale} is that for some objective functions the AT algorithms first increase the scale parameter before following the exponentially decreasing progression. This flexibility to adapt to the objective function may not be worth sacrificing for the one-size-fits all approach. Rather, we highlight this possibility as a possible avenue for further understanding the AT-BBPSO algorithms. 
 
-\begin{figure}[!ht]
+\begin{figure}[p]
 \centering
 \includegraphics[width=0.95\textwidth]{../code/psosims/scaleplot.png}
 \caption{Scale parameter over time for one replication of the the AT2-BBPSO-CF algorithm with the SS3 neighborhood for each of OF1--OF6.}
@@ -199,7 +199,7 @@ Additionally, we employ a class of genetic algorithms (GAs) described in \cite{h
 
 % latex table generated in R 3.3.2 by xtable 1.8-2 package
 % Tue Jan 03 15:55:01 2017
-\begin{table}[ht]
+\begin{table}[p]
 \centering
 \begingroup\scriptsize
 \begin{tabular}{lrr}
@@ -243,17 +243,17 @@ GA-11 & \bf{14.40} & 21.19 \\
 
 From Table \ref{tab:psokriging} we immediately see that the first set of parameter values tends to work the best in the PSO algorithms while in the BBPSO algorithms the non-xp variants tend to outperform the xp variants, though neither of these is universally true. For both objective functions the PSO1 algorithm with the global neighborhood topology performs the best of the non AT variants and is outperformed by several of the AT variants. The best GAs are competitive with the best PSO algorithms, though they appear to be slightly worse. The five best performing algorithms for $\overline{Q}_{puk}$ are, in order, AT2-PSO2, AT1-PSO1, GA-11, PSO1-Global, and AT2-PSO1 (bolded in Table \ref{tab:psokriging}). Similarly, the five best performing algorithms for $Q^*_{puk}$ are, in order, AT1-PSO1, PSO1, GA-12, PSO2, and AT2-PSO1 (bolded in Table \ref{tab:psokriging}). In Section \ref{sec:psocompare} we found that the AT-BBPSO and AT-BBPSO-CF variants were competitive with the other PSO algorithms and in the case of the hardest problems seemed to be the best. The key seems to be that the AT-BBPSO variants are more robust to complicated objective surfaces with many local minima. When the objective surface is simpler, PSO and AT-PSO variants are more attractive and appear to converge faster. Similarly for problems that are simple enough PSO outperforms AT-PSO, but for hard enough problems AT-PSO becomes advantageous. For example in simulations not reported here, PSO1 outperforms all other algorithms when adding significantly less monitoring locations to the network, e.g., 20. But in this case, with 100 new locations, AT1-PSO1 appears to be superior for both objective functions. 
 
-\begin{figure}
+\begin{figure}[p]
 \centering
 \includegraphics[scale=.8]{../code/kriging/sig2pukmean.png}
 \cprotect\caption{Best designs found according to $\overline{Q}_{puk}$. Original network points are grey, new points are red. Harris County is outlined in black. The background map is from Google Maps via \verb0ggmap0; \cite{ggmap2013}.}
 \label{fig:designoutmean}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[p]
 \centering
 \includegraphics[scale=.8]{../code/kriging/sig2pukmax.png}
-\cprotect\caption{Best designs found according to $Q^*_{puk}$ (right). Original network points are grey, new points are red. Harris County is outlined in black. The background map is from Google Maps via \verb0ggmap0; \cite{ggmap2013}.}
+\cprotect\caption{Best designs found according to $Q^*_{puk}$. Original network points are grey, new points are red. Harris County is outlined in black. The background map is from Google Maps via \verb0ggmap0; \cite{ggmap2013}.}
 \label{fig:designoutmax}
 \end{figure}
 
