@@ -130,7 +130,7 @@ algidstr <- "PSO-2-CF-AT2"
 atplotout <- subset(psoout, (obj %in% c(1, 6) & nbhd == 3 & algid == algidstr &
                              time > 0 & rep == rr))[,c(1,4,5,12)]
 atplotout <- rbind(atplotout, data.frame(obj = 1, time = 1:niter, algid = "DI-PSO", inertias = 1/(1 + ((1:niter + 1)/200)^1)))
-atplotout$Algorithm <- mapvalues(atplotout$algid, algidstr, "AT5-PSO2-CF")
+atplotout$Algorithm <- mapvalues(atplotout$algid, algidstr, "AT2-PSO2-CF")
 atplotout$Algorithm <- paste(atplotout$Algorithm, ", Obj = ", atplotout$obj, sep = "")
 atplotout$Algorithm <- mapvalues(atplotout$Algorithm, "DI-PSO, Obj = 1", "DI-PSO")
 atplotout$Algorithm <- factor(atplotout$Algorithm, unique(atplotout$Algorithm)[c(3,1,2)])
