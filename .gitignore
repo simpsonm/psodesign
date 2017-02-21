@@ -12,6 +12,7 @@
 
 # extra tex files for makefile
 *blind.tex
+*graphs.tex
 
 # emacs auto backups
 *~
