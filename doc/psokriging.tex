@@ -23,16 +23,6 @@
 \@ifundefined{blind}{\def\blind{0}}{}
 \makeatother
 
-% if preview is on, generate a nopreview variable
-% for generating eps files of figures
-% this weird construction is needed so it works with \cprotect in Figures 3 and 4.
-\ifPreview
-\def\noprev{0}
-\else
-\def\noprev{1}
-\fi 
-\DeclareRobustCommand{\myprot}{\cite}
-
 % if not blinded, reference unblinded appendix
 \if0\blind
 {
