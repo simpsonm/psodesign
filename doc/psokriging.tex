@@ -14,9 +14,6 @@
 \newcommand{\E}{\mathrm{E}}
 \newcommand{\tr}{\mathrm{tr}}
 
-\usepackage[tightpage]{preview} % for generating external images
-\PreviewBorder=12pt\relax
-
 % if variable blind is undefined, assume it is 0
 % for generating automatically blinded pdfs
 \makeatletter
@@ -123,15 +120,7 @@ In order to compare AT-BBPSO to other PSO variants, we employ a subset of test f
 
 \begin{table}[p]
 \centering
-\begin{tabular}{llll}
- Equation & ArgMin & Minimum \\\hline
- $Q_1(\bm{\theta}) = \sum_{i=1}^D\theta_i^2$ & $\bm{\theta}^* = \bm{0}$ & $Q_1(\bm{\theta}^*) = 0$  \\
- $Q_2(\bm{\theta}) = \sum_{i=1}^D\left(\sum_{j=1}^i \theta_j\right)^2 $ & $\bm{\theta}^* = \bm{0}$ & $Q_2(\bm{\theta}^*) = 0$ \\
- $Q_3(\bm{\theta}) = \sum_{i=1}^{D-1}\left[100\{\theta_{i+1} + 1 - (\theta_i + 1)^2\} + \theta_i^2\right]$ & $\bm{\theta}^* = \bm{0}$ & $Q_3(\bm{\theta}^*) = 0$ \\
- $Q_4(\bm{\theta}) = \sum_{i=1}^D\{\theta_i^2 - \cos(2\pi \theta_i) + 10\} - 9D$ & $\bm{\theta}^*=\bm{0}$ & $Q_4(\bm{\theta}^*) = 0$ \\
- $Q_5(\bm{\theta}) = \frac{1}{4000}||\bm{\theta}||^2 - \prod_{i=1}^D\cos\left(\frac{\theta_i}{\sqrt{i}}\right) + 1$ & $\bm{\theta}^* = \bm{0}$ & $Q_5(\bm{\theta}^*) = 0$ \\
- \shortstack[l]{$Q_6(\bm{\theta}) = -20\exp\left(-0.2\sqrt{\frac{1}{D}||\bm{\theta}||}\right)$ \\ \ \ \ \ \ \ \ \ $- \exp\left\{\frac{1}{D}\sum_{i=1}^D\cos(2\pi \theta_i)\right\} + 20 + \exp(1)$} & $\bm{\theta}^* = \bm{0}$ & $Q_6(\bm{\theta}^*) = 0$ \\\hline
-\end{tabular}
+\input{table-testfuns.tex}
 \caption{Test functions for evaluating PSO algorithms. The dimension of $\bm{\theta}$ is $D$ and $||\cdot||$ is the Euclidean norm: $||\bm{\theta}|| = \sqrt{\sum_{i=1}^D\theta_i^2}$.}
 \label{tab:testfuns}
 \end{table}
@@ -143,16 +132,10 @@ Tables~\ref{tab:psosim1}-\ref{tab:psosim6} in the supporting materials contain t
 The DI-PSO and AT-PSO algorithms are similar conceptually, but often yield different results. DI-PSO deterministically reduces the inertia parameter over time in the same manner given a fixed set of parameter values ($\alpha$ and $\beta$), while AT-PSO dynamically adjusts the inertia parameter to hit a target improvement rate. Figure~\ref{fig:inertia} plots the inertia over time for the DI-PSO algorithm with $\alpha=200$ and $\beta=1$, and observed inertia over time for one replication of the AT2-PSO2-CF algorithm with the SS3 neighborhood for OF1 and one replication for OF6. DI-PSO smoothly decreases its inertia with a slowly decreasing rate, while AT2-PSO2-CF behaves very differently depending on the objective function. For OF1, the inertia drops to about to about 0.7 then bounces back up to about 0.8 and fluctuates around that point. This is pretty typical behavior for the inertia parameter of AT-PSO --- it tends to bounce around a level which is approximately the average over time of the DI-PSO's inertia, though lower values of $R^*$ will result in higher inertias. In this way, AT-PSO alternates between periods of exploration (relatively high inertia) and periods of exploitation (relatively low inertia). The main exception to this pattern is when AT-PSO converges around a local minimum. In this case, inertia plummets to zero as the particles settle down. This is precisely what happens for OF6 in Figure~\ref{fig:inertia}, though in this case the minimum is not global --- Table~\ref{tab:psosim6} indicates the algorithm never converged to the global minimum. In optimization problems with multiple local optima, AT-PSO can exhibit this behavior and prematurely converge to a local minima, so it may not be advantageous for those problems. In theory we expect this behavior for AT-BBPSO as well, but it turns out that some variants of the AT-BBPSO algorithms were able to get significantly closer to the global minimum for OF6, which has many local optima.
 
 \begin{figure}[p]
-\begin{preview}
 \centering
 \includegraphics[width=0.8\textwidth]{inertiaplot.png}
-\ifPreview
-\caption{Simpson et al; Up $\uparrow$}
-\else
 \caption{Inertia over time for the DI-PSO algorithm with $\alpha=200$ and $\beta=1$, and for one replication of the AT2-PSO-CF algorithm with the SS3 neighborhood for each of OFs 1 and 6.}
 \label{fig:inertia}
-\fi
-\end{preview}
 \end{figure}
 
 The AT-BBPSO algorithms are fairly competitive for most of the objective functions we consider, but AT-BBPSO strongly outperforms the alternatives in a few cases where the objective function is particularly difficult to optimize. This is clearest in Table~\ref{tab:psosim6} for OF6, but in Tables~\ref{tab:psosim4} and~\ref{tab:psosim5} for OF5 and OF6, respectively, the best performing AT-BBPSO variants are significantly better than the best performing PSO, AT-PSO, and DI-PSO variants. OF6 in particular is a difficult function to optimize with many local optima AT-BBPSO algorithms also buck a couple of trends. First, the difference between the CF and non-CF variants is much less stark and is often reversed --- the best algorithms for OF6, for example, are AT-BBPSO-CF variants. Second, the SS1 neighborhood topology often works well for AT-BBPSO variants. There does not appear to be a hard and fast rule to abide by for deciding \emph{which} AT-BBPSO variant is best, but one of AT2-BBPSO-CF or AT2-BBPSOxp-CF with either the global or SS3 neighborhood tends to be the best AT-BBPSO variant for the problems we consider in this section.
@@ -160,16 +143,10 @@ The AT-BBPSO algorithms are fairly competitive for most of the objective functio
 Figure~\ref{fig:scale} displays the scale parameter over time for one replication of the AT2-BBPSO-CF algorithm for each of the objective functions we considered with the SS3 neighborhood. Notably, they all result in similar scale parameter dynamics. This holds up remarkably well across replications, BBPSO vs. BBPSOxp, CF vs. not, and neighborhood topologies such that it may be possible to pick a one-size-fits-all deterministic progression of the scale parameter that matches the algorithm to an AT algorithm with a specific target improvement rate, $R^*$. One key source of variation that is sometimes more pronounced than in Figure~\ref{fig:scale} is that for some objective functions the AT algorithms first increase the scale parameter before exponentially decaying. This flexibility to adapt to the objective function may not be worth sacrificing for the one-size-fits all approach. Rather, we highlight this possibility as a potential avenue for further understanding the AT-BBPSO algorithms.
 
 \begin{figure}[p]
-\begin{preview}
 \centering
 \includegraphics[width=0.8\textwidth]{scaleplot.png}
-\ifPreview
-\caption{Simpson et al; Up $\uparrow$}
-\else
 \caption{Scale parameter over time for one replication of the the AT2-BBPSO-CF algorithm with the SS3 neighborhood for each of OF1--OF6.}
 \label{fig:scale}
-\fi
-\end{preview}
 \end{figure}
 
 AT-PSO and AT-BBPSO both improve on PSO in at least some contexts based on the results of this section. Notably for more difficult problems with, e.g., many local optima, AT-BBPSO variants are capable of vastly outperforming other PSO variants. In the next section, we turn to applying these algorithms to the practical problem of spatial network design.
@@ -212,72 +189,25 @@ Additionally, we employ a class of genetic algorithms (GAs) described in \cite{h
 % Tue Jan 03 15:55:01 2017
 \begin{table}[p]
 \centering
-\begingroup\scriptsize
-\begin{tabular}{lrr}
-Algorithm & $\overline{Q}_{puk}$ & $Q^*_{puk}$ \\\hline
-Uniform & 16.40 & 26.80 \\\hline
-PSO1 & \bf{14.40} & \bf{20.63} \\
-  PSO2 & 14.45 & \bf{21.03}\\
-  PSO1-CF & 15.53 & 23.54 \\
-  PSO2-CF & 15.77 & 23.16 \\
-   \hline
-AT1-PSO1 & \bf{14.38} & \bf{20.57} \\
-  AT1-PSO2 & 14.56 & 23.18 \\
-  AT1-PSO1-CF & 15.96 & 23.33 \\
-  AT1-PSO2-CF & 15.60 & 24.02 \\
-   \hline
-AT2-PSO1 & \bf{14.42} & \bf{21.13} \\
-  AT2-PSO2 & \bf{14.32} & 22.11 \\
-  AT2-PSO1-CF & 15.85 & 24.00 \\
-  AT2-PSO2-CF & 15.95 & 23.63 \\
-   \hline
-AT1-BBPSO & 14.53 & 22.28 \\
-  AT1-BBPSOxp & 15.87 & 22.19 \\
-  AT1-BBPSO-CF & 14.65 & 21.33 \\
-  AT1-BBPSOxp-CF & 14.84 & 22.34 \\
-   \hline
-AT2-BBPSO & 14.65 & 23.49 \\
-  AT2-BBPSOxp & 15.21 & 23.25 \\
-  AT2-BBPSO-CF & 14.63 & 21.92\\
-  AT2-BBPSOxp-CF & 14.52 & 22.76 \\
-   \hline
-GA-11 & \bf{14.40} & 21.19 \\
-  GA-21 & 15.20 & 23.21 \\
-  GA-12 & 14.45 & \bf{20.84} \\
-  GA-22 & 15.26 & 22.61 \\
-\hline
-\end{tabular}
-\endgroup
-\caption{ Simulation results for each objective function, $\overline{Q}_{puk}$ and $Q^*_{puk}$. Bold values in a given column are the five best (lowest)  values for the corresponding objective function. AT-PSO and AT-BBPSO variants are adaptively-tuned, with AT1 and AT2 corresponding to two different parameter settings for the tuned portion of the algorithm. CF indicates that the velocity or scale parameter update is coordinate free. PSO1 and PSO2 use two different parameter settings for any non-adaptive parameters, and similarly for BBPSO and BBPSOxp. GAs have two possible values for a rate parameter and also for a variance parameter, indicated by the appended numbers. See Secton~\ref{sec:houston} for further description of all of these parameter settings.}
+\input{table-psokriging.tex}
+\caption{Simulation results for each objective function, $\overline{Q}_{puk}$ and $Q^*_{puk}$. Bold values in a given column are the five best (lowest)  values for the corresponding objective function. AT-PSO and AT-BBPSO variants are adaptively-tuned, with AT1 and AT2 corresponding to two different parameter settings for the tuned portion of the algorithm. CF indicates that the velocity or scale parameter update is coordinate free. PSO1 and PSO2 use two different parameter settings for any non-adaptive parameters, and similarly for BBPSO and BBPSOxp. GAs have two possible values for a rate parameter and also for a variance parameter, indicated by the appended numbers. See Secton~\ref{sec:houston} for further description of all of these parameter settings.}
 \label{tab:psokriging}
 \end{table}
 
 From Table~\ref{tab:psokriging} we immediately see that the first set of tuning parameters tends to work the best in the PSO algorithms, while in the AT-BBPSO algorithms the non-xp variants tend to outperform the xp variants, though neither of these is universally true. For both objective functions the PSO1 algorithm with the global neighborhood topology performs the best of the standard PSO variants and is outperformed by several of the AT variants. The best GAs are competitive with the best PSO algorithms, though they appear to be slightly worse. The five best performing algorithms for $\overline{Q}_{puk}$ are, in order, AT2-PSO2, AT1-PSO1, GA-11, PSO1-Global, and AT2-PSO1 (bold in Table~\ref{tab:psokriging}). Similarly, the five best performing algorithms for $Q^*_{puk}$ are, in order, AT1-PSO1, PSO1, GA-12, PSO2, and AT2-PSO1 (bold in Table~\ref{tab:psokriging}). In Section~\ref{sec:psocompare} we found that the AT-BBPSO and AT-BBPSO-CF variants were competitive with the other PSO algorithms and in the case of the hardest problems seemed to be the best. The key seems to be that the AT-BBPSO variants are more robust to complicated objective surfaces with many local minima. When the objective surface is simpler, PSO and AT-PSO variants are more attractive and appear to converge faster. Similarly, for problems that are simple enough PSO outperforms AT-PSO, but for hard enough problems AT-PSO becomes advantageous. For example, in simulations not reported here, PSO1 outperforms all other algorithms when adding significantly less monitoring locations to the network, e.g., 20. But in this case, with 100 new locations, AT1-PSO1 appears to be superior for both objective functions, though the difference is small.
 
 \begin{figure}[p]
-\begin{preview}
 \centering
 \includegraphics[width=.8\textwidth]{sig2pukmean.png}
-\ifPreview
-\caption{Simpson et al; Up $\uparrow$}
-\else
 \caption{Best designs found according to $\overline{Q}_{puk}$. Original network points are gray, new points are red. Harris County is outlined in black. The background map is from Google Maps via ggmap \citep{ggmap2013}.}
-\fi
 \label{fig:designoutmean}
-\end{preview}
 \end{figure}
 
 \begin{figure}[p]
-\begin{preview}
 \centering
 \includegraphics[width=.8\textwidth]{sig2pukmax.png}
-\ifPreview
-\caption{Simpson et al; Up $\uparrow$}
-\else
 \caption{Best designs found according to $Q^*_{puk}$. Original network points are Gray, new points are red. Harris County is outlined in black. The background map is from Google Maps via ggmap \citep{ggmap2013}.}
-\fi
 \label{fig:designoutmax}
-\end{preview}
 \end{figure}
 
 Figures~\ref{fig:designoutmean} and~\ref{fig:designoutmax} contain the best designs found using $\overline{Q}_{puk}$ and $Q^*_{puk}$, respectively. When using the mean kriging variance ($\overline{Q}_{puk}$), the best design spreads nodes of the network fairly evenly throughout the spatial domain (i.e., a space-filling design). With the maximum kriging variance ($Q^*_{puk}$), the best design is more erratic. Notably, there are many more nodes directly on or very close to the border of the spatial domain while interior areas have a tendency to be more sparsely populated with nodes. This is unsurprising since $Q^*_{puk}$ is worst case kriging variance over the entire county, which incentivizes obtaining a better estimate of $\bm{\beta}$. The further away a point is from other monitoring locations, the more the prediction depends on the model's estimate of $\bm{\beta}$ and the less it depends on the values of nearby observations, and putting more monitoring locations near the edges of the county results in smaller variances for the elements of $\widehat{\bm{\beta}}_{gls}$.

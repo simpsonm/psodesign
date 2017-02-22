@@ -1,0 +1,10 @@
+\begin{tabular}{llll}
+ Equation & ArgMin & Minimum \\\hline
+ $Q_1(\bm{\theta}) = \sum_{i=1}^D\theta_i^2$ & $\bm{\theta}^* = \bm{0}$ & $Q_1(\bm{\theta}^*) = 0$  \\
+ $Q_2(\bm{\theta}) = \sum_{i=1}^D\left(\sum_{j=1}^i \theta_j\right)^2 $ & $\bm{\theta}^* = \bm{0}$ & $Q_2(\bm{\theta}^*) = 0$ \\
+ $Q_3(\bm{\theta}) = \sum_{i=1}^{D-1}\left[100\{\theta_{i+1} + 1 - (\theta_i + 1)^2\} + \theta_i^2\right]$ & $\bm{\theta}^* = \bm{0}$ & $Q_3(\bm{\theta}^*) = 0$ \\
+ $Q_4(\bm{\theta}) = \sum_{i=1}^D\{\theta_i^2 - \cos(2\pi \theta_i) + 10\} - 9D$ & $\bm{\theta}^*=\bm{0}$ & $Q_4(\bm{\theta}^*) = 0$ \\
+ $Q_5(\bm{\theta}) = \frac{1}{4000}||\bm{\theta}||^2 - \prod_{i=1}^D\cos\left(\frac{\theta_i}{\sqrt{i}}\right) + 1$ & $\bm{\theta}^* = \bm{0}$ & $Q_5(\bm{\theta}^*) = 0$ \\
+ \shortstack[l]{$Q_6(\bm{\theta}) = -20\exp\left(-0.2\sqrt{\frac{1}{D}||\bm{\theta}||}\right)$ \\ \ \ \ \ \ \ \ \ $- \exp\left\{\frac{1}{D}\sum_{i=1}^D\cos(2\pi \theta_i)\right\} + 20 + \exp(1)$} & $\bm{\theta}^* = \bm{0}$ & $Q_6(\bm{\theta}^*) = 0$ \\\hline
+\end{tabular}
+

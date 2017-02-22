@@ -8,7 +8,7 @@ DOCB=psokrigingblind
 APPB=psokrigingappblind
 FULL=psokrigingfull
 FULLB=psokrigingblindfull
-FIG=psokriginggraphs
+#FIG=psokriginggraphs
 
 all:	$(DOC).pdf $(DOCB).pdf $(FULL).pdf $(FULLB).pdf $(FIG).pdf
 
@@ -16,8 +16,8 @@ all:	$(DOC).pdf $(DOCB).pdf $(FULL).pdf $(FULLB).pdf $(FIG).pdf
 
 clean:
 	\rm *.aux *.blg *.out *.bbl *.log $(DOC).pdf $(DOCB).pdf \
- $(APP).pdf $(APPB).pdf $(FULL).pdf $(FULLB).pdf $(DOCB).tex $(APPB).tex \
- $(FIG).pdf $(FIG).tex
+ $(APP).pdf $(APPB).pdf $(FULL).pdf $(FULLB).pdf $(DOCB).tex $(APPB).tex 
+ ##$(FIG).pdf $(FIG).tex
 
 $(DOC).pdf: 	$(DOC).tex $(APP).tex
 	pdflatex "\def\blind{0} \input{$(DOC).tex}"
@@ -51,9 +51,9 @@ $(FULL).pdf: $(DOC).pdf $(APP).pdf
 $(FULLB).pdf: $(DOCB).pdf $(APPB).pdf
 	pdfunite $(DOCB).pdf $(APPB).pdf $(FULLB).pdf
 
-$(FIG).pdf: $(DOC).pdf
-	cp $(DOC).tex $(FIG).tex
-	pdflatex '\PassOptionsToPackage{active}{preview} \input{$(FIG).tex}'
+#$(FIG).pdf: $(DOC).pdf
+#	cp $(DOC).tex $(FIG).tex
+#	pdflatex '\PassOptionsToPackage{active}{preview} \input{$(FIG).tex}'
 # ## run this after in shell; can't get to work in makefile
 # 	P=$(pdftk $(FIG).pdf dump_data|grep NumberOfPages| awk '{print $2}')	
 # 	for i in $(seq 1 1 $P)
