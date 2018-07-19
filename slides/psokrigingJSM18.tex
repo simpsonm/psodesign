@@ -2,6 +2,7 @@
 \makeatletter\def\Hy@xspace@end{}\makeatother 
 \usepackage{graphicx, color, amssymb, amsmath, bm, rotating, graphics,
 epsfig, multicol, amsthm, animate}
+\usepackage{media9}
 \usepackage[english]{babel}
 \usepackage[T1]{fontenc}
 \usepackage[ansinew]{inputenc}
@@ -67,10 +68,24 @@ Research supported by the NSF-Census Research Network}
 
 \begin{frame}
 \frametitle{Particle Swarm Optimization --- Intuition}
-Mimic animal flocking behavior.
-
-(Animation Here)
-
+\begin{center}
+\includemedia[
+  width=0.9\textwidth,
+  activate=pagevisible,
+  deactivate=pageinvisible,
+  addresource=fishschool.mp4,   %passcontext,  %show VPlayer's right-click menu
+  flashvars={
+    %important: same path as in `addresource'
+    source=fishschool.mp4
+    &autoPlay=true
+    &loop=true
+  }
+]{\fbox{Click!}}{VPlayer.swf}
+\end{center}
+Put a ``swarm'' of particles in the search space:\\
+\begin{itemize}
+\item[] Don't search alone, pay attention to what your neighbors are doing!
+\end{itemize}
 \end{frame}
 
 \begin{frame}
@@ -292,7 +307,8 @@ Easy to visualize example: Ring-$k$ neighborhood topology.
     \end{tikzpicture}
   }
 \end{figure}
-Each particle is informed by $k$ neighbors to the left and $k$ to the right.
+Each particle is informed by $k$ neighbors to the left and $k$ to the right,\\
+\emph{\ \ \ no matter where they are in the search space}.
 \end{frame}
 
 \begin{frame}
@@ -378,7 +394,8 @@ In PSO larger $\omega$ $\implies$ more exploration, smaller $\omega$ $\implies$ 
 
 \pause
 
-Idea: slowly decrease $\omega(k)$ over time \citep{eberhart2000comparing} (DI-PSO).\\
+Idea: deterministic inertia PSO (DI-PSO) \\
+\ \ \ \ \ \ \ $\to$ slowly decrease $\omega(k)$ over time \citep{eberhart2000comparing}.
 \begin{itemize}
 \item Hard to set appropriately for any given problem.\\~\\
 \end{itemize}
@@ -390,14 +407,14 @@ Idea: slowly decrease $\omega(k)$ over time \citep{eberhart2000comparing} (DI-PS
 \log\omega(k+1) = \log\omega(k) + c\{R(k+1) - R^*\}.
 \end{align*}
 \pause
-Defaults: $R^*\in[0.3, 0.5]$, $c = 0.1$.\\~\\
+Same defaults: $R^*\in[0.3, 0.5]$, $c = 0.1$.\\~\\
 
 \pause
 
 Similar PSO algorithm in spirit: \cite{zhang2003adaptive}.
 \begin{itemize} 
 \item $\omega$ is constant while $\phi_1$ and $\phi_2$ vary across time {\color{red}\emph{and particle}}. 
-\item Harder to have intuition for choosing how $\phi_1$ and $\phi_2$ adapt.
+\item Can't use the same method to adapt $\phi_1$ and $\phi_2$.
 \end{itemize}
 \end{frame}
 
@@ -408,10 +425,12 @@ Example progressions of $\sigma^2(k)$ (left) and $\omega(k)$ (right):
 \pause
 \begin{itemize}
 \item  AT-BBPSO's scale progressions are all remarkably similar.\pause
-\item  Often AT-BBPSO's scale initially increases $\sigma^2(k)$ above 1, then starts decaying to zero --- initial burst of exploration.\pause
+\item  Often AT-BBPSO initially increases $\sigma^2(k)$ above 1, then starts decaying it to zero --- initial burst of high-exploration... sometimes.\pause
 \item  DI-PSO's inertia has a nice smooth progression towards zero. \pause
-\item  AT-PSO's inertia typically bounces around a flat trendline.\pause
-\item  AT-PSO's inertia crashes to zero when it converges (may be premature local convergence).
+\item  AT-PSO's inertia typically bounces around a flat trendline.\\
+$\to$ Alternating between \emph{relative} exploration and exploitation. \pause
+\item  AT-PSO's inertia crashes to zero when it converges. \\
+$\to$ May be premature local convergence.
 \end{itemize}
 \end{frame}
 
@@ -427,12 +446,90 @@ Tuning $\omega(k)/\sigma^2(k)$ allows the swarm to adjust the exploration / expl
 
 Overview of results from a simulation study with a variety of objective functions:
 \begin{itemize}
-\item BBPSO tends to perform poorly, but AT-BBPSO performs quite well. \pause
-\item AT-BBPSO often the best for complex objective functions with many local optima. \pause 
+\item BBPSO tends to perform poorly, but AT-BBPSO performs quite well.\\
+\item AT-BBPSO often the best for complex objective functions.\\
+$\to$ The $\mathrm{T}_{df}$ makes it fairly robust to many local optima.\pause 
 \item AT-PSO performs better than PSO on ``hard enough'' problems... \pause
 \item ...but has trouble with many local optima.
 \end{itemize}
 \end{frame}
+
+\begin{frame}
+\frametitle{Spatial Design --- Problem Setup}
+Goal: want to learn about the spatial field $Y(\bm{u})$, $\bm{u}\in\mathcal{D}\subset \mathbb{R}^2$. \pause\\~\\
+
+We observe a noisy signal of $Y(\bm{u})$ at $N_s$ fixed monitoring locations, $\bm{s}_1, \dots, \bm{s}_{N_s}$, 
+and assume:
+\begin{align*}
+Z(\bm{u}) = Y(\bm{u}) + \varepsilon(\bm{u})
+\end{align*}
+for all $\bm{u}\in\mathcal{D}$, and $\varepsilon(\bm{u}) \stackrel{iid}{\sim} \mathrm{N}(0, \tau^2)$. \pause\\~\\
+
+Assume 
+\begin{align*}
+Y(\bm{u}) \sim \mathrm{GP}(\bm{x}(\bm{u})'\bm{\beta}, C(\cdot, \cdot))
+\end{align*}
+where $\bm{x}(\bm{u})$ is a vector of covariates known at all locations $\bm{u}\in\mathcal{D}$. \pause \\~\\
+
+Where should we put an additional $N_d$ monitoring locations, $\bm{d}_1, \dots, \bm{d}_{N_d}$? \pause \\~\\
+
+What if $\tau^2$, $\bm{\beta}$, and $C(\cdot, \cdot)$ are unknown?
+\end{frame}
+
+\begin{frame}
+\frametitle{Spatial Design --- MSPE and Kriging}
+Sensible goal: minimize MSPE in some sense.\\~\\
+
+When $\tau^2$ and $C(\cdot, \cdot)$ are known, the universal kriging predictor is:
+\begin{align*}
+\widehat{Y}_{uk}(\bm{u}; \bm{d}) = \bm{x}(\bm{u})'\widehat{\bm{\beta}}_{gls} + \bm{c}_Y(\bm{u})'\bm{C}_Z^{-1}(\bm{Z} - \bm{X}\widehat{\bm{\beta}}_{gls})
+\end{align*}
+\citep{cressie2011statistics} where
+\begin{align*}
+\bm{X} &= (\bm{x}(\bm{s}_1), \dots, \bm{x}(\bm{s}_{N_s}), \bm{x}(\bm{d}_1, \dots, \bm{x}(\bm{d}_{N_d}))',\\
+\bm{Y} &= (Y(\bm{s}_1), \dots, Y(\bm{s}_{N_s}), Y(\bm{d}_1), \dots, Y(\bm{d}_{N_d}))',\\
+\bm{Z} &= (Z(\bm{s}_1), \dots, Z(\bm{s}_{N_s}), Z(\bm{d}_1), \dots, Z(\bm{d}_{N_d}))',\\
+\bm{C}_Z &= \mathrm{Cov}(\bm{Z}) = \tau^2\bm{\mathrm{I}} + \mathrm{Cov}(\bm{Y}),\\
+\bm{c}_Y &= \mathrm{Cov}(Y(\bm{u}), \bm{Y}),\\
+\widehat{\bm{\beta}}_{gls} &= (\bm{X}'\bm{C}_Z^{-1}\bm{X})^{-1}\bm{X}'\bm{C}_Z^{-1}\bm{Z}.
+\end{align*}
+\end{frame}
+
+\begin{frame}
+\frametitle{Spatial Design --- Kriging Variances}
+Kriging MSPE: \ \ $\mathrm{E}\left\{Y(\bm{u}) - \widehat{Y}_{uk}(\bm{u})\right\}^2 = \sigma_{uk}^2(\bm{u};\bm{d})=$
+\begin{align*}
+&C(\bm{u}, \bm{u}) - \bm{c}_Y(\bm{u})'\bm{C}_Z^{-1}\bm{c}_Y(\bm{u})\\
+& + \{\bm{x}(\bm{u})  - \bm{X}'\bm{C}_Z^{-1}\bm{c}_Y(\bm{u})\}'(\bm{X}'\bm{C}_Z^{-1}\bm{X})^{-1}\{\bm{x}(\bm{u})  - \bm{X}'\bm{C}_Z^{-1}\bm{c}_Y(\bm{u})\}
+\end{align*}
+\pause
+What about when $\tau^2$ and/or $C(\cdot, \cdot)$ are estimated?\\
+$\to$ Parameter uncertainty universal kriging MSPE:
+\begin{align*}
+\mathrm{E}\left\{Y(\bm{u}) - \widehat{Y}_{uk}(\bm{u})\right\}^2 \approx \sigma^2_{puk}(\bm{u};\bm{d},\widehat{\bm{\theta}}) = \sigma^2_{uk}(\bm{u};\bm{d},\widehat{\bm{\theta}}) + \mbox{ stuff, }
+\end{align*}
+depending on the Fisher information matrix and the MLE of all parameters, denoted by $\widehat{\bm{\theta}}$ \citep{zimmerman1992mean,abt1999estimating}.
+\end{frame}
+
+\begin{frame}
+\frametitle{Spatial Design --- Design Criteria}
+Ideal design criteria: choose design points to minimize...
+\begin{itemize}
+\item Mean/total MSPE: $\int_{\mathcal{D}}\sigma^2(\bm{u})d\bm{u}$
+\item Maximum MSPE: $\max_{\bm{u}\in\mathcal{D}}\sigma^2(\bm{u})$\\~\\
+\end{itemize}
+
+\pause
+
+This is computationally infeasible. \pause \\~\\
+
+Realistic criteria: approximate with a grid of target points $\bm{r}_1,\dots,\bm{r}_{N_t}$:
+\begin{itemize}
+\item Minimize $\sum_{i=1}^{N_t}\sigma^2(\bm{r}_i)$ 
+\item Minimize $\max_{i=1,2,\dots,N_t}\sigma^2(\bm{r}_i)$
+\end{itemize}
+\end{frame}
+
 
 \appendix
 \newcounter{finalframe}
