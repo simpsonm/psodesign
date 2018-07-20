@@ -57,7 +57,7 @@ Research supported by the NSF-Census Research Network}
  \citep{blum2008swarm, clerc2010particle, clerc2011spso}\\~\\
 \item New adaptively-tuned PSO algorithms.\\~\\
 \item Using (adaptively-tuned) PSO for spatial design.\\~\\
-\item Example adding to an existing monitoring network.
+\item Example adding locations to an existing monitoring network.
 \end{enumerate}
 \end{column}
 \begin{column}{0.5\textwidth}
@@ -67,12 +67,15 @@ Research supported by the NSF-Census Research Network}
 \end{frame}
 
 \begin{frame}
-\frametitle{Particle Swarm Optimization --- Intuition}
+  \frametitle{Particle Swarm Optimization --- Intuition}
+Put a ``swarm'' of particles in the search space:\\
+\begin{itemize}
+\item[] Don't search alone, pay attention to what your neighbors are doing!\pause
+\end{itemize}
 \begin{center}
 \includemedia[
   width=0.9\textwidth,
-  activate=pagevisible,
-  deactivate=pageinvisible,
+  activate=pageopen,
   addresource=fishschool.mp4,   %passcontext,  %show VPlayer's right-click menu
   flashvars={
     %important: same path as in `addresource'
@@ -82,10 +85,7 @@ Research supported by the NSF-Census Research Network}
   }
 ]{\fbox{Click!}}{VPlayer.swf}
 \end{center}
-Put a ``swarm'' of particles in the search space:\\
-\begin{itemize}
-\item[] Don't search alone, pay attention to what your neighbors are doing!
-\end{itemize}
+Best for {\color{red} complex} objective functions which are {\color{red} cheap} to compute, and when {\color{red} near-optimal} solutions are useful.
 \end{frame}
 
 \begin{frame}
@@ -420,8 +420,8 @@ Similar PSO algorithm in spirit: \cite{zhang2003adaptive}.
 
 \begin{frame}
 Example progressions of $\sigma^2(k)$ (left) and $\omega(k)$ (right):
-\includegraphics[width = 0.5\textwidth]{../doc/scaleplot.png}
-\includegraphics[width = 0.5\textwidth]{../doc/inertiaplot.png}
+\includegraphics[width = 0.48\textwidth]{../doc/scaleplot.png}
+\includegraphics[width = 0.48\textwidth]{../doc/inertiaplot.png}
 \pause
 \begin{itemize}
 \item  AT-BBPSO's scale progressions are all remarkably similar.\pause
@@ -467,20 +467,22 @@ for all $\bm{u}\in\mathcal{D}$, and $\varepsilon(\bm{u}) \stackrel{iid}{\sim} \m
 
 Assume 
 \begin{align*}
-Y(\bm{u}) \sim \mathrm{GP}(\bm{x}(\bm{u})'\bm{\beta}, C(\cdot, \cdot))
+Y(\bm{u}) \sim \mathrm{GP}(\bm{x}(\bm{u})'\bm{\beta}, C_{\bm{\phi}}(\cdot, \cdot))
 \end{align*}
 where $\bm{x}(\bm{u})$ is a vector of covariates known at all locations $\bm{u}\in\mathcal{D}$. \pause \\~\\
 
 Where should we put an additional $N_d$ monitoring locations, $\bm{d}_1, \dots, \bm{d}_{N_d}$? \pause \\~\\
 
-What if $\tau^2$, $\bm{\beta}$, and $C(\cdot, \cdot)$ are unknown?
+What if $\bm{\theta} = (\tau^2, \bm{\beta}, \bm{\phi})$ is unknown?.
 \end{frame}
 
 \begin{frame}
 \frametitle{Spatial Design --- MSPE and Kriging}
-Sensible goal: minimize MSPE in some sense.\\~\\
+Sensible goal: choose new locations to minimize MSPE. \\~\\
 
-When $\tau^2$ and $C(\cdot, \cdot)$ are known, the universal kriging predictor is:
+\pause
+
+When $\tau^2$ and $\bm{\phi}$ are known, the universal kriging predictor is:
 \begin{align*}
 \widehat{Y}_{uk}(\bm{u}; \bm{d}) = \bm{x}(\bm{u})'\widehat{\bm{\beta}}_{gls} + \bm{c}_Y(\bm{u})'\bm{C}_Z^{-1}(\bm{Z} - \bm{X}\widehat{\bm{\beta}}_{gls})
 \end{align*}
@@ -499,24 +501,25 @@ When $\tau^2$ and $C(\cdot, \cdot)$ are known, the universal kriging predictor i
 \frametitle{Spatial Design --- Kriging Variances}
 Kriging MSPE: \ \ $\mathrm{E}\left\{Y(\bm{u}) - \widehat{Y}_{uk}(\bm{u})\right\}^2 = \sigma_{uk}^2(\bm{u};\bm{d})=$
 \begin{align*}
-&C(\bm{u}, \bm{u}) - \bm{c}_Y(\bm{u})'\bm{C}_Z^{-1}\bm{c}_Y(\bm{u})\\
+&C_{\bm{\phi}}(\bm{u}, \bm{u}) - \bm{c}_Y(\bm{u})'\bm{C}_Z^{-1}\bm{c}_Y(\bm{u})\\
 & + \{\bm{x}(\bm{u})  - \bm{X}'\bm{C}_Z^{-1}\bm{c}_Y(\bm{u})\}'(\bm{X}'\bm{C}_Z^{-1}\bm{X})^{-1}\{\bm{x}(\bm{u})  - \bm{X}'\bm{C}_Z^{-1}\bm{c}_Y(\bm{u})\}
 \end{align*}
 \pause
-What about when $\tau^2$ and/or $C(\cdot, \cdot)$ are estimated?\\
+What about when $\tau^2$ and $\bm{\phi}$ are estimated? \pause\\
 $\to$ Parameter uncertainty universal kriging MSPE:
 \begin{align*}
 \mathrm{E}\left\{Y(\bm{u}) - \widehat{Y}_{uk}(\bm{u})\right\}^2 \approx \sigma^2_{puk}(\bm{u};\bm{d},\widehat{\bm{\theta}}) = \sigma^2_{uk}(\bm{u};\bm{d},\widehat{\bm{\theta}}) + \mbox{ stuff, }
 \end{align*}
-depending on the Fisher information matrix and the MLE of all parameters, denoted by $\widehat{\bm{\theta}}$ \citep{zimmerman1992mean,abt1999estimating}.
+depending on the MLE ($\widehat{\bm{\theta}}$), FI matrix, and gradient
+of $\widehat{Y}_{uk}$ wrt $\bm{\theta}$.\\ \citep{zimmerman1992mean,abt1999estimating}
 \end{frame}
 
 \begin{frame}
 \frametitle{Spatial Design --- Design Criteria}
 Ideal design criteria: choose design points to minimize...
 \begin{itemize}
-\item Mean/total MSPE: $\int_{\mathcal{D}}\sigma^2(\bm{u})d\bm{u}$
-\item Maximum MSPE: $\max_{\bm{u}\in\mathcal{D}}\sigma^2(\bm{u})$\\~\\
+\item Mean/total MSPE: $\overline{Q}_{(p)uk}(\bm{d}) = \int_{\mathcal{D}}\sigma_{(p)uk}^2(\bm{u})d\bm{u}$
+\item Maximum MSPE: $Q^*_{(p)uk}(\bm{d}) = \max_{\bm{u}\in\mathcal{D}}\sigma_{(p)uk}^2(\bm{u})$\\~\\
 \end{itemize}
 
 \pause
@@ -525,11 +528,153 @@ This is computationally infeasible. \pause \\~\\
 
 Realistic criteria: approximate with a grid of target points $\bm{r}_1,\dots,\bm{r}_{N_t}$:
 \begin{itemize}
-\item Minimize $\sum_{i=1}^{N_t}\sigma^2(\bm{r}_i)$ 
-\item Minimize $\max_{i=1,2,\dots,N_t}\sigma^2(\bm{r}_i)$
+\item Minimize $\overline{Q}_{(p)uk}(\bm{d}) = \sum_{i=1}^{N_t}\sigma_{(p)uk}^2(\bm{r}_i)$ 
+\item Minimize $Q_{(p)uk}^*(\bm{d}) = \max_{i=1,2,\dots,N_t}\sigma_{(p)uk}^2(\bm{r}_i)$ \pause
 \end{itemize}
+
+\cite{zimmerman2006optimal}: optimal design is highly dependent on the mean function
+
 \end{frame}
 
+\begin{frame}
+  \frametitle{Optimzation for Spatial Design}
+  The spatial design optimization problem cannot be solved in closed form. \\~\\ \pause
+  
+  Usual solution: grid up the space and use an exchange algorithm. \citep{nychka1998design,wikle1999space,wikle2005dynamic} \\~\\ \pause
+
+  In principle, \emph{any} location is a valid design point, not just the grid.\\
+  $\implies$ why not use PSO? \pause \\
+  \begin{itemize}
+  \item Near-optimal solutions are nearly as valuable as optimal solutions.
+  \item Objective function is cheap in universal kriging.
+  \item More expensive in kriging with parameter uncertainty, but doable.
+  \item Highly multi-modal objective function (e.g. switch two locations).\pause
+  \end{itemize}
+
+  Genetic algorithms also reasonable, e.g. \citet{hamada2001finding}.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Example: Ozone Monitoring in Harris County, TX}
+  \begin{columns}
+    \begin{column}{0.6\textwidth}
+      \includegraphics[width = 0.95\textwidth]{../code/kriging/houston.png}\\
+      Map via ggmap \citep{ggmap2013}.
+    \end{column}
+    \begin{column}{0.4\textwidth}
+      \begin{itemize}
+      \item Ozone concentration is associated with increased risk of cardiac arrest \citep{ensor2013case}. \\~ \pause
+      \item In August 2016, there were 44 active monitoring locations near Houston, TX. \\~ \pause
+      \item Harris County, TX, contains 33 of these locations.
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Hypothetical Design Problem and Data}
+  Want to learn more about ozone concentrations in Harris County. \\~
+
+  Where to put 100 new monitoring locations within the county? \\
+  \begin{itemize}
+  \item[] Note: nearby locations outside of the county still useful for estimation.\\~\\
+  \end{itemize}\pause
+
+  Data from the Texas Commission on Environmental Quality (TCEQ)
+  \begin{itemize}
+  \item Monitoring locations measure several air quality indicators.
+  \item Ozone: daily maximum eight-hour ozone concentration (DM8) in parts per billion.\\
+    $\to$ maximum of all contiguous 8-hour means for that day.
+  \item Some locations have missing data.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Model and Design Criteria}
+  Model:
+  \begin{itemize}
+  \item Linear mean function in spatial coordinates: $\bm{x}(\bm{u})' = (u_1, u_2)$. \pause
+  \item Exponential covariance function:
+    \begin{align*}
+      C(\bm{u},\bm{v}) = \sigma^2\exp(-||\bm{u} - \bm{v}||/\psi)
+    \end{align*} \pause
+  \item Estimate $\bm{\theta} = (\tau^2, \beta_0, \beta_1, \beta_2, \sigma^2, \psi)$ via maximum likelihood. \\~\\ \pause
+  \end{itemize}
+
+  Design Criteria:
+  \begin{itemize}
+  \item Mean MSPE w/ parameter uncertainty $\overline{Q}_{puk}(\bm{d})$.
+  \item Maximum MSPE w/ parameter uncertainty $Q^*_{puk}(\bm{d})$.\pause
+  \item Approximate each with a grid of 1229 points in Harris County.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \begin{columns}
+    \begin{column}{0.4\textwidth}
+  \begin{scriptsize}
+\begin{tabular}{lrr}
+Algorithm & $\overline{Q}_{puk}$ & $Q^*_{puk}$ \\\hline
+Uniform & 16.40 & 26.80 \\\hline
+PSO1 & \bf{14.40} & \bf{20.63} \\
+  PSO2 & 14.45 & \bf{21.03}\\
+  PSO1-CF & 15.53 & 23.54 \\
+  PSO2-CF & 15.77 & 23.16 \\
+   \hline
+AT1-PSO1 & \bf{14.38} & \bf{20.57} \\
+  AT1-PSO2 & 14.56 & 23.18 \\
+  AT1-PSO1-CF & 15.96 & 23.33 \\
+  AT1-PSO2-CF & 15.60 & 24.02 \\
+   \hline
+AT2-PSO1 & \bf{14.42} & \bf{21.13} \\
+  AT2-PSO2 & \bf{14.32} & 22.11 \\
+  AT2-PSO1-CF & 15.85 & 24.00 \\
+  AT2-PSO2-CF & 15.95 & 23.63 \\
+   \hline
+AT1-BBPSO & 14.53 & 22.28 \\
+  AT1-BBPSOxp & 15.87 & 22.19 \\
+  AT1-BBPSO-CF & 14.65 & 21.33 \\
+  AT1-BBPSOxp-CF & 14.84 & 22.34 \\
+   \hline
+AT2-BBPSO & 14.65 & 23.49 \\
+  AT2-BBPSOxp & 15.21 & 23.25 \\
+  AT2-BBPSO-CF & 14.63 & 21.92\\
+  AT2-BBPSOxp-CF & 14.52 & 22.76 \\
+   \hline
+GA-11 & \bf{14.40} & 21.19 \\
+  GA-21 & 15.20 & 23.21 \\
+  GA-12 & 14.45 & \bf{20.84} \\
+  GA-22 & 15.26 & 22.61 \\
+\hline
+\end{tabular}
+\end{scriptsize}
+\end{column}
+\begin{column}{0.55\textwidth}
+  Results:
+  \begin{itemize}
+  \item Uniform: uniformly sample new \\
+\hspace{1.42cm} monitoring locations.\\
+GA: genetic algorithm.
+\item Bolded: top 5 for that design criterion (column).\pause
+\item Objective function is simple enough that AT-BBPSO variants are less good.\pause
+\item PSO and AT-PSO variants tend to be the best. \pause
+\item GAs are competitive. \pause
+\item With significantly fewer monitoring locations, PSO variants are the best.
+  \end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Conclusions}
+  \begin{itemize}
+  \item Introduced new classes of adaptively tuned PSO and BBPSO algorithms.\\~\\ \pause
+  \item AT-BBPSO performed well on very difficult problems. \\~\\ \pause
+  \item AT-PSO performed well on difficult, but not too difficult problems. \\~\\ \pause
+  \item For spatial design problems, standard PSO works well. \\~\\\pause
+  \item For large enough spatial design problems, AT-PSO is attractive.
+  \end{itemize}
+\end{frame}
 
 \appendix
 \newcounter{finalframe}

@@ -29,8 +29,12 @@ housgeom$latitude <- d2@coords[,2]
 ## plot of houston area, Harris county, and current monitoring sites
 basemap <- get_map(location = "houston", zoom = 9, maptype = 'terrain')
 p <- ggmap(basemap) + geom_point(aes(Longitude, Latitude), data = houston, size = I(3), alpha=0.6)
-p + geom_polygon(aes(longitude,latitude, group = Poly_Name), data = housgeom, fill = NA,
+p2 <- p +
+    geom_polygon(aes(longitude,latitude, group = Poly_Name),
+                 data = housgeom, fill = NA,
                  colour = "black")
+
+ggsave("houston.png", p2, scale = 1)
 
 ## convert longitude & lattitude to approximate kilometers
 houston$u <- houston$Longitude*pi/180*6371
@@ -155,14 +159,14 @@ datlist$ss <- currloc               ## current observation locations
 datlist$tt <- grid                  ## prediction locations
 N.t <- nrow(datlist$tt)             ## number of prediction locations
 D.t <- matrix(0, N.t, N.t)          ## prediction location distance matrix
-tt <- datlist$tt                    
+tt <- datlist$tt
 for(i in 2:N.t){
   for(j in 1:(i-1)){
     D.t[i,j] <- sqrt(sum((tt[i,] - tt[j,])^2))
     D.t[j,i] <- D.t[i,j]
   }
 }
-datlist$D.t <- D.t                   
+datlist$D.t <- D.t
 N.s <- nrow(datlist$ss)             ## number of current observation locations
 D.s <- matrix(0, N.s, N.s)          ## observation location distance matrix
 ss <- datlist$ss
@@ -172,14 +176,14 @@ for(i in 2:N.s){
     D.s[j,i] <- D.s[i,j]
   }
 }
-datlist$D.s <- D.s          
+datlist$D.s <- D.s
 D.s.t <- matrix(0, N.s, N.t)        ## observation vs. prediction distance matrix
 for(i in 1:N.s){
   for(j in 1:N.t){
     D.s.t[i,j] <- sqrt(sum((datlist$ss[i,] - tt[j,])^2))
   }
 }
-datlist$D.s.t <- D.s.t               
+datlist$D.s.t <- D.s.t
 Cz.s <- diag(datlist$sig2z, N.s) + datlist$theta[1]*exp(-D.s/datlist$theta[2])
 datlist$invCz.s <- chol2inv(chol(Cz.s))  ## inverse of cov(Z) on observation locations
 datlist$Cyy.s.t <- datlist$theta[1]*exp(-D.s.t/datlist$theta[2])  ## cov(Y(s), Y(t)) matrix
@@ -197,7 +201,7 @@ p + geom_polygon(aes(longitude,latitude, group = Poly_Name), data = housgeom, fi
                  colour = "black") +
   geom_point(aes(u, v), data = data.frame(u = datlist$tt[,1]/(pi/180*6371),
                                           v = datlist$tt[,2]/(pi/180*6371)),
-             colour = "blue", alpha = 0.6, shape="+", size = I(3)) 
+             colour = "blue", alpha = 0.6, shape="+", size = I(3))
 
 
 
@@ -309,7 +313,7 @@ p + geom_polygon(aes(longitude,latitude, group = Poly_Name), data = housgeom, fi
              colour = "blue", shape="X", size = I(5)) +
   geom_point(aes(u, v), data = data.frame(u = spsoCI.max2$par[1:ndesign]/(pi/180*6371),
                                           v = spsoCI.max2$par[ndesign + 1:ndesign]/(pi/180*6371)),
-             colour = "blue", shape="O", size = I(5)) 
+             colour = "blue", shape="O", size = I(5))
 
 
 
