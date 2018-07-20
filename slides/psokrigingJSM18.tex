@@ -1,5 +1,5 @@
 \documentclass[xcolor=dvipsnames]{beamer}
-\makeatletter\def\Hy@xspace@end{}\makeatother 
+\makeatletter\def\Hy@xspace@end{}\makeatother
 \usepackage{graphicx, color, amssymb, amsmath, bm, rotating, graphics,
 epsfig, multicol, amsthm, animate}
 \usepackage{media9}
@@ -91,15 +91,15 @@ Best for {\color{red} complex} objective functions which are {\color{red} cheap}
 \begin{frame}
 \frametitle{Particle Swarm Optimization}
 Goal: minimize some objective function $Q(\bm{\theta}): \mathbb{R}^D \to \mathbb{R}$.\\~\\
-Populate $\Theta$ with $n$ particles. Define particle $i$ in period $k$ by:
+Populate $\mathbb{R}^D$ with $n$ particles. Define particle $i$ in period $k$ by:
 \begin{itemize}
 \item a {\color{red}location} \hfill $\bm{\theta}_i(k)\in \mathbb{R}^D$;\hspace{2.5cm}\phantom{.}
 \item a {\color{red}velocity} \hfill $\bm{v}_i(k) \in \mathbb{R}^D$;\hspace{2.5cm}\phantom{.}
-\item a {\color{red}personal best} location \hfill $\bm{p}_i(k) \in \mathbb{R}^D$;\hspace{2.5cm}\phantom{.} 
+\item a {\color{red}personal best} location \hfill $\bm{p}_i(k) \in \mathbb{R}^D$;\hspace{2.5cm}\phantom{.}
 \item a {\color{red}neighborhood (group) best} location \hfill $\bm{g}_i(k) \in \mathbb{R}^D$.\hspace{2.5cm}\phantom{.} \\~\\
 \end{itemize}
 
-\pause 
+\pause
 
 Basic PSO: update particle $i$ from $k$ to $k+1$ via: \\
 \begin{itemize}
@@ -359,7 +359,7 @@ with e.g. $df = 1$ by default.
 \end{itemize}
 How to choose $\sigma^2(k)$'s progression? \\~\\
 
-\pause 
+\pause
 
 Analogy with adaptively tuned random walk Metropolis.\\
 \ \  \citep{andrieu2008tutorial}
@@ -412,8 +412,8 @@ Same defaults: $R^*\in[0.3, 0.5]$, $c = 0.1$.\\~\\
 \pause
 
 Similar PSO algorithm in spirit: \cite{zhang2003adaptive}.
-\begin{itemize} 
-\item $\omega$ is constant while $\phi_1$ and $\phi_2$ vary across time {\color{red}\emph{and particle}}. 
+\begin{itemize}
+\item $\omega$ is constant while $\phi_1$ and $\phi_2$ vary across time {\color{red}\emph{and particle}}.
 \item Can't use the same method to adapt $\phi_1$ and $\phi_2$.
 \end{itemize}
 \end{frame}
@@ -448,7 +448,7 @@ Overview of results from a simulation study with a variety of objective function
 \begin{itemize}
 \item BBPSO tends to perform poorly, but AT-BBPSO performs quite well.\\
 \item AT-BBPSO often the best for complex objective functions.\\
-$\to$ The $\mathrm{T}_{df}$ makes it fairly robust to many local optima.\pause 
+$\to$ The $\mathrm{T}_{df}$ makes it fairly robust to many local optima.\pause
 \item AT-PSO performs better than PSO on ``hard enough'' problems... \pause
 \item ...but has trouble with many local optima.
 \end{itemize}
@@ -458,14 +458,14 @@ $\to$ The $\mathrm{T}_{df}$ makes it fairly robust to many local optima.\pause
 \frametitle{Spatial Design --- Problem Setup}
 Goal: want to learn about the spatial field $Y(\bm{u})$, $\bm{u}\in\mathcal{D}\subset \mathbb{R}^2$. \pause\\~\\
 
-We observe a noisy signal of $Y(\bm{u})$ at $N_s$ fixed monitoring locations, $\bm{s}_1, \dots, \bm{s}_{N_s}$, 
+We observe a noisy signal of $Y(\bm{u})$ at $N_s$ fixed monitoring locations, $\bm{s}_1, \dots, \bm{s}_{N_s}$,
 and assume:
 \begin{align*}
 Z(\bm{u}) = Y(\bm{u}) + \varepsilon(\bm{u})
 \end{align*}
 for all $\bm{u}\in\mathcal{D}$, and $\varepsilon(\bm{u}) \stackrel{iid}{\sim} \mathrm{N}(0, \tau^2)$. \pause\\~\\
 
-Assume 
+Assume
 \begin{align*}
 Y(\bm{u}) \sim \mathrm{GP}(\bm{x}(\bm{u})'\bm{\beta}, C_{\bm{\phi}}(\cdot, \cdot))
 \end{align*}
@@ -528,7 +528,7 @@ This is computationally infeasible. \pause \\~\\
 
 Realistic criteria: approximate with a grid of target points $\bm{r}_1,\dots,\bm{r}_{N_t}$:
 \begin{itemize}
-\item Minimize $\overline{Q}_{(p)uk}(\bm{d}) = \sum_{i=1}^{N_t}\sigma_{(p)uk}^2(\bm{r}_i)$ 
+\item Minimize $\overline{Q}_{(p)uk}(\bm{d}) = \sum_{i=1}^{N_t}\sigma_{(p)uk}^2(\bm{r}_i)$
 \item Minimize $Q_{(p)uk}^*(\bm{d}) = \max_{i=1,2,\dots,N_t}\sigma_{(p)uk}^2(\bm{r}_i)$ \pause
 \end{itemize}
 
@@ -539,7 +539,7 @@ Realistic criteria: approximate with a grid of target points $\bm{r}_1,\dots,\bm
 \begin{frame}
   \frametitle{Optimzation for Spatial Design}
   The spatial design optimization problem cannot be solved in closed form. \\~\\ \pause
-  
+
   Usual solution: grid up the space and use an exchange algorithm. \citep{nychka1998design,wikle1999space,wikle2005dynamic} \\~\\ \pause
 
   In principle, \emph{any} location is a valid design point, not just the grid.\\
@@ -666,6 +666,18 @@ GA: genetic algorithm.
 \end{frame}
 
 \begin{frame}
+\frametitle{Best Designs for Both Criteria}
+{\centering
+\includegraphics[width=.49\textwidth]{../doc/sig2pukmean.png}
+\includegraphics[width=.49\textwidth]{../doc/sig2pukmax.png}
+}\\
+Best designs found according to $\overline{Q}_{puk}$ (left) and $Q^*_{puk}$ (right).\\~
+
+Background map via ggmap \citep{ggmap2013}.
+
+\end{frame}
+
+\begin{frame}
   \frametitle{Conclusions}
   \begin{itemize}
   \item Introduced new classes of adaptively tuned PSO and BBPSO algorithms.\\~\\ \pause
@@ -686,12 +698,12 @@ GA: genetic algorithm.
 
         \font\endfont = cmss10 at 25.40mm
         \color{MUgold}
-        \endfont 
+        \endfont
         \baselineskip 20.0mm
 
         Thank you!
 
-      \end{center}    
+      \end{center}
 
 
 \end{frame}
@@ -700,6 +712,6 @@ GA: genetic algorithm.
         \frametitle{References}
         \bibliographystyle{apalike}
         \bibliography{../doc/pso}
-\end{frame} 
+\end{frame}
 \setcounter{framenumber}{\value{finalframe}}
 \end{document}
