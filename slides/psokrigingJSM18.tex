@@ -419,22 +419,6 @@ Similar PSO algorithm in spirit: \cite{zhang2003adaptive}.
 \end{frame}
 
 \begin{frame}
-Example progressions of $\sigma^2(k)$ (left) and $\omega(k)$ (right):
-\includegraphics[width = 0.48\textwidth]{../doc/scaleplot.png}
-\includegraphics[width = 0.48\textwidth]{../doc/inertiaplot.png}
-\pause
-\begin{itemize}
-\item  AT-BBPSO's scale progressions are all remarkably similar.\pause
-\item  Often AT-BBPSO initially increases $\sigma^2(k)$ above 1, then starts decaying it to zero --- initial burst of high-exploration... sometimes.\pause
-\item  DI-PSO's inertia has a nice smooth progression towards zero. \pause
-\item  AT-PSO's inertia typically bounces around a flat trendline.\\
-$\to$ Alternating between \emph{relative} exploration and exploitation. \pause
-\item  AT-PSO's inertia crashes to zero when it converges. \\
-$\to$ May be premature local convergence.
-\end{itemize}
-\end{frame}
-
-\begin{frame}
 \frametitle{Comparing AT-PSO/BBPSO to PSO/BBPSO}
 Tuning $\omega(k)/\sigma^2(k)$ allows the swarm to adjust the exploration / exploitation tradeoff based on local conditions.
 \begin{itemize}
@@ -444,7 +428,7 @@ Tuning $\omega(k)/\sigma^2(k)$ allows the swarm to adjust the exploration / expl
 
 \pause
 
-Overview of results from a simulation study with a variety of objective functions:
+Overview of results from a simulation study:
 \begin{itemize}
 \item BBPSO tends to perform poorly, but AT-BBPSO performs quite well.\\
 \item AT-BBPSO often the best for complex objective functions.\\
@@ -488,7 +472,7 @@ When $\tau^2$ and $\bm{\phi}$ are known, the universal kriging predictor is:
 \end{align*}
 \citep{cressie2011statistics} where
 \begin{align*}
-\bm{X} &= (\bm{x}(\bm{s}_1), \dots, \bm{x}(\bm{s}_{N_s}), \bm{x}(\bm{d}_1, \dots, \bm{x}(\bm{d}_{N_d}))',\\
+\bm{X} &= (\bm{x}(\bm{s}_1), \dots, \bm{x}(\bm{s}_{N_s}), \bm{x}(\bm{d}_1), \dots, \bm{x}(\bm{d}_{N_d}))',\\
 \bm{Y} &= (Y(\bm{s}_1), \dots, Y(\bm{s}_{N_s}), Y(\bm{d}_1), \dots, Y(\bm{d}_{N_d}))',\\
 \bm{Z} &= (Z(\bm{s}_1), \dots, Z(\bm{s}_{N_s}), Z(\bm{d}_1), \dots, Z(\bm{d}_{N_d}))',\\
 \bm{C}_Z &= \mathrm{Cov}(\bm{Z}) = \tau^2\bm{\mathrm{I}} + \mathrm{Cov}(\bm{Y}),\\
@@ -518,8 +502,8 @@ of $\widehat{Y}_{uk}$ wrt $\bm{\theta}$.\\ \citep{zimmerman1992mean,abt1999estim
 \frametitle{Spatial Design --- Design Criteria}
 Ideal design criteria: choose design points to minimize...
 \begin{itemize}
-\item Mean/total MSPE: $\overline{Q}_{(p)uk}(\bm{d}) = \int_{\mathcal{D}}\sigma_{(p)uk}^2(\bm{u})d\bm{u}$
-\item Maximum MSPE: $Q^*_{(p)uk}(\bm{d}) = \max_{\bm{u}\in\mathcal{D}}\sigma_{(p)uk}^2(\bm{u})$\\~\\
+\item Mean/total MSPE: $\overline{Q}_{puk}(\bm{d}) = \int_{\mathcal{D}}\sigma_{puk}^2(\bm{u})d\bm{u}$
+\item Maximum MSPE: $Q^*_{puk}(\bm{d}) = \max_{\bm{u}\in\mathcal{D}}\sigma_{puk}^2(\bm{u})$\\~\\
 \end{itemize}
 
 \pause
@@ -528,11 +512,9 @@ This is computationally infeasible. \pause \\~\\
 
 Realistic criteria: approximate with a grid of target points $\bm{r}_1,\dots,\bm{r}_{N_t}$:
 \begin{itemize}
-\item Minimize $\overline{Q}_{(p)uk}(\bm{d}) = \sum_{i=1}^{N_t}\sigma_{(p)uk}^2(\bm{r}_i)$
-\item Minimize $Q_{(p)uk}^*(\bm{d}) = \max_{i=1,2,\dots,N_t}\sigma_{(p)uk}^2(\bm{r}_i)$ \pause
+\item Minimize $\overline{Q}_{puk}(\bm{d}) = \sum_{i=1}^{N_t}\sigma_{puk}^2(\bm{r}_i)$
+\item Minimize $Q_{puk}^*(\bm{d}) = \max_{i=1,2,\dots,N_t}\sigma_{puk}^2(\bm{r}_i)$ \pause
 \end{itemize}
-
-\cite{zimmerman2006optimal}: optimal design is highly dependent on the mean function
 
 \end{frame}
 
@@ -666,12 +648,12 @@ GA: genetic algorithm.
 \end{frame}
 
 \begin{frame}
-\frametitle{Best Designs for Both Criteria}
+\frametitle{Best designs found according to $\overline{Q}_{puk}$ (left) and $Q^*_{puk}$ (right)}
 {\centering
 \includegraphics[width=.49\textwidth]{../doc/sig2pukmean.png}
 \includegraphics[width=.49\textwidth]{../doc/sig2pukmax.png}
 }\\
-Best designs found according to $\overline{Q}_{puk}$ (left) and $Q^*_{puk}$ (right).\\~
+Optimal design is highly dependent on the mean function\\ \citep{zimmerman2006optimal}.\\~
 
 Background map via ggmap \citep{ggmap2013}.
 
