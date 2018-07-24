@@ -73,17 +73,17 @@ Put a ``swarm'' of particles in the search space:\\
 \item[] Don't search alone, pay attention to what your neighbors are doing!\pause
 \end{itemize}
 \begin{center}
-\includemedia[
-  width=0.9\textwidth,
-  activate=pageopen,
-  addresource=fishschool.mp4,   %passcontext,  %show VPlayer's right-click menu
-  flashvars={
-    %important: same path as in `addresource'
-    source=fishschool.mp4
-    &autoPlay=true
-    &loop=true
-  }
-]{\fbox{Click!}}{VPlayer.swf}
+% \includemedia[
+%   width=0.9\textwidth,
+%   activate=pageopen,
+%   addresource=fishschool.mp4,   %passcontext,  %show VPlayer's right-click menu
+%   flashvars={
+%     %important: same path as in `addresource'
+%     source=fishschool.mp4
+%     &autoPlay=true
+%     &loop=true
+%   }
+% ]{\fbox{Click!}}{VPlayer.swf}
 \end{center}
 Best for {\color{red} complex} objective functions which are {\color{red} cheap} to compute, and when {\color{red} near-optimal} solutions are useful.
 \end{frame}
@@ -116,19 +116,23 @@ v_{ij}(k+1) &= {\color{blue}\omega} v_{ij}(k) +  \mathrm{U}(0,{\color{blue}\phi_
 
 \begin{frame}
 \frametitle{PSO --- Parameters}
-{\color{red}Inertia} parameter: $\omega$.
+\begin{align*}
+v_{ij}(k+1) &= {\color{blue}\omega} v_{ij}(k) +  \mathrm{U}(0,{\color{blue}\phi_1})\times\{p_{ij}(k) - \theta_{ij}(k)\} \\
+     &\;\phantom{= \omega v_{ij}(k)}+  \mathrm{U}(0,{\color{blue}\phi_2})\times\{g_{ij}(k) - \theta_{ij}(k)\}
+\end{align*}
+{\color{blue}Inertia} parameter: ${\color{blue}\omega}$.
 \begin{itemize}
 \item Controls the particle's tendency to keep moving in the same direction.\\~\\
 \end{itemize}
 
-{\color{red}Cognitive} correction factor: $\phi_1$.
+{\color{blue}Cognitive} correction factor: ${\color{blue}\phi_1}$.
 \begin{itemize}
 \item Controls the particle's tendency to move toward its personal best.\\~\\
 \end{itemize}
 
-{\color{red}Social} correction factor: $\phi_2$.
+{\color{blue}Social} correction factor: ${\color{blue}\phi_2}$.
 \begin{itemize}
-\item Controls the particle's tendency to move toward its neighborhood best.\\~\\
+\item Controls the particle's tendency to move toward its group best.\\~\\
 \end{itemize}
 
 Default choices:
@@ -143,250 +147,35 @@ Default choices:
 \frametitle{PSO --- Neighborhood Topologies}
 Sometimes it is useful to restrict the flow of information across the swarm --- e.g. complicated objective functions with many local optima.\\~\\
 
-Particles are only informed by their \emph{neighbors}. \\~\\
+Particles are only informed by their {\color{blue}neighbors} for their group best $\bm{g}_i(k)$.\\
+\ \ $\to$ \emph{No matter where they are in the search space}. \\~\\
 
 \pause
 
-Easy to visualize example: Ring-$k$ neighborhood topology.
-\begin{figure}
-  \centering
-  {
-    \begin{tikzpicture}[transform shape]
-      % the multiplication with floats is not possible. Thus I split the loop in two.
-      \foreach \number in {1,...,2}{
-        % Computer angle:
-        \mycount=\number
-        \advance\mycount by 0
-        \multiply\mycount by 45
-        \advance\mycount by 22.5
-        \node[circle,inner sep=0.1cm,fill=MUgold] (N-\number) at (\the\mycount:1cm) {};
-      }
-      \foreach \number in {1,...,1}{
-        % Computer angle:
-        \mycount=\number
-        \advance\mycount by 1
-        \multiply\mycount by 45
-        \advance\mycount by 0
-        \node[draw=black,circle,inner sep=0.1cm,fill=black,label=Ring-1] (N-\number) at (\the\mycount:1cm) {};
-        \foreach \number in {1,...,7}{
-          % Computer angle:
-          \mycount=\number
-          \advance\mycount by 2
-          \multiply\mycount by 45
-          \advance\mycount by 0
-          \node[draw,circle,inner sep=0.1cm] (N-\number) at (\the\mycount:1cm) {};
-        }
-        \foreach \number in {8,...,15}{
-          % Computer angle:
-          \mycount=\number
-          \advance\mycount by 1
-          \multiply\mycount by 45
-          \advance\mycount by 22.5
-          \node[draw,circle,inner sep=0.1cm] (N-\number) at (\the\mycount:1cm) {};
-        }
-      }
-    \end{tikzpicture}
-  }
-  {
-    \begin{tikzpicture}[transform shape]
-      % the multiplication with floats is not possible. Thus I split the loop in two.
-      \foreach \number in {1,...,2}{
-        % Computer angle:
-        \mycount=\number
-        \advance\mycount by 0
-        \multiply\mycount by 45
-        \advance\mycount by 22.5
-        \node[circle,inner sep=0.1cm,fill=MUgold] (N-\number) at (\the\mycount:1cm) {};
-      }
-      \foreach \number in {1,...,3}{
-        % Computer angle:
-        \mycount=\number
-        \advance\mycount by 0
-        \multiply\mycount by 45
-        \advance\mycount by 0
-        \node[circle,inner sep=0.1cm,fill=MUgold] (N-\number) at (\the\mycount:1cm) {};
-      }
-      \foreach \number in {1,...,1}{
-        % Computer angle:
-        \mycount=\number
-        \advance\mycount by 1
-        \multiply\mycount by 45
-        \advance\mycount by 0
-        \node[draw=black,circle,inner sep=0.1cm,fill=black,label=Ring-2] (N-\number) at (\the\mycount:1cm) {};
-        \foreach \number in {1,...,7}{
-          % Computer angle:
-          \mycount=\number
-          \advance\mycount by 2
-          \multiply\mycount by 45
-          \advance\mycount by 0
-          \node[draw,circle,inner sep=0.1cm] (N-\number) at (\the\mycount:1cm) {};
-        }
-        \foreach \number in {8,...,15}{
-          % Computer angle:
-          \mycount=\number
-          \advance\mycount by 1
-          \multiply\mycount by 45
-          \advance\mycount by 22.5
-          \node[draw,circle,inner sep=0.1cm] (N-\number) at (\the\mycount:1cm) {};
-        }
-      }
-    \end{tikzpicture}
-  }
-  {
-    \begin{tikzpicture}[transform shape]
-      % the multiplication with floats is not possible. Thus I split the loop in two.
-      \foreach \number in {1,...,4}{
-        % Computer angle:
-        \mycount=\number
-        \advance\mycount by -1
-        \multiply\mycount by 45
-        \advance\mycount by 22.5
-        \node[circle,inner sep=0.1cm,fill=MUgold] (N-\number) at (\the\mycount:1cm) {};
-      }
-      \foreach \number in {1,...,3}{
-        % Computer angle:
-        \mycount=\number
-        \advance\mycount by 0
-        \multiply\mycount by 45
-        \advance\mycount by 0
-        \node[circle,inner sep=0.1cm,fill=MUgold] (N-\number) at (\the\mycount:1cm) {};
-      }
-      \foreach \number in {1,...,1}{
-        % Computer angle:
-        \mycount=\number
-        \advance\mycount by 1
-        \multiply\mycount by 45
-        \advance\mycount by 0
-        \node[draw=black,circle,inner sep=0.1cm,fill=black,label=Ring-3] (N-\number) at (\the\mycount:1cm) {};
-        \foreach \number in {1,...,7}{
-          % Computer angle:
-          \mycount=\number
-          \advance\mycount by 2
-          \multiply\mycount by 45
-          \advance\mycount by 0
-          \node[draw,circle,inner sep=0.1cm] (N-\number) at (\the\mycount:1cm) {};
-        }
-        \foreach \number in {8,...,15}{
-          % Computer angle:
-          \mycount=\number
-          \advance\mycount by 1
-          \multiply\mycount by 45
-          \advance\mycount by 22.5
-          \node[draw,circle,inner sep=0.1cm] (N-\number) at (\the\mycount:1cm) {};
-        }
-      }
-    \end{tikzpicture}
-  }
-  {
-    \begin{tikzpicture}[transform shape]
-      % the multiplication with floats is not possible. Thus I split the loop in two.
-      \foreach \number in {2,...,8}{
-        % Computer angle:
-        \mycount=\number
-        \advance\mycount by 1
-        \multiply\mycount by 45
-        \advance\mycount by 0
-        \node[draw,circle,inner sep=0.1cm,fill=MUgold] (N-\number) at (\the\mycount:1cm) {};
-      }
-      \foreach \number in {9,...,16}{
-        % Computer angle:
-        \mycount=\number
-        \advance\mycount by 1
-        \multiply\mycount by 45
-        \advance\mycount by 22.5
-        \node[draw,circle,inner sep=0.1cm,fill=MUgold] (N-\number) at (\the\mycount:1cm) {};
-      }
-      \foreach \number in {1,...,1}{
-        % Computer angle:
-        \mycount=\number
-        \advance\mycount by 1
-        \multiply\mycount by 45
-        \advance\mycount by 0
-        \node[draw=black,circle,inner sep=0.1cm,fill=black,label=Global] (N-\number) at (\the\mycount:1cm) {};
-      }
-    \end{tikzpicture}
-  }
-\end{figure}
-Each particle is informed by $k$ neighbors to the left and $k$ to the right,\\
-\emph{\ \ \ no matter where they are in the search space}.
+We use the stochastic star neighborhood topology \citep{miranda2008stochastic}.\\
+\begin{itemize}
+\item Each particle informs itself and $m$ random particles.\\
+$\to$ informants sampled with replacement once during initialization.
+\item On average each particle is informed by $m$ particles.
+\item A small number of particles will be informed by many particles.
+\end{itemize}
+
+
 \end{frame}
 
 \begin{frame}
-\frametitle{Stochastic Star Topology, and Other Bells and Whistles}
-We use the stochastic star neighborhood topology \citep{miranda2008stochastic}.
-\begin{itemize}
-\item Each particle informs itself and $m$ random particles.\\
-$\to$ sampled with replacement once during initialization.
-\item On average each particle is informed by $m$ particles.
-\item A small number of particles will be informed by many particles.\\~\\
-\end{itemize}
-
-\pause
-
-Many variants available \citep{clerc2011spso}, \citep[][appendix]{simpson2017adaptively}.
+\frametitle{Many variants on basic PSO exist}
+See e.g. \citep{clerc2011spso}, \citep[][appendix]{simpson2017adaptively}.
 \begin{itemize}
 \item Handling search space constraints.
 \item Coordinate free velocity updates.
 \item Parallelization.
 \item Asynchronous updates.
 \item Redraw neighborhoods.
+\item Bare-bones PSO (no velocity term)
 \end{itemize}
 \end{frame}
 
-\begin{frame}
-\frametitle{Bare Bones PSO (BBPSO)}
-Developed by \citet{kennedy2003bare}.\\~\\
-
-Strips out the velocity term:
-\begin{align*}
-\theta_{ij}(k+1) \sim \mathrm{N}\left(\frac{p_{ij}(k) + g_{ij}(k)}{2}, |p_{ij}(k) - g_{ij}(k)|^2\right).
-\end{align*}
-Mimics the behavior of standard PSO.\\~\\
-
-Easier to analyze, but tends to perform worse.
-\end{frame}
-
-\begin{frame}
-\frametitle{Adaptively Tuned BBPSO}
-Add flexibility to the scale parameter:
-\begin{align*}
-\theta_{ij}(k+1) \sim \mathrm{T}_{df}\left(\frac{p_{ij}(k) + g_{ij}(k)}{2}, \sigma^2(k)|p_{ij}(k) - g_{ij}(k)|^2\right).
-\end{align*}
-with e.g. $df = 1$ by default.
-\begin{itemize}
-\item Larger $\sigma^2(k)$: more exploration.
-\item Smaller $\sigma^2(k)$: more exploitation.\\~\\
-\end{itemize}
-How to choose $\sigma^2(k)$'s progression? \\~\\
-
-\pause
-
-Analogy with adaptively tuned random walk Metropolis.\\
-\ \  \citep{andrieu2008tutorial}
-\end{frame}
-
-\begin{frame}
-\frametitle{Adaptively Tuned BBPSO --- $\sigma^2(k)$'s progression}
-Define the improvement rate of the swarm in period $k$:
-\begin{align*}
-R(k) = &&  \mbox{proportion of particles that improved}\\
-       &&  \mbox{on their personal best last period.}
-\end{align*}
-\pause
-Let ${\color{blue}R^*}$ denote a target improvement rate, and\\
-\ \ ${\color{blue}c}$ denote an adjustment factor.\\~
-
-Update $\sigma^2(k)$ via:
-\begin{align*}
-\log \sigma^2(k+1) &= \log\sigma^2(k) + {\color{blue}c}\{R(k+1) - {\color{blue}R^*}\}
-\end{align*}
-\pause
-Larger $c$, faster changes to $\sigma^2(k)$.\\~
-
-\pause
-
-Defaults: $R^*\in[0.3, 0.5]$, $c = 0.1$.
-\end{frame}
 
 \begin{frame}
 \frametitle{Adaptively Tuning PSO}
@@ -402,12 +191,29 @@ Idea: deterministic inertia PSO (DI-PSO) \\
 
 \pause
 
- AT-PSO: tune $\omega(k)$ just like $\sigma^2(k)$ in AT-BBPSO.
+ AT-PSO: tune $\omega(k)$ using an analogy with adaptively tuned random walk Metropolis \citep{andrieu2008tutorial}.
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Adaptively Tuned PSO --- $\omega(k)$'s progression}
+Define the improvement rate of the swarm in period $k$:
 \begin{align*}
-\log\omega(k+1) = \log\omega(k) + c\{R(k+1) - R^*\}.
+R(k) = &&  \mbox{proportion of particles that improved}\\
+       &&  \mbox{on their personal best last period.}
 \end{align*}
 \pause
-Same defaults: $R^*\in[0.3, 0.5]$, $c = 0.1$.\\~\\
+Let ${\color{blue}R^*}$ denote a target improvement rate, and\\
+\ \ ${\color{blue}c}$ denote an adjustment factor.\\~
+
+Update $\omega(k)$ via:
+\begin{align*}
+\log \omega(k+1) &= \log\omega(k) + {\color{blue}c}\{R(k+1) - {\color{blue}R^*}\}
+\end{align*}
+
+\pause
+
+Defaults: $R^*\in[0.3, 0.5]$, $c = 0.1$.\\~
 
 \pause
 
@@ -419,8 +225,14 @@ Similar PSO algorithm in spirit: \cite{zhang2003adaptive}.
 \end{frame}
 
 \begin{frame}
-\frametitle{Comparing AT-PSO/BBPSO to PSO/BBPSO}
-Tuning $\omega(k)/\sigma^2(k)$ allows the swarm to adjust the exploration / exploitation tradeoff based on local conditions.
+\frametitle{Adaptively Tuned Bare Bones PSO and Results}
+AT-BBPSO strips away the velocity term (typically $df = 1$):
+\begin{align*}
+\theta_{ij}(k+1) &\sim \mathrm{T}_{df}\left(\frac{p_{ij}(k) + g_{ij}(k)}{2}, \sigma^2(k)|p_{ij}(k) - g_{ij}(k)|^2\right),\\
+\log \sigma^2(k+1) &= \log\sigma^2(k) + {\color{blue}c}\{R(k+1) - {\color{blue}R^*}\}.
+\end{align*}
+\pause
+Intuition: tuning $\omega(k)/\sigma^2(k)$ allows the swarm to adjust the exploration / exploitation tradeoff based on local conditions.
 \begin{itemize}
 \item This has a tendency to speed up convergence.
 \item ...but convergence may be premature in multi-modal problems.\\~\\
@@ -430,11 +242,9 @@ Tuning $\omega(k)/\sigma^2(k)$ allows the swarm to adjust the exploration / expl
 
 Overview of results from a simulation study:
 \begin{itemize}
-\item BBPSO tends to perform poorly, but AT-BBPSO performs quite well.\\
-\item AT-BBPSO often the best for complex objective functions.\\
-$\to$ The $\mathrm{T}_{df}$ makes it fairly robust to many local optima.\pause
 \item AT-PSO performs better than PSO on ``hard enough'' problems... \pause
-\item ...but has trouble with many local optima.
+\item ...but has trouble with many local optima.\pause
+\item AT-BBPSO is often the best performing algorithm for complex, multimodal objective functions.
 \end{itemize}
 \end{frame}
 
@@ -449,15 +259,13 @@ Z(\bm{u}) = Y(\bm{u}) + \varepsilon(\bm{u})
 \end{align*}
 for all $\bm{u}\in\mathcal{D}$, and $\varepsilon(\bm{u}) \stackrel{iid}{\sim} \mathrm{N}(0, \tau^2)$. \pause\\~\\
 
-Assume
+Assume $Y(\bm{u}) = \bm{x}(\bm{u})'\bm{\beta} + \delta(\bm{u})$ with
 \begin{align*}
-Y(\bm{u}) \sim \mathrm{GP}(\bm{x}(\bm{u})'\bm{\beta}, C_{\bm{\phi}}(\cdot, \cdot))
+\delta(\bm{u}) \sim \mathrm{GP}(0, C_{\bm{\phi}}(\cdot, \cdot))
 \end{align*}
 where $\bm{x}(\bm{u})$ is a vector of covariates known at all locations $\bm{u}\in\mathcal{D}$. \pause \\~\\
 
-Where should we put an additional $N_d$ monitoring locations, $\bm{d}_1, \dots, \bm{d}_{N_d}$? \pause \\~\\
-
-What if $\bm{\theta} = (\tau^2, \bm{\beta}, \bm{\phi})$ is unknown?.
+Where should we put additional monitoring locations, $\bm{D} = \{\bm{d}_1, \dots, \bm{d}_{N_d}$\}?
 \end{frame}
 
 \begin{frame}
@@ -466,36 +274,22 @@ Sensible goal: choose new locations to minimize MSPE. \\~\\
 
 \pause
 
-When $\tau^2$ and $\bm{\phi}$ are known, the universal kriging predictor is:
+With $\tau^2$ and $\bm{\phi}$ known, universal kriging MSPE is {\footnotesize \citep{cressie2011statistics}:}
+{\footnotesize
 \begin{align*}
-\widehat{Y}_{uk}(\bm{u}; \bm{d}) = \bm{x}(\bm{u})'\widehat{\bm{\beta}}_{gls} + \bm{c}_Y(\bm{u})'\bm{C}_Z^{-1}(\bm{Z} - \bm{X}\widehat{\bm{\beta}}_{gls})
+& \sigma_{uk}^2(\bm{u};\bm{D}, \widehat{\bm{\theta}})=C_{\widehat{\bm{\phi}}}(\bm{u}, \bm{u}) - \bm{c}_Y(\bm{u};\bm{D})'\bm{C}_Z^{-1}(\bm{D})\bm{c}_Y(\bm{u};\bm{D}) \ + \\
+& \left\{\bm{x}(\bm{u})  - \bm{X}'\bm{C}_Z^{-1}(\bm{D})\bm{c}_Y(\bm{u};\bm{D})\right\}'\left\{\bm{X}'\bm{C}_Z^{-1}(\bm{D})\bm{X}\right\}^{-1}\left\{\bm{x}(\bm{u})  - \bm{X}'\bm{C}_Z^{-1}(\bm{D})\bm{c}_Y(\bm{u};\bm{D})\right\}
 \end{align*}
-\citep{cressie2011statistics} where
-\begin{align*}
-\bm{X} &= (\bm{x}(\bm{s}_1), \dots, \bm{x}(\bm{s}_{N_s}), \bm{x}(\bm{d}_1), \dots, \bm{x}(\bm{d}_{N_d}))',\\
-\bm{Y} &= (Y(\bm{s}_1), \dots, Y(\bm{s}_{N_s}), Y(\bm{d}_1), \dots, Y(\bm{d}_{N_d}))',\\
-\bm{Z} &= (Z(\bm{s}_1), \dots, Z(\bm{s}_{N_s}), Z(\bm{d}_1), \dots, Z(\bm{d}_{N_d}))',\\
-\bm{C}_Z &= \mathrm{Cov}(\bm{Z}) = \tau^2\bm{\mathrm{I}} + \mathrm{Cov}(\bm{Y}),\\
-\bm{c}_Y &= \mathrm{Cov}(Y(\bm{u}), \bm{Y}),\\
-\widehat{\bm{\beta}}_{gls} &= (\bm{X}'\bm{C}_Z^{-1}\bm{X})^{-1}\bm{X}'\bm{C}_Z^{-1}\bm{Z}.
-\end{align*}
-\end{frame}
-
-\begin{frame}
-\frametitle{Spatial Design --- Kriging Variances}
-Kriging MSPE: \ \ $\mathrm{E}\left\{Y(\bm{u}) - \widehat{Y}_{uk}(\bm{u})\right\}^2 = \sigma_{uk}^2(\bm{u};\bm{d})=$
-\begin{align*}
-&C_{\bm{\phi}}(\bm{u}, \bm{u}) - \bm{c}_Y(\bm{u})'\bm{C}_Z^{-1}\bm{c}_Y(\bm{u})\\
-& + \{\bm{x}(\bm{u})  - \bm{X}'\bm{C}_Z^{-1}\bm{c}_Y(\bm{u})\}'(\bm{X}'\bm{C}_Z^{-1}\bm{X})^{-1}\{\bm{x}(\bm{u})  - \bm{X}'\bm{C}_Z^{-1}\bm{c}_Y(\bm{u})\}
-\end{align*}
+}
 \pause
-What about when $\tau^2$ and $\bm{\phi}$ are estimated? \pause\\
-$\to$ Parameter uncertainty universal kriging MSPE:
+What about when $\tau^2$ and $\bm{\phi}$ are estimated? \pause\\~\\
+
+Parameter uncertainty universal kriging MSPE:
 \begin{align*}
-\mathrm{E}\left\{Y(\bm{u}) - \widehat{Y}_{uk}(\bm{u})\right\}^2 \approx \sigma^2_{puk}(\bm{u};\bm{d},\widehat{\bm{\theta}}) = \sigma^2_{uk}(\bm{u};\bm{d},\widehat{\bm{\theta}}) + \mbox{ stuff, }
+\approx \sigma^2_{puk}(\bm{u};\bm{d},\widehat{\bm{\theta}}) = \sigma^2_{uk}(\bm{u};\bm{d},\widehat{\bm{\theta}}) + \mbox{ stuff, }
 \end{align*}
-depending on the MLE ($\widehat{\bm{\theta}}$), FI matrix, and gradient
-of $\widehat{Y}_{uk}$ wrt $\bm{\theta}$.\\ \citep{zimmerman1992mean,abt1999estimating}
+depending on the FI matrix and gradient of predictor wrt $\bm{\theta}$\\
+\citep{zimmerman1992mean,abt1999estimating}.
 \end{frame}
 
 \begin{frame}
@@ -508,12 +302,12 @@ Ideal design criteria: choose design points to minimize...
 
 \pause
 
-This is computationally infeasible. \pause \\~\\
+This is computationally infeasible. \\~\\
 
 Realistic criteria: approximate with a grid of target points $\bm{r}_1,\dots,\bm{r}_{N_t}$:
 \begin{itemize}
 \item Minimize $\overline{Q}_{puk}(\bm{d}) = \sum_{i=1}^{N_t}\sigma_{puk}^2(\bm{r}_i)$
-\item Minimize $Q_{puk}^*(\bm{d}) = \max_{i=1,2,\dots,N_t}\sigma_{puk}^2(\bm{r}_i)$ \pause
+\item Minimize $Q_{puk}^*(\bm{d}) = \max_{i=1,2,\dots,N_t}\sigma_{puk}^2(\bm{r}_i)$
 \end{itemize}
 
 \end{frame}
@@ -522,10 +316,11 @@ Realistic criteria: approximate with a grid of target points $\bm{r}_1,\dots,\bm
   \frametitle{Optimzation for Spatial Design}
   The spatial design optimization problem cannot be solved in closed form. \\~\\ \pause
 
-  Usual solution: grid up the space and use an exchange algorithm. \citep{nychka1998design,wikle1999space,wikle2005dynamic} \\~\\ \pause
+  Usual solution: grid up the space and use an exchange algorithm.\\
+ \citep{nychka1998design,wikle1999space,wikle2005dynamic} \\~\\ \pause
 
   In principle, \emph{any} location is a valid design point, not just the grid.\\
-  $\implies$ why not use PSO? \pause \\
+  $\implies$ why not use PSO? \pause Other points in its favor: \\
   \begin{itemize}
   \item Near-optimal solutions are nearly as valuable as optimal solutions.
   \item Objective function is cheap in universal kriging.
@@ -545,8 +340,8 @@ Realistic criteria: approximate with a grid of target points $\bm{r}_1,\dots,\bm
     \end{column}
     \begin{column}{0.4\textwidth}
       \begin{itemize}
-      \item Ozone concentration is associated with increased risk of cardiac arrest \citep{ensor2013case}. \\~ \pause
-      \item In August 2016, there were 44 active monitoring locations near Houston, TX. \\~ \pause
+      \item Ozone concentration is associated with increased risk of cardiac arrest \citep{ensor2013case}. \\~
+      \item In August 2016, there were 44 active monitoring locations near Houston, TX. \\~
       \item Harris County, TX, contains 33 of these locations.
       \end{itemize}
     \end{column}
@@ -575,18 +370,18 @@ Realistic criteria: approximate with a grid of target points $\bm{r}_1,\dots,\bm
   \frametitle{Model and Design Criteria}
   Model:
   \begin{itemize}
-  \item Linear mean function in spatial coordinates: $\bm{x}(\bm{u})' = (u_1, u_2)$. \pause
+  \item Linear mean function in spatial coordinates: $\bm{x}(\bm{u})' = (u_1, u_2)$.
   \item Exponential covariance function:
     \begin{align*}
       C(\bm{u},\bm{v}) = \sigma^2\exp(-||\bm{u} - \bm{v}||/\psi)
-    \end{align*} \pause
-  \item Estimate $\bm{\theta} = (\tau^2, \beta_0, \beta_1, \beta_2, \sigma^2, \psi)$ via maximum likelihood. \\~\\ \pause
+    \end{align*}
+  \item Estimate $(\bm{\theta}, \bm{\delta})$ via maximum likelihood. \\~\\ \pause
   \end{itemize}
 
   Design Criteria:
   \begin{itemize}
   \item Mean MSPE w/ parameter uncertainty $\overline{Q}_{puk}(\bm{d})$.
-  \item Maximum MSPE w/ parameter uncertainty $Q^*_{puk}(\bm{d})$.\pause
+  \item Maximum MSPE w/ parameter uncertainty $Q^*_{puk}(\bm{d})$.
   \item Approximate each with a grid of 1229 points in Harris County.
   \end{itemize}
 \end{frame}
@@ -638,8 +433,8 @@ GA-11 & \bf{14.40} & 21.19 \\
 \hspace{1.42cm} monitoring locations.\\
 GA: genetic algorithm.
 \item Bolded: top 5 for that design criterion (column).\pause
-\item Objective function is simple enough that AT-BBPSO variants are less good.\pause
-\item PSO and AT-PSO variants tend to be the best. \pause
+\item Objective function is simple enough that robustness of AT-BBPSO variants is unnecessary.\pause
+\item PSO and AT-PSO variants tend to be the best.
 \item GAs are competitive. \pause
 \item With significantly fewer monitoring locations, PSO variants are the best.
   \end{itemize}
@@ -663,10 +458,11 @@ Background map via ggmap \citep{ggmap2013}.
   \frametitle{Conclusions}
   \begin{itemize}
   \item Introduced new classes of adaptively tuned PSO and BBPSO algorithms.\\~\\ \pause
-  \item AT-BBPSO performed well on very difficult problems. \\~\\ \pause
+  \item AT-BBPSO performed well on very difficult problems --- quite robust to extreme multimodality. \\~\\ \pause
   \item AT-PSO performed well on difficult, but not too difficult problems. \\~\\ \pause
   \item For spatial design problems, standard PSO works well. \\~\\\pause
-  \item For large enough spatial design problems, AT-PSO is attractive.
+  \item For large enough spatial design problems, AT-PSO is attractive. \\~\\\pause
+  \item Approach can easily be extended to spatio-\emph{temporal} design.
   \end{itemize}
 \end{frame}
 
