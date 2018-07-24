@@ -54,7 +54,7 @@ Research supported by the NSF-Census Research Network}
 \begin{column}{0.5\textwidth}
 \begin{enumerate}
 \item What is particle swarm optimization (PSO)?\\
- \citep{blum2008swarm, clerc2010particle, clerc2011spso}\\~\\
+ \citep*{blum2008swarm, clerc2010particle, clerc2011spso}\\~\\
 \item New adaptively-tuned PSO algorithms.\\~\\
 \item Using (adaptively-tuned) PSO for spatial design.\\~\\
 \item Example adding locations to an existing monitoring network.
@@ -137,8 +137,8 @@ v_{ij}(k+1) &= {\color{blue}\omega} v_{ij}(k) +  \mathrm{U}(0,{\color{blue}\phi_
 
 Default choices:
 \begin{itemize}
-\item $\omega = 0.7298$, $\phi_1 = \phi_2 = 1.496$ \citep{clerc2002particle}.
-\item $\omega = 1/(2\ln 2)\approx 0.721$, $\phi_1=\phi_2=1/2 + \ln 2\approx 1.193$ \citep{clerc2006stagnation}.
+\item $\omega = 0.7298$, $\phi_1 = \phi_2 = 1.496$ \citep*{clerc2002particle}.
+\item $\omega = 1/(2\ln 2)\approx 0.721$, $\phi_1=\phi_2=1/2 + \ln 2\approx 1.193$ \citep*{clerc2006stagnation}.
 \end{itemize}
 
 \end{frame}
@@ -152,7 +152,7 @@ Particles are only informed by their {\color{blue}neighbors} for their group bes
 
 \pause
 
-We use the stochastic star neighborhood topology \citep{miranda2008stochastic}.\\
+We use the stochastic star neighborhood topology \citep*{miranda2008stochastic}.\\
 \begin{itemize}
 \item Each particle informs itself and $m$ random particles.\\
 $\to$ informants sampled with replacement once during initialization.
@@ -165,7 +165,7 @@ $\to$ informants sampled with replacement once during initialization.
 
 \begin{frame}
 \frametitle{Many variants on basic PSO exist}
-See e.g. \citet{clerc2011spso}, \citet[][appendix]{simpson2017adaptively}.
+See e.g. \citet*{clerc2011spso}, \citet*[][appendix]{simpson2017adaptively}.
 \begin{itemize}
 \item Handling search space constraints.
 \item Coordinate free velocity updates.
@@ -184,14 +184,14 @@ In PSO larger $\omega$ $\implies$ more exploration, smaller $\omega$ $\implies$ 
 \pause
 
 Idea: deterministic inertia PSO (DI-PSO) \\
-\ \ \ \ \ \ \ $\to$ slowly decrease $\omega(k)$ over time \citep{eberhart2000comparing}.
+\ \ \ \ \ \ \ $\to$ slowly decrease $\omega(k)$ over time \citep*{eberhart2000comparing}.
 \begin{itemize}
 \item Hard to set appropriately for any given problem.\\~\\
 \end{itemize}
 
 \pause
 
-AT-PSO: tune $\omega(k)$ using an analogy with adaptively tuned random walk Metropolis \citep{andrieu2008tutorial}.\\~\\
+AT-PSO: tune $\omega(k)$ using an analogy with adaptively tuned random walk Metropolis \citep*{andrieu2008tutorial}.\\~\\
 
 Can also create AT-BBPSO algorithms.
 \end{frame}
@@ -263,7 +263,7 @@ Sensible goal: choose new locations to minimize MSPE. \\~\\
 
 \pause
 
-With $\tau^2$ and $\bm{\phi}$ known, universal kriging MSPE is {\footnotesize \citep{cressie2011statistics}:}
+With $\tau^2$ and $\bm{\phi}$ known, universal kriging MSPE is {\footnotesize \citep*{cressie2011statistics}:}
 {\footnotesize
 \begin{align*}
 & \sigma_{uk}^2(\bm{u};\bm{D}, \widehat{\bm{\theta}})=C_{\widehat{\bm{\phi}}}(\bm{u}, \bm{u}) - \bm{c}_Y(\bm{u};\bm{D})'\bm{C}_Z^{-1}(\bm{D})\bm{c}_Y(\bm{u};\bm{D}) \ + \\
@@ -278,7 +278,7 @@ Parameter uncertainty universal kriging MSPE:
 \approx \sigma^2_{puk}(\bm{u};\bm{D},\widehat{\bm{\theta}}) = \sigma^2_{uk}(\bm{u};\bm{D},\widehat{\bm{\theta}}) + \mbox{ stuff, }
 \end{align*}
 depending on the FI matrix and gradient of predictor wrt $\bm{\theta}$\\
-\citep{zimmerman1992mean,abt1999estimating}.
+\citep*{zimmerman1992mean,abt1999estimating}.
 \end{frame}
 
 \begin{frame}
@@ -306,7 +306,7 @@ Realistic criteria: approximate with a grid of target points $\bm{r}_1,\dots,\bm
   The spatial design optimization problem cannot be solved in closed form. \\~\\ \pause
 
   Usual solution: grid up the space and use an exchange algorithm.\\
- \citep{nychka1998design,wikle1999space,wikle2005dynamic} \\~\\ \pause
+ \citep*{nychka1998design,wikle1999space,wikle2005dynamic} \\~\\ \pause
 
   In principle, \emph{any} location is a valid design point, not just the grid.\\
   $\implies$ why not use PSO? \pause Other points in its favor: \\
@@ -317,7 +317,7 @@ Realistic criteria: approximate with a grid of target points $\bm{r}_1,\dots,\bm
   \item Highly multi-modal objective function (e.g. switch two locations).\pause
   \end{itemize}
 
-  Genetic algorithms also reasonable, e.g. \citet{hamada2001finding}.
+  Genetic algorithms also reasonable, e.g. \citet*{hamada2001finding}.
 \end{frame}
 
 \begin{frame}
@@ -325,11 +325,11 @@ Realistic criteria: approximate with a grid of target points $\bm{r}_1,\dots,\bm
   \begin{columns}
     \begin{column}{0.6\textwidth}
       \includegraphics[width = 0.95\textwidth]{../code/kriging/houston.png}\\
-      Map via ggmap \citep{ggmap2013}.
+      Map via ggmap \citep*{ggmap2013}.
     \end{column}
     \begin{column}{0.4\textwidth}
       \begin{itemize}
-      \item Ozone concentration is associated with increased risk of cardiac arrest \citep{ensor2013case}. \\~
+      \item Ozone concentration is associated with increased risk of cardiac arrest \citep*{ensor2013case}. \\~
       \item In August 2016, there were 44 active monitoring locations near Houston, TX. \\~
       \item Harris County, TX, contains 33 of these locations.
       \end{itemize}
@@ -437,9 +437,9 @@ GA: genetic algorithm.
 \includegraphics[width=.49\textwidth]{../doc/sig2pukmean.png}
 \includegraphics[width=.49\textwidth]{../doc/sig2pukmax.png}
 }\\
-Optimal design is highly dependent on the mean function\\ \citep{zimmerman2006optimal}.\\~
+Optimal design is highly dependent on the mean function\\ \citep*{zimmerman2006optimal}.\\~
 
-Background map via ggmap \citep{ggmap2013}.
+Background map via ggmap \citep*{ggmap2013}.
 
 \end{frame}
 
