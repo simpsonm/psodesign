@@ -70,20 +70,20 @@ Research supported by the NSF-Census Research Network}
   \frametitle{Particle Swarm Optimization --- Intuition}
 Put a ``swarm'' of particles in the search space:\\
 \begin{itemize}
-\item[] Don't search alone, pay attention to what your neighbors are doing!\pause
+\item[] Don't search alone, pay attention to what your neighbors are doing!
 \end{itemize}
 \begin{center}
-% \includemedia[
-%   width=0.9\textwidth,
-%   activate=pageopen,
-%   addresource=fishschool.mp4,   %passcontext,  %show VPlayer's right-click menu
-%   flashvars={
-%     %important: same path as in `addresource'
-%     source=fishschool.mp4
-%     &autoPlay=true
-%     &loop=true
-%   }
-% ]{\fbox{Click!}}{VPlayer.swf}
+\includemedia[
+  width=0.9\textwidth,
+  activate=pageopen,
+  addresource=fishschool.mp4,   %passcontext,  %show VPlayer's right-click menu
+  flashvars={
+    %important: same path as in `addresource'
+    source=fishschool.mp4
+    &autoPlay=true
+    &loop=true
+  }
+]{\fbox{Click!}}{VPlayer.swf}
 \end{center}
 Best for {\color{red} complex} objective functions which are {\color{red} cheap} to compute, and when {\color{red} near-optimal} solutions are useful.
 \end{frame}
@@ -165,14 +165,14 @@ $\to$ informants sampled with replacement once during initialization.
 
 \begin{frame}
 \frametitle{Many variants on basic PSO exist}
-See e.g. \citep{clerc2011spso}, \citep[][appendix]{simpson2017adaptively}.
+See e.g. \citet{clerc2011spso}, \citet[][appendix]{simpson2017adaptively}.
 \begin{itemize}
 \item Handling search space constraints.
 \item Coordinate free velocity updates.
 \item Parallelization.
 \item Asynchronous updates.
 \item Redraw neighborhoods.
-\item Bare-bones PSO (no velocity term)
+\item Bare-bones PSO (BBPSO) --- no velocity term.
 \end{itemize}
 \end{frame}
 
@@ -191,7 +191,9 @@ Idea: deterministic inertia PSO (DI-PSO) \\
 
 \pause
 
- AT-PSO: tune $\omega(k)$ using an analogy with adaptively tuned random walk Metropolis \citep{andrieu2008tutorial}.
+AT-PSO: tune $\omega(k)$ using an analogy with adaptively tuned random walk Metropolis \citep{andrieu2008tutorial}.\\~\\
+
+Can also create AT-BBPSO algorithms.
 \end{frame}
 
 
@@ -213,28 +215,14 @@ Update $\omega(k)$ via:
 
 \pause
 
-Defaults: $R^*\in[0.3, 0.5]$, $c = 0.1$.\\~
-
-\pause
-
-Similar PSO algorithm in spirit: \cite{zhang2003adaptive}.
-\begin{itemize}
-\item $\omega$ is constant while $\phi_1$ and $\phi_2$ vary across time {\color{red}\emph{and particle}}.
-\item Can't use the same method to adapt $\phi_1$ and $\phi_2$.
-\end{itemize}
+Defaults: ${\color{blue}R^*}\in[0.3, 0.5]$, ${\color{blue}c} = 0.1$.
 \end{frame}
 
 \begin{frame}
-\frametitle{Adaptively Tuned Bare Bones PSO and Results}
-AT-BBPSO strips away the velocity term (typically $df = 1$):
-\begin{align*}
-\theta_{ij}(k+1) &\sim \mathrm{T}_{df}\left(\frac{p_{ij}(k) + g_{ij}(k)}{2}, \sigma^2(k)|p_{ij}(k) - g_{ij}(k)|^2\right),\\
-\log \sigma^2(k+1) &= \log\sigma^2(k) + {\color{blue}c}\{R(k+1) - {\color{blue}R^*}\}.
-\end{align*}
-\pause
-Intuition: tuning $\omega(k)/\sigma^2(k)$ allows the swarm to adjust the exploration / exploitation tradeoff based on local conditions.
+\frametitle{AT-PSO/AT-BBPSO Simulation Study Results}
+Intuition: tuning $\omega(k)$ allows the swarm to adjust the exploration / exploitation tradeoff on the fly based on current swarm conditions.\\
 \begin{itemize}
-\item This has a tendency to speed up convergence.
+\item This has a tendency to speed up convergence.\\
 \item ...but convergence may be premature in multi-modal problems.\\~\\
 \end{itemize}
 
@@ -242,9 +230,10 @@ Intuition: tuning $\omega(k)/\sigma^2(k)$ allows the swarm to adjust the explora
 
 Overview of results from a simulation study:
 \begin{itemize}
-\item AT-PSO performs better than PSO on ``hard enough'' problems... \pause
+\item AT-PSO performs better than PSO on ``hard enough'' problems... 
 \item ...but has trouble with many local optima.\pause
-\item AT-BBPSO is often the best performing algorithm for complex, multimodal objective functions.
+\item AT-BBPSO is often the best performing algorithm for complex, multimodal objective functions...
+\item ...but is less competitive for easier objective functions.
 \end{itemize}
 \end{frame}
 
@@ -286,7 +275,7 @@ What about when $\tau^2$ and $\bm{\phi}$ are estimated? \pause\\~\\
 
 Parameter uncertainty universal kriging MSPE:
 \begin{align*}
-\approx \sigma^2_{puk}(\bm{u};\bm{d},\widehat{\bm{\theta}}) = \sigma^2_{uk}(\bm{u};\bm{d},\widehat{\bm{\theta}}) + \mbox{ stuff, }
+\approx \sigma^2_{puk}(\bm{u};\bm{D},\widehat{\bm{\theta}}) = \sigma^2_{uk}(\bm{u};\bm{D},\widehat{\bm{\theta}}) + \mbox{ stuff, }
 \end{align*}
 depending on the FI matrix and gradient of predictor wrt $\bm{\theta}$\\
 \citep{zimmerman1992mean,abt1999estimating}.
@@ -296,8 +285,8 @@ depending on the FI matrix and gradient of predictor wrt $\bm{\theta}$\\
 \frametitle{Spatial Design --- Design Criteria}
 Ideal design criteria: choose design points to minimize...
 \begin{itemize}
-\item Mean/total MSPE: $\overline{Q}_{puk}(\bm{d}) = \int_{\mathcal{D}}\sigma_{puk}^2(\bm{u})d\bm{u}$
-\item Maximum MSPE: $Q^*_{puk}(\bm{d}) = \max_{\bm{u}\in\mathcal{D}}\sigma_{puk}^2(\bm{u})$\\~\\
+\item Mean/total MSPE: $\overline{Q}_{puk}(\bm{D}) = \int_{\mathcal{D}}\sigma_{puk}^2(\bm{u};\bm{D},\widehat{\bm{\theta}})d\bm{u}$
+\item Maximum MSPE: $Q^*_{puk}(\bm{D}) = \max_{\bm{u}\in\mathcal{D}}\sigma_{puk}^2(\bm{u},\bm{D},\widehat{\bm{\theta}})$\\~\\
 \end{itemize}
 
 \pause
@@ -306,8 +295,8 @@ This is computationally infeasible. \\~\\
 
 Realistic criteria: approximate with a grid of target points $\bm{r}_1,\dots,\bm{r}_{N_t}$:
 \begin{itemize}
-\item Minimize $\overline{Q}_{puk}(\bm{d}) = \sum_{i=1}^{N_t}\sigma_{puk}^2(\bm{r}_i)$
-\item Minimize $Q_{puk}^*(\bm{d}) = \max_{i=1,2,\dots,N_t}\sigma_{puk}^2(\bm{r}_i)$
+\item Minimize $\overline{Q}_{puk}(\bm{D}) = \sum_{i=1}^{N_t}\sigma_{puk}^2(\bm{r}_i;\bm{D},\widehat{\bm{\theta}})$
+\item Minimize $Q_{puk}^*(\bm{D}) = \max_{i=1,2,\dots,N_t}\sigma_{puk}^2(\bm{r}_i;\bm{D},\widehat{\bm{\theta}})$
 \end{itemize}
 
 \end{frame}
