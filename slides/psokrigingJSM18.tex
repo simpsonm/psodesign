@@ -7,6 +7,7 @@ epsfig, multicol, amsthm, animate}
 \usepackage[T1]{fontenc}
 \usepackage[ansinew]{inputenc}
 \usepackage[authoryear]{natbib}
+\usepackage{bibentry}
 %\newcommand{\newblock}{}  %needed to make beamer and natbib play nice
 \usepackage{tikz, caption}
 % A counter, since TikZ is not clever enough (yet) to handle
@@ -36,13 +37,16 @@ epsfig, multicol, amsthm, animate}
 \author[Matt Simpson]{Matthew Simpson}
 \institute[Mizzou Stat / SAS]{Department of Statistics, University of Missouri\\
                               SAS Institute, Inc.}
-\date{August 3, 2016}
+\date{July 29, 2018}
 
 \begin{document}
 
 \begin{frame}
 \titlepage
 \centering
+
+Simpson, M., Wikle, C. K., and Holan, S. H. (2017). Adaptively tuned particle swarm optimization with application to spatial design. \emph{Stat}.\\~\\
+
 {\scriptsize
 Joint work with Christopher Wikle and Scott H. Holan\\~\\
 Research supported by the NSF-Census Research Network}
@@ -75,15 +79,16 @@ Put a ``swarm'' of particles in the search space:\\
 \begin{center}
 \includemedia[
   width=0.9\textwidth,
+  height= 0.3\textheight,
   activate=pageopen,
-  addresource=fishschool.mp4,   %passcontext,  %show VPlayer's right-click menu
+  addresource=fish_school.mp4,   %passcontext,  %show VPlayer's right-click menu
   flashvars={
     %important: same path as in `addresource'
-    source=fishschool.mp4
+    source=fish_school.mp4
     &autoPlay=true
     &loop=true
   }
-]{\fbox{Click!}}{VPlayer.swf}
+]{\fbox{}}{VPlayer.swf}
 \end{center}
 Best for {\color{red} complex} objective functions which are {\color{red} cheap} to compute, and when {\color{red} near-optimal} solutions are useful.
 \end{frame}
