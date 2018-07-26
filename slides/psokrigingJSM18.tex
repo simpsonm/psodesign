@@ -238,11 +238,68 @@ Overview of results from a simulation study:
 \end{frame}
 
 \begin{frame}
-\frametitle{Spatial Design --- Problem Setup}
-Goal: want to learn about the spatial field $Y(\bm{u})$, $\bm{u}\in\mathcal{D}\subset \mathbb{R}^2$. \pause\\~\\
+\frametitle{Spatial Design}
+Goal: want to learn about the spatial field $Y(\bm{u})$, $\bm{u}\in\mathcal{D}\subset \mathbb{R}^2$. \\~\\
 
-We observe a noisy signal of $Y(\bm{u})$ at $N_s$ fixed monitoring locations, $\bm{s}_1, \dots, \bm{s}_{N_s}$,
-and assume:
+Where should we observe $Y(\bm{u})$? Usual objective: minimize MSPE.\pause \\~
+
+Usual solution: grid up the space and use an exchange algorithm.\\
+ \citep*{nychka1998design,wikle1999space,wikle2005dynamic} \\~\\ \pause
+
+ In principle, \emph{any} location is a valid design point, not just the grid.\\
+ $\implies$ why not use PSO? \pause Other points in its favor: \\
+ \begin{itemize}
+ \item Near-optimal solutions are nearly as valuable as optimal solutions.
+ \item Objective function is cheap in universal kriging.
+ \item More expensive in kriging with parameter uncertainty, but doable.
+ \item Highly multi-modal objective function (e.g. switch two locations).\\ \pause
+ \end{itemize}
+
+ Genetic algorithms also reasonable, e.g. \citet*{hamada2001finding}.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Example: Ozone Monitoring in Harris County, TX}
+  \begin{columns}
+    \begin{column}{0.6\textwidth}
+      \includegraphics[width = 0.95\textwidth]{../code/kriging/houston.png}\\
+      Map via ggmap \citep*{ggmap2013}.
+    \end{column}
+    \begin{column}{0.4\textwidth}
+      \begin{itemize}
+      \item Ozone concentration is associated with increased risk of cardiac arrest \citep*{ensor2013case}. \\~
+      \item In August 2016, there were 44 active monitoring locations near Houston, TX. \\~
+      \item Harris County, TX, contains 33 of these locations.
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Hypothetical Design Problem and Data}
+  Want to learn more about ozone concentrations in Harris County.\\~
+
+  Where to put 100 new monitoring locations within the county? \\
+  \begin{itemize}
+  \item[] Note: nearby locations outside of the county still useful for estimation.\\~\\
+  \end{itemize}\pause
+
+  Data from the Texas Commission on Environmental Quality (TCEQ)
+  \begin{itemize}
+  \item Monitoring locations measure several air quality indicators.
+  \item Ozone: daily maximum eight-hour ozone concentration (DM8) in parts per billion.\\
+    $\to$ maximum of all contiguous 8-hour means for that day.
+  \item Some locations have missing data.\\~\pause 
+  \end{itemize}
+
+  Let $Y(\bm{u})$ denote DM8 and $Z(\bm{u})$ denote measured DM8 at $\bm{u}$.
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Ozone Monitoring Model}
+Assume $Z(\bm{u})$ is a noisy signal of $Y(\bm{u})$:
 \begin{align*}
 Z(\bm{u}) = Y(\bm{u}) + \varepsilon(\bm{u})
 \end{align*}
@@ -252,14 +309,22 @@ Assume $Y(\bm{u}) = \bm{x}(\bm{u})'\bm{\beta} + \delta(\bm{u})$ with
 \begin{align*}
 \delta(\bm{u}) \sim \mathrm{GP}(0, C_{\bm{\phi}}(\cdot, \cdot))
 \end{align*}
-where $\bm{x}(\bm{u})$ is a vector of covariates known at all locations $\bm{u}\in\mathcal{D}$. \pause \\~\\
+where $\bm{x}(\bm{u})$ is a vector of covariates known at all locations $\bm{u}\in\mathcal{D}$.\pause \\~\\ 
 
-Where should we put additional monitoring locations, $\bm{D} = \{\bm{d}_1, \dots, \bm{d}_{N_d}$\}?
+Details:
+\begin{itemize}
+\item Linear mean function in spatial coordinates: $\bm{x}(\bm{u})' = (u_1, u_2)$.
+\item Exponential covariance function:
+  \begin{align*}
+    C(\bm{u},\bm{v}) = \sigma^2\exp(-||\bm{u} - \bm{v}||/\psi)
+  \end{align*}
+\item Estimate $(\bm{\theta}, \bm{\delta})$ via maximum likelihood.
+\end{itemize}
 \end{frame}
 
 \begin{frame}
 \frametitle{Spatial Design --- MSPE and Kriging}
-Sensible goal: choose new locations to minimize MSPE. \\~\\
+Goal: choose new locations $\bm{D} = \{\bm{d}_1, \dots, \bm{d}_{100}\}$ to minimize MSPE. \\~\\
 
 \pause
 
@@ -296,83 +361,9 @@ This is computationally infeasible. \\~\\
 Realistic criteria: approximate with a grid of target points $\bm{r}_1,\dots,\bm{r}_{N_t}$:
 \begin{itemize}
 \item Minimize $\overline{Q}_{puk}(\bm{D}) = \sum_{i=1}^{N_t}\sigma_{puk}^2(\bm{r}_i;\bm{D},\widehat{\bm{\theta}})$
-\item Minimize $Q_{puk}^*(\bm{D}) = \max_{i=1,2,\dots,N_t}\sigma_{puk}^2(\bm{r}_i;\bm{D},\widehat{\bm{\theta}})$
+\item Minimize $Q_{puk}^*(\bm{D}) = \max_{i=1,2,\dots,N_t}\sigma_{puk}^2(\bm{r}_i;\bm{D},\widehat{\bm{\theta}})$\\~\\\pause
 \end{itemize}
-
-\end{frame}
-
-\begin{frame}
-  \frametitle{Optimzation for Spatial Design}
-  The spatial design optimization problem cannot be solved in closed form. \\~\\ \pause
-
-  Usual solution: grid up the space and use an exchange algorithm.\\
- \citep*{nychka1998design,wikle1999space,wikle2005dynamic} \\~\\ \pause
-
-  In principle, \emph{any} location is a valid design point, not just the grid.\\
-  $\implies$ why not use PSO? \pause Other points in its favor: \\
-  \begin{itemize}
-  \item Near-optimal solutions are nearly as valuable as optimal solutions.
-  \item Objective function is cheap in universal kriging.
-  \item More expensive in kriging with parameter uncertainty, but doable.
-  \item Highly multi-modal objective function (e.g. switch two locations).\pause
-  \end{itemize}
-
-  Genetic algorithms also reasonable, e.g. \citet*{hamada2001finding}.
-\end{frame}
-
-\begin{frame}
-  \frametitle{Example: Ozone Monitoring in Harris County, TX}
-  \begin{columns}
-    \begin{column}{0.6\textwidth}
-      \includegraphics[width = 0.95\textwidth]{../code/kriging/houston.png}\\
-      Map via ggmap \citep*{ggmap2013}.
-    \end{column}
-    \begin{column}{0.4\textwidth}
-      \begin{itemize}
-      \item Ozone concentration is associated with increased risk of cardiac arrest \citep*{ensor2013case}. \\~
-      \item In August 2016, there were 44 active monitoring locations near Houston, TX. \\~
-      \item Harris County, TX, contains 33 of these locations.
-      \end{itemize}
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Hypothetical Design Problem and Data}
-  Want to learn more about ozone concentrations in Harris County. \\~
-
-  Where to put 100 new monitoring locations within the county? \\
-  \begin{itemize}
-  \item[] Note: nearby locations outside of the county still useful for estimation.\\~\\
-  \end{itemize}\pause
-
-  Data from the Texas Commission on Environmental Quality (TCEQ)
-  \begin{itemize}
-  \item Monitoring locations measure several air quality indicators.
-  \item Ozone: daily maximum eight-hour ozone concentration (DM8) in parts per billion.\\
-    $\to$ maximum of all contiguous 8-hour means for that day.
-  \item Some locations have missing data.
-  \end{itemize}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Model and Design Criteria}
-  Model:
-  \begin{itemize}
-  \item Linear mean function in spatial coordinates: $\bm{x}(\bm{u})' = (u_1, u_2)$.
-  \item Exponential covariance function:
-    \begin{align*}
-      C(\bm{u},\bm{v}) = \sigma^2\exp(-||\bm{u} - \bm{v}||/\psi)
-    \end{align*}
-  \item Estimate $(\bm{\theta}, \bm{\delta})$ via maximum likelihood. \\~\\ \pause
-  \end{itemize}
-
-  Design Criteria:
-  \begin{itemize}
-  \item Mean MSPE w/ parameter uncertainty $\overline{Q}_{puk}(\bm{d})$.
-  \item Maximum MSPE w/ parameter uncertainty $Q^*_{puk}(\bm{d})$.
-  \item Approximate each with a grid of 1229 points in Harris County.
-  \end{itemize}
+Use a grid of 1229 points in Harris County.
 \end{frame}
 
 \begin{frame}
