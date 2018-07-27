@@ -80,7 +80,7 @@ Put a ``swarm'' of particles in the search space:\\
 \includemedia[
   width=0.9\textwidth,
   height= 0.3\textheight,
-  activate=pageopen,
+  activate=pagevisible,
   addresource=fish_school.mp4,   %passcontext,  %show VPlayer's right-click menu
   flashvars={
     %important: same path as in `addresource'
@@ -312,7 +312,7 @@ for all $\bm{u}\in\mathcal{D}$, and $\varepsilon(\bm{u}) \stackrel{iid}{\sim} \m
 
 Assume $Y(\bm{u}) = \bm{x}(\bm{u})'\bm{\beta} + \delta(\bm{u})$ with
 \begin{align*}
-\delta(\bm{u}) \sim \mathrm{GP}(0, C_{\bm{\phi}}(\cdot, \cdot))
+\delta(\bm{u}) \sim \mathrm{GP}(0, C(\cdot, \cdot))
 \end{align*}
 where $\bm{x}(\bm{u})$ is a vector of covariates known at all locations $\bm{u}\in\mathcal{D}$.\pause \\~\\ 
 
@@ -323,7 +323,7 @@ Details:
   \begin{align*}
     C(\bm{u},\bm{v}) = \sigma^2\exp(-||\bm{u} - \bm{v}||/\psi)
   \end{align*}
-\item Estimate $(\bm{\theta}, \bm{\delta})$ via maximum likelihood.
+\item Estimate $(\bm{\theta}, \bm{\delta})$ via maximum likelihood, $\bm{\theta} = (\tau^2, \bm{\beta}, \sigma^2, \psi)$.
 \end{itemize}
 \end{frame}
 
